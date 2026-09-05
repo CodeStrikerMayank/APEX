@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from backend.app.database.connection import get_db
 from backend.app.models.schema import (
     Student, DailyAssignment, DailyAssignmentItem, Question,
-    StudentAttemptItem, StudentConceptMastery, StudentErrorLog
+    StudentAttemptItem, StudentConceptMastery, StudentErrorLog, utc_now
 )
 from backend.app.curriculum.exambench_service import ExamBenchService
 from backend.app.student_model.mastery import MasteryEngine
@@ -40,7 +40,13 @@ def get_stream_subjects(exam: str) -> List[str]:
     """Returns the 3 canonical subjects for each exam stream."""
     if exam == "NEET":
         return ["Biology", "Physics", "Chemistry"]
-    elif exam == "CENTRAL_GOVT" or exam == "UPSC":
+    elif exam == "UPSC":
+        return [
+            "Indian Polity & Governance",
+            "Economy, Environment & Technology",
+            "Ethics, Integrity & Aptitude"
+        ]
+    elif exam == "CENTRAL_GOVT":
         return ["General Studies", "Science & Technology", "Mathematics"]
     return ["Physics", "Chemistry", "Mathematics"]  # Default JEE PCM
 
@@ -96,7 +102,7 @@ def get_today_assignment(
             correct_count=0,
             score_percentage=0.0,
             subject_scores={},
-            created_at=datetime.datetime.utcnow()
+            created_at=utc_now()
         )
         db.add(assignment)
         db.flush()
@@ -240,7 +246,7 @@ def submit_assignment(
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    now = datetime.datetime.utcnow()
+    now = utc_now()
     items = db.query(DailyAssignmentItem).filter(DailyAssignmentItem.assignment_id == req.assignment_id).all()
     item_map = {it.question_id: it for it in items}
 
@@ -422,5 +428,6 @@ def get_assignment_history(student_id: str, db: Session = Depends(get_db)):
         "student_id": student_id,
         "streak_days": streak,
         "total_assignments_completed": len(completed_dates),
-        "history": history
+        "history": history,
+        "assignments": history
     }

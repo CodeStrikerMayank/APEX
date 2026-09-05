@@ -1,0 +1,3241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APEX Student Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     THEME TOKENS — light (default) + dark (html[data-theme=dark])
+     Elevated visual design system with adaptive alpha borders,
+     obsidian/zinc dark theme, glassmorphic depth & electric accents.
+     ============================================================ */
+  :root{
+    /* Surface & Canvas */
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --card-elevated: #F1F5F9;
+    --card-glass: rgba(255, 255, 255, 0.82);
+    --border: rgba(0, 0, 0, 0.07);
+    --border-subtle: rgba(0, 0, 0, 0.04);
+    --border-hover: rgba(0, 0, 0, 0.12);
+    --track-bg: rgba(0, 0, 0, 0.05);
+
+    /* Typography ink */
+    --ink: #0F172A;
+    --ink-soft: #475569;
+    --ink-faint: #828EA4;
+
+    /* Primary Accent: Electric Indigo / Violet */
+    --purple: #6366F1;
+    --purple-dark: #4F46E5;
+    --purple-rgb: 99, 102, 241;
+    --purple-tint: rgba(99, 102, 241, 0.10);
+    --purple-border: rgba(99, 102, 241, 0.28);
+    --purple-glow: 0 0 20px rgba(99, 102, 241, 0.25);
+
+    /* Dual-layer Ambient Box Shadows */
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 12px 28px -4px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.08), 0 24px 48px -8px rgba(15, 23, 42, 0.12);
+    --card-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+
+    /* Soft 10-14% Alpha Semantic Badges */
+    --red-bg: rgba(239, 68, 68, 0.11);     --red-fg: #DC2626;     --red-border: rgba(239, 68, 68, 0.22);
+    --amber-bg: rgba(245, 158, 11, 0.12);  --amber-fg: #B45309;   --amber-border: rgba(245, 158, 11, 0.25);
+    --blue-bg: rgba(59, 130, 246, 0.11);   --blue-fg: #2563EB;    --blue-border: rgba(59, 130, 246, 0.22);
+    --green-bg: rgba(16, 185, 129, 0.12);  --green-fg: #059669;   --green-border: rgba(16, 185, 129, 0.25);
+
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html[data-theme="dark"]{
+    /* Obsidian & Zinc-Slate Base Canvas & Elevated Surfaces */
+    --bg: #0B0F17;
+    --card: #121824;
+    --card-elevated: #182232;
+    --card-glass: rgba(18, 24, 36, 0.82);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-hover: rgba(255, 255, 255, 0.16);
+    --track-bg: rgba(255, 255, 255, 0.06);
+
+    /* Typography ink */
+    --ink: #F1F5F9;
+    --ink-soft: #94A3B8;
+    --ink-faint: #64748B;
+
+    /* Electric Indigo / Violet */
+    --purple: #818CF8;
+    --purple-dark: #6366F1;
+    --purple-rgb: 129, 140, 248;
+    --purple-tint: rgba(129, 140, 248, 0.13);
+    --purple-border: rgba(129, 140, 248, 0.35);
+    --purple-glow: 0 0 24px rgba(129, 140, 248, 0.30);
+
+    /* Dual-layer Ambient Box Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 16px 44px -8px rgba(0, 0, 0, 0.65), 0 4px 16px -2px rgba(0, 0, 0, 0.45);
+    --card-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+
+    /* Soft 10-14% Alpha Semantic Badges with High Legibility */
+    --red-bg: rgba(248, 113, 113, 0.13);    --red-fg: #F87171;    --red-border: rgba(248, 113, 113, 0.25);
+    --amber-bg: rgba(251, 191, 36, 0.13);   --amber-fg: #FBBF24;  --amber-border: rgba(251, 191, 36, 0.25);
+    --blue-bg: rgba(96, 165, 250, 0.13);    --blue-fg: #60A5FA;   --blue-border: rgba(96, 165, 250, 0.25);
+    --green-bg: rgba(52, 211, 153, 0.13);   --green-fg: #34D399;  --green-border: rgba(52, 211, 153, 0.25);
+  }
+
+  /* ============================================================
+     THEME: SKETCH — hand-drawn drafting-table / blueprint paper
+     Monochrome graphite ink on warm paper, hard stamped shadows,
+     technical corner crosshairs, muted pencil-tint badges.
+     ============================================================ */
+  html[data-theme="sketch"]{
+    /* Surface & Canvas — aged paper */
+    --bg: #EFEAE0;
+    --card: #FBF9F3;
+    --card-elevated: #E9E3D4;
+    --card-glass: rgba(251, 249, 243, 0.88);
+    --border: rgba(31, 27, 20, 0.32);
+    --border-subtle: rgba(31, 27, 20, 0.14);
+    --border-hover: rgba(31, 27, 20, 0.5);
+    --track-bg: rgba(31, 27, 20, 0.09);
+
+    /* Typography ink */
+    --ink: #201C15;
+    --ink-soft: #5B5548;
+    --ink-faint: #8D8674;
+
+    /* Primary Accent: Graphite Pencil */
+    --purple: #2A2620;
+    --purple-dark: #100E0A;
+    --purple-rgb: 42, 38, 32;
+    --purple-tint: rgba(42, 38, 32, 0.08);
+    --purple-border: rgba(42, 38, 32, 0.32);
+    --purple-glow: 0 0 0 rgba(0,0,0,0);
+
+    /* Hard "stamped paper" shadows — no soft blur, hand-drawn feel */
+    --shadow-sm: 1px 1px 0 rgba(31, 27, 20, 0.14);
+    --shadow-md: 2px 3px 0 rgba(31, 27, 20, 0.16);
+    --shadow-lg: 3px 5px 0 rgba(31, 27, 20, 0.18);
+    --card-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+
+    /* Muted pencil-tint semantic badges (desaturated colour pencil) */
+    --red-bg: rgba(154, 74, 59, 0.13);     --red-fg: #8A4433;     --red-border: rgba(138, 68, 51, 0.38);
+    --amber-bg: rgba(191, 138, 32, 0.17); --amber-fg: #8A6410;   --amber-border: rgba(168, 118, 24, 0.42);
+    --blue-bg: rgba(69, 93, 117, 0.15);    --blue-fg: #3C5570;    --blue-border: rgba(60, 85, 112, 0.35);
+    --green-bg: rgba(85, 112, 78, 0.15);   --green-fg: #465F41;   --green-border: rgba(70, 95, 65, 0.35);
+
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+  }
+
+  /* ============================================================
+     PAGE LOADER — hand-sketched meshing gears splash screen
+     ============================================================ */
+  #pageLoader{
+    position:fixed;inset:0;z-index:99999;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;
+    background:#F4F2EC;
+    background-image:
+      repeating-linear-gradient(135deg, rgba(31,27,20,.035) 0px, rgba(31,27,20,.035) 1px, transparent 1px, transparent 7px),
+      repeating-linear-gradient(45deg, rgba(31,27,20,.02) 0px, rgba(31,27,20,.02) 1px, transparent 1px, transparent 9px);
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #pageLoader.loader-hidden{opacity:0;visibility:hidden;pointer-events:none;}
+  .loader-corner{position:absolute;width:220px;height:220px;opacity:.9;}
+  .loader-corner.tl{top:-18px;left:-18px;}
+  .loader-corner.tr{top:-18px;right:-18px;transform:scaleX(-1);}
+  .loader-corner.bl{bottom:-18px;left:-18px;transform:scaleY(-1);}
+  .loader-corner.br{bottom:-18px;right:-18px;transform:scale(-1,-1);}
+  .loader-gears{width:280px;height:280px;position:relative;}
+  .gear-big{transform-origin:159px 137px;animation:spinCW 6s linear infinite;}
+  .gear-small{transform-origin:118px 190px;animation:spinCCW 4.5s linear infinite;}
+  @keyframes spinCW{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes spinCCW{ from{transform:rotate(0deg);} to{transform:rotate(-360deg);} }
+  .loader-caption{margin-top:22px;text-align:center;}
+  .loader-caption b{
+    display:block;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;
+    color:#3A352B;text-transform:uppercase;
+  }
+  .loader-dots{display:flex;gap:6px;justify-content:center;margin-top:10px;}
+  .loader-dots span{
+    width:6px;height:6px;border-radius:50%;background:#3A352B;opacity:.25;
+    animation:dotPulse 1.2s ease-in-out infinite;
+  }
+  .loader-dots span:nth-child(2){animation-delay:.15s;}
+  .loader-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes dotPulse{ 0%,80%,100%{opacity:.2;transform:scale(1);} 40%{opacity:.9;transform:scale(1.3);} }
+
+  /* Faint cross-hatch pencil texture across the paper canvas */
+  html[data-theme="sketch"] body{
+    background-color:var(--bg);
+    background-image:
+      repeating-linear-gradient(135deg, rgba(31,27,20,.035) 0px, rgba(31,27,20,.035) 1px, transparent 1px, transparent 7px),
+      repeating-linear-gradient(45deg, rgba(31,27,20,.02) 0px, rgba(31,27,20,.02) 1px, transparent 1px, transparent 9px);
+  }
+  /* Dashed hand-drawn borders on primary surfaces instead of crisp digital lines */
+  html[data-theme="sketch"] .welcome-card,
+  html[data-theme="sketch"] .stat-card,
+  html[data-theme="sketch"] .panel,
+  html[data-theme="sketch"] .coach-card,
+  html[data-theme="sketch"] .exam-card,
+  html[data-theme="sketch"] .tier-card,
+  html[data-theme="sketch"] .diagnostic-banner,
+  html[data-theme="sketch"] .pill-select,
+  html[data-theme="sketch"] .pill-timer,
+  html[data-theme="sketch"] .icon-btn,
+  html[data-theme="sketch"] .sidebar{
+    border-style:dashed;
+  }
+  html[data-theme="sketch"] .brand-mark{
+    background:linear-gradient(135deg,var(--purple),#100E0A);
+    box-shadow:none;
+  }
+  html[data-theme="sketch"] .avatar-circ{
+    box-shadow:none;
+  }
+  html[data-theme="sketch"] .btn-primary,
+  html[data-theme="sketch"] .btn-solid-purple,
+  html[data-theme="sketch"] .btn-amber{
+    background:repeating-linear-gradient(135deg, var(--purple-dark), var(--purple-dark) 6px, #211D17 6px, #211D17 12px);
+    color:#F5F1E6;box-shadow:var(--shadow-md);border:1px solid rgba(0,0,0,.4);
+  }
+  html[data-theme="sketch"] .btn-primary:hover,
+  html[data-theme="sketch"] .btn-solid-purple:hover,
+  html[data-theme="sketch"] .btn-amber:hover{
+    box-shadow:var(--shadow-lg);
+  }
+  html[data-theme="sketch"] .diagnostic-icon{
+    background:var(--purple);box-shadow:none;
+  }
+  html[data-theme="sketch"] .diagnostic-banner{
+    background:linear-gradient(135deg, rgba(191,138,32,.22), rgba(191,138,32,.07));
+    border-color:rgba(168,118,24,.5);
+  }
+  html[data-theme="sketch"] .badge-tag{
+    background:rgba(191,138,32,.16);color:var(--amber-fg);
+  }
+  html[data-theme="sketch"] .coach-fab{
+    background:linear-gradient(135deg, var(--purple), #6B4A1E);
+    box-shadow:var(--shadow-md);border:1px solid rgba(0,0,0,.35);
+  }
+  html[data-theme="sketch"] .coach-fab:hover{
+    box-shadow:var(--shadow-lg);
+  }
+  html[data-theme="sketch"] .coach-fab .fab-dot{
+    box-shadow:none;border-color:var(--card);
+  }
+  html[data-theme="sketch"] .coach-w-avatar,
+  html[data-theme="sketch"] .coach-avatar{
+    background:linear-gradient(135deg, var(--purple), #6B4A1E) !important;
+    box-shadow:none;
+  }
+  html[data-theme="sketch"] .dot-live{box-shadow:none;}
+  html[data-theme="sketch"] .stat-icon{box-shadow:none;}
+
+  *, *::before, *::after{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    width:100%;max-width:100%;
+    overflow-x:hidden;
+    -webkit-text-size-adjust:100%;
+  }
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    transition:background .25s ease, color .25s ease;
+  }
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  svg{display:block;max-width:100%;}
+  .icon{width:18px;height:18px;flex-shrink:0;}
+  .icon-sm{width:15px;height:15px;flex-shrink:0;}
+
+  /* ===== Layout shell ===== */
+  .shell{
+    display:flex;min-height:100vh;
+    width:100%;max-width:100%;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* ===== Sidebar with Glassmorphic Styling ===== */
+  .sidebar{
+    width:236px;flex-shrink:0;
+    background:var(--card-glass);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-right:1px solid var(--border);
+    padding:22px 16px;display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+    transition:background .25s ease, border-color .25s ease, transform .28s var(--ease-out);
+    z-index:1200;
+  }
+  .sidebar-backdrop{
+    position:fixed;inset:0;
+    background:rgba(11,15,23,.6);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    z-index:1150;
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .sidebar-backdrop.is-open{
+    opacity:1;pointer-events:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--purple),#8A7CFB);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;box-shadow:0 4px 12px -2px rgba(var(--purple-rgb),.35);flex-shrink:0;
+    transition:transform .2s var(--ease-out);
+  }
+  .brand-mark:hover{transform:scale(1.04);}
+  .brand-text b{display:block;font-size:15px;font-weight:700;letter-spacing:.02em;}
+  .brand-text span{display:block;font-size:11px;color:var(--ink-faint);font-weight:500;}
+  .sidebar-close-btn{
+    display:none;margin-left:auto;
+  }
+
+  .nav-group-label{
+    font-size:10.5px;font-weight:600;letter-spacing:.05em;color:var(--ink-faint);
+    margin:14px 10px 8px;
+  }
+  .nav-item{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;padding:9px 10px;border-radius:10px;margin-bottom:2px;
+    font-size:13.5px;font-weight:500;color:var(--ink-soft);
+    transition:background .2s ease, color .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .nav-item .left{display:flex;align-items:center;gap:10px;}
+  .nav-item.active{
+    background:var(--purple-tint);color:var(--purple);font-weight:600;
+    box-shadow:inset 0 0 0 1px var(--purple-border), 0 2px 10px rgba(var(--purple-rgb),.12);
+  }
+  .nav-item:not(.active):hover{background:rgba(0,0,0,.03);color:var(--ink);transform:translateX(2px);}
+  html[data-theme="dark"] .nav-item:not(.active):hover{background:rgba(255,255,255,.04);}
+  .nav-item .count{
+    font-size:11px;font-weight:600;color:var(--ink-faint);
+    background:var(--track-bg);padding:2px 7px;border-radius:20px;
+    border:1px solid var(--border-subtle);
+  }
+  .sidebar-footer{
+    margin-top:auto;display:flex;align-items:center;gap:8px;
+    padding:10px 10px 4px;font-size:12px;color:var(--ink-faint);font-weight:500;
+  }
+  .dot-live{
+    width:7px;height:7px;border-radius:50%;background:var(--green-fg);flex-shrink:0;
+    box-shadow:0 0 8px var(--green-fg);
+  }
+  .sidebar-footer .status{margin-left:auto;color:var(--green-fg);font-weight:600;}
+
+  /* ===== Main column ===== */
+  .main{
+    flex:1;min-width:0;max-width:100%;
+    display:flex;flex-direction:column;
+    overflow-x:hidden;
+  }
+
+  /* ===== Topbar with Glassmorphic Depth ===== */
+  .topbar{
+    padding:12px 28px;
+    background:var(--card-glass);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:100;
+    transition:background .25s ease, border-color .25s ease;
+    width:100%;max-width:100%;
+  }
+  .topbar-row{
+    display:flex;align-items:center;gap:16px;width:100%;
+  }
+  .topbar-left{
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
+  }
+  .mobile-menu-btn{
+    display:none;
+  }
+  .crumb{font-size:13px;font-weight:600;color:var(--ink-faint);white-space:nowrap;letter-spacing:.01em;}
+  .crumb b{color:var(--ink);font-weight:700;}
+  .tabs{
+    display:flex;align-items:center;gap:4px;background:var(--track-bg);padding:4px;border-radius:11px;
+    border:1px solid var(--border-subtle);
+    overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    padding:7px 13px;border-radius:8px;font-size:13px;font-weight:500;color:var(--ink-soft);
+    border:none;background:transparent;white-space:nowrap;flex-shrink:0;
+    transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .2s var(--ease-out);
+  }
+  .tab:not(.active):hover{color:var(--ink);background:rgba(0,0,0,.03);}
+  html[data-theme="dark"] .tab:not(.active):hover{background:rgba(255,255,255,.05);}
+  .tab.active{
+    background:var(--card);color:var(--purple);font-weight:600;
+    box-shadow:var(--shadow-sm), 0 0 12px rgba(var(--purple-rgb),.18);
+  }
+  .spacer{flex:1;}
+  .topbar-actions{
+    display:flex;align-items:center;gap:12px;flex-shrink:0;margin-left:auto;
+  }
+  .pill-group{
+    display:flex;align-items:center;gap:8px;flex-shrink:0;
+  }
+  .user-group{
+    display:flex;align-items:center;gap:8px;flex-shrink:0;
+  }
+  .pill-select{
+    display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);
+    padding:7px 12px;border-radius:11px;font-size:13px;font-weight:600;white-space:nowrap;color:var(--ink);
+    box-shadow:var(--shadow-sm);transition:border-color .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .pill-select:hover{border-color:var(--border-hover);transform:translateY(-1.5px);box-shadow:var(--shadow-md);}
+  .pill-select .icon{color:var(--purple);}
+  .pill-timer{
+    display:flex;align-items:center;gap:7px;background:var(--amber-bg);border:1px solid var(--amber-border);
+    padding:7px 12px;border-radius:11px;font-size:12.5px;font-weight:600;color:var(--amber-fg);white-space:nowrap;
+    transition:transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .pill-timer:hover{transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
+  .icon-btn{
+    width:34px;height:34px;border-radius:10px;border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--ink-soft);
+    box-shadow:var(--shadow-sm);transition:background .2s ease, color .2s ease, border-color .2s ease, transform .2s var(--ease-out);flex-shrink:0;
+  }
+  .icon-btn:hover{background:var(--bg);color:var(--ink);border-color:var(--border-hover);transform:translateY(-1.5px);}
+  .icon-btn:active{transform:translateY(0.5px);}
+  .avatar-block{display:flex;align-items:center;gap:9px;white-space:nowrap;flex-shrink:0;}
+  .avatar-circ{
+    width:34px;height:34px;border-radius:50%;background:var(--purple-tint);color:var(--purple);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;
+    border:1px solid var(--purple-border);flex-shrink:0;box-shadow:0 0 10px rgba(var(--purple-rgb),.18);
+  }
+  .avatar-details b{display:block;font-size:12.5px;font-weight:600;}
+  .avatar-details span{display:block;font-size:11px;color:var(--ink-faint);font-weight:400;}
+
+  /* ===== Content ===== */
+  .content{padding:26px 28px 60px;max-width:1360px;width:100%;margin:0 auto;}
+  .section-gap{margin-top:34px;}
+
+  /* ===== Card Elevation & Physical Lighting Highlights ===== */
+  .welcome-card,
+  .stat-card,
+  .panel,
+  .coach-card,
+  .exam-card,
+  .tier-card{
+    box-shadow:var(--card-highlight), var(--shadow-sm);
+  }
+
+  html[data-theme="dark"] .welcome-card,
+  html[data-theme="dark"] .stat-card,
+  html[data-theme="dark"] .panel,
+  html[data-theme="dark"] .coach-card,
+  html[data-theme="dark"] .exam-card,
+  html[data-theme="dark"] .tier-card{
+    box-shadow:inset 0 1px 0 0 rgba(255,255,255,.09), var(--shadow-sm);
+    background-image:linear-gradient(180deg, rgba(255,255,255,.025) 0%, rgba(255,255,255,0) 100%);
+  }
+
+  html[data-theme="dark"] .stat-card:hover,
+  html[data-theme="dark"] .panel:hover,
+  html[data-theme="dark"] .exam-card:hover,
+  html[data-theme="dark"] .tier-card:hover{
+    box-shadow:inset 0 1px 0 0 rgba(255,255,255,.14), var(--shadow-md);
+  }
+
+  /* ===== Welcome banner ===== */
+  .welcome-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    transition:border-color .25s ease, box-shadow .25s ease;
+  }
+  html[data-theme="dark"] .welcome-card{
+    background:linear-gradient(135deg,#182232,#121824);
+    border-color:var(--border);
+  }
+  .welcome-tags{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600;color:var(--ink-faint);margin-bottom:8px;letter-spacing:.05em;}
+  .welcome-tags .live{color:var(--green-fg);display:flex;align-items:center;gap:6px;}
+  .welcome-card h1{margin:0 0 8px;font-size:28px;font-weight:800;letter-spacing:-.02em;}
+  .welcome-card p{margin:0;font-size:14px;color:var(--ink-soft);max-width:560px;line-height:1.6;font-weight:400;}
+  .welcome-card p b{color:var(--ink);font-weight:600;}
+  .btn-primary{
+    background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;border:none;padding:13px 22px;border-radius:12px;
+    font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+    box-shadow:0 4px 14px -2px rgba(var(--purple-rgb),.45), var(--purple-glow);
+    transition:background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .btn-primary:hover{transform:translateY(-1.5px);box-shadow:0 12px 24px -6px rgba(var(--purple-rgb),.5), var(--purple-glow);}
+  .btn-primary:active{transform:translateY(0.5px);}
+
+  .diagnostic-banner{
+    margin-top:18px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius-md);
+    padding:16px 20px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap;
+    box-shadow:var(--shadow-sm);transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  html[data-theme="dark"] .diagnostic-banner{
+    background:rgba(251,191,36,.08);
+    border-color:rgba(251,191,36,.22);
+    box-shadow:inset 0 1px 0 0 rgba(255,255,255,.06), var(--shadow-sm);
+  }
+  .diagnostic-left{display:flex;align-items:center;gap:14px;}
+  .diagnostic-icon{
+    width:42px;height:42px;border-radius:12px;background:var(--amber-fg);display:flex;align-items:center;
+    justify-content:center;flex-shrink:0;color:#fff;box-shadow:0 6px 16px -4px rgba(217,119,6,.45);
+  }
+  .diagnostic-left b{font-size:14.5px;font-weight:600;}
+  .badge-tag{
+    background:rgba(0,0,0,.07);color:var(--amber-fg);font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;margin-left:8px;letter-spacing:.04em;
+  }
+  html[data-theme="dark"] .badge-tag{background:rgba(255,255,255,.08);}
+  .diagnostic-left p{margin:3px 0 0;font-size:13px;color:var(--ink-soft);font-weight:400;}
+  .btn-amber{
+    background:var(--amber-fg);color:#fff;border:none;padding:12px 18px;border-radius:11px;font-size:13px;font-weight:600;
+    white-space:nowrap;display:inline-flex;align-items:center;gap:7px;
+    box-shadow:0 4px 14px -2px rgba(217,119,6,.45);
+    transition:background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .btn-amber:hover{transform:translateY(-1.5px);box-shadow:0 12px 24px -6px rgba(217,119,6,.55);}
+  .btn-amber:active{transform:translateY(0.5px);}
+
+  /* ===== Stat cards ===== */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px;}
+  .stat-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;
+    transition:transform .25s var(--ease-out), box-shadow .25s var(--ease-out), border-color .25s ease;
+  }
+  .stat-card:hover{transform:translateY(-1.5px);box-shadow:var(--shadow-md);border-color:var(--border-hover);}
+  .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .stat-label{font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--ink-faint);}
+  .stat-icon{
+    width:30px;height:30px;border-radius:9px;background:var(--purple-tint);color:var(--purple);
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--purple-border);
+  }
+  .stat-value{font-size:29px;font-weight:800;display:flex;align-items:baseline;gap:8px;letter-spacing:-.02em;}
+  .stat-value .unit{font-size:16px;font-weight:600;}
+  .stat-delta{
+    font-size:11.5px;font-weight:600;color:var(--green-fg);background:var(--green-bg);
+    border:1px solid var(--green-border);padding:3px 8px;border-radius:20px;letter-spacing:.02em;
+  }
+  .stat-sub{font-size:12px;font-weight:500;color:var(--ink-faint);margin-top:6px;}
+  .stat-card .bars{margin-top:16px;display:flex;flex-direction:column;gap:10px;}
+  .bar-row{font-size:12px;font-weight:500;}
+  .bar-row .flabel{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;color:var(--ink-soft);font-weight:500;}
+  .bar-row .flabel .fl-left{display:flex;align-items:center;gap:6px;}
+  .bar-track{height:6px;border-radius:20px;background:var(--track-bg);overflow:hidden;}
+  .bar-fill{height:100%;border-radius:20px;}
+  .fill-orange{background:var(--amber-fg);}
+  .fill-green{background:var(--green-fg);}
+  .mini-chart{margin-top:14px;height:46px;overflow:visible;}
+  .stat-detail-list{margin-top:16px;display:flex;flex-direction:column;gap:9px;}
+  .stat-detail-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:500;color:var(--ink-soft);}
+  .chip{font-size:11px;font-weight:600;letter-spacing:.03em;padding:3px 9px;border-radius:20px;}
+  .chip-green{background:var(--green-bg);color:var(--green-fg);border:1px solid var(--green-border);}
+  .chip-amber{background:var(--amber-bg);color:var(--amber-fg);border:1px solid var(--amber-border);}
+  .range-track{margin-top:14px;height:6px;border-radius:20px;background:var(--track-bg);position:relative;overflow:visible;}
+  .range-band{position:absolute;top:0;bottom:0;left:32%;right:32%;background:var(--amber-bg);border-radius:20px;opacity:.85;}
+  .range-fill{position:absolute;top:0;bottom:0;left:45%;width:10%;background:var(--amber-fg);border-radius:20px;}
+  .range-knob{
+    position:absolute;top:50%;left:45%;width:14px;height:14px;border-radius:50%;background:var(--purple);
+    border:2.5px solid var(--card);box-shadow:0 0 0 1.5px var(--purple), 0 2px 6px rgba(var(--purple-rgb),.4);
+    transform:translate(-50%,-50%);transition:transform .2s var(--ease-out);
+  }
+
+  /* ===== Two-column layout ===== */
+  .two-col{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+
+  .panel{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;
+    transition:box-shadow .25s ease, border-color .25s ease;
+  }
+  .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--purple);margin-bottom:5px;}
+  .panel-head h2{margin:0;font-size:21px;font-weight:700;line-height:1.25;letter-spacing:-.015em;}
+  .head-actions{display:flex;gap:8px;flex-shrink:0;}
+  .icon-square{
+    width:36px;height:36px;border-radius:11px;border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--ink-soft);
+    box-shadow:var(--shadow-sm);transition:background .2s ease, border-color .2s ease, transform .2s var(--ease-out), color .2s ease;
+  }
+  .icon-square:hover{background:var(--bg);border-color:var(--border-hover);color:var(--ink);transform:translateY(-1.5px);}
+  .icon-square:active{transform:translateY(0.5px);}
+  .link-pill{
+    display:flex;align-items:center;gap:6px;background:var(--purple-tint);color:var(--purple);
+    padding:8px 14px;border-radius:11px;font-size:13px;font-weight:600;border:1px solid var(--purple-border);white-space:nowrap;
+    transition:background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .link-pill:hover{background:rgba(var(--purple-rgb),.18);transform:translateY(-1.5px);box-shadow:0 4px 14px -2px rgba(var(--purple-rgb),.3);}
+  .link-pill:active{transform:translateY(0.5px);}
+
+  /* ===== Study path list ===== */
+  .task-row{
+    display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:16px;margin-bottom:12px;background:var(--card);
+    transition:transform .2s var(--ease-out), border-color .2s ease, box-shadow .2s var(--ease-out), background-color .2s ease;
+  }
+  .task-row:hover{
+    transform:translateY(-1.5px);border-color:var(--purple-border);box-shadow:var(--shadow-sm);
+  }
+  .task-row:last-child{margin-bottom:0;}
+  .task-num{
+    width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:13.5px;flex-shrink:0;border:1px solid transparent;
+  }
+  .num-red{background:var(--red-bg);color:var(--red-fg);border-color:var(--red-border);}
+  .num-amber{background:var(--amber-bg);color:var(--amber-fg);border-color:var(--amber-border);}
+  .num-blue{background:var(--blue-bg);color:var(--blue-fg);border-color:var(--blue-border);}
+  .num-green{background:var(--green-bg);color:var(--green-fg);border-color:var(--green-border);}
+  .task-body{flex:1;min-width:0;}
+  .task-title{font-size:15px;font-weight:600;margin-bottom:7px;}
+  .status-chip{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;letter-spacing:.03em;
+    padding:3px 9px;border-radius:20px;margin-bottom:6px;border:1px solid transparent;
+  }
+  .status-chip .sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .status-red{background:var(--red-bg);color:var(--red-fg);border-color:var(--red-border);} .status-red .sdot{background:var(--red-fg);}
+  .status-amber{background:var(--amber-bg);color:var(--amber-fg);border-color:var(--amber-border);} .status-amber .sdot{background:var(--amber-fg);}
+  .status-blue{background:var(--blue-bg);color:var(--blue-fg);border-color:var(--blue-border);} .status-blue .sdot{background:var(--blue-fg);}
+  .status-green{background:var(--green-bg);color:var(--green-fg);border-color:var(--green-border);} .status-green .sdot{background:var(--green-fg);}
+  .task-desc{font-size:12.5px;font-weight:400;color:var(--ink-faint);}
+  .task-action{flex-shrink:0;}
+  .btn-outline{
+    background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:11px 16px;
+    border-radius:11px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+    transition:background .2s ease, border-color .2s ease, color .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .btn-outline:hover{border-color:var(--purple);color:var(--purple);transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
+  .btn-outline:active{transform:translateY(0.5px);}
+  .btn-solid-purple{
+    background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;border:none;padding:12px 18px;border-radius:11px;
+    font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+    box-shadow:0 4px 14px -2px rgba(var(--purple-rgb),.45);
+    transition:background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .btn-solid-purple:hover{transform:translateY(-1.5px);box-shadow:0 12px 22px -6px rgba(var(--purple-rgb),.5);}
+  .btn-solid-purple:active{transform:translateY(0.5px);}
+  .btn-done{
+    background:var(--green-bg);color:var(--green-fg);border:1px solid var(--green-border);padding:11px 16px;border-radius:11px;
+    font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+    transition:transform .2s var(--ease-out), box-shadow .2s ease, opacity .2s ease;
+  }
+  .btn-done:hover{transform:translateY(-1.5px);box-shadow:var(--shadow-sm);opacity:.92;}
+  .btn-done:active{transform:translateY(0.5px);}
+
+  /* ===== Practice arena ===== */
+  .tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .tier-card{
+    border:1px solid var(--border);border-radius:var(--radius-md);padding:18px;background:var(--card);
+    transition:border-color .25s ease, transform .25s var(--ease-out), box-shadow .25s var(--ease-out);
+  }
+  .tier-card:hover{transform:translateY(-1.5px);box-shadow:var(--shadow-md);}
+  .tier-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .tier-emoji{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;border:1px solid transparent;}
+  .em-1{background:var(--red-bg);border-color:var(--red-border);}
+  .em-2{background:var(--blue-bg);border-color:var(--blue-border);}
+  .em-3{background:var(--green-bg);border-color:var(--green-border);}
+  .em-4{background:var(--amber-bg);border-color:var(--amber-border);}
+  .tier-card:nth-child(1):hover{border-color:var(--red-fg);}
+  .tier-card:nth-child(2):hover{border-color:var(--blue-fg);}
+  .tier-card:nth-child(3):hover{border-color:var(--green-fg);}
+  .tier-card:nth-child(4):hover{border-color:var(--amber-fg);}
+  .tier-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.04em;border:1px solid transparent;}
+  .tb-1{background:var(--red-bg);color:var(--red-fg);border-color:var(--red-border);}
+  .tb-2{background:var(--blue-bg);color:var(--blue-fg);border-color:var(--blue-border);}
+  .tb-3{background:var(--green-bg);color:var(--green-fg);border-color:var(--green-border);}
+  .tb-4{background:var(--amber-bg);color:var(--amber-fg);border-color:var(--amber-border);}
+  .tier-title{font-size:14.5px;font-weight:700;margin:3px 0 7px;}
+  .tier-desc{font-size:12px;font-weight:400;color:var(--ink-faint);line-height:1.55;min-height:36px;}
+  .tier-foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+  .tier-time{font-size:11.5px;color:var(--ink-faint);font-weight:500;display:flex;align-items:center;gap:5px;}
+  .tier-start{font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:4px;transition:transform .2s var(--ease-out);}
+  .tier-card:hover .tier-start{transform:translateX(3px);}
+  .start-purple{color:var(--purple);} .start-blue{color:var(--blue-fg);} .start-green{color:var(--green-fg);} .start-amber{color:var(--amber-fg);}
+  .last-drill{
+    margin-top:16px;display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:13px 15px;font-size:12.5px;color:var(--ink-soft);background:var(--card);
+    transition:border-color .2s ease, box-shadow .2s ease, transform .2s var(--ease-out);
+  }
+  .last-drill:hover{transform:translateY(-1.5px);border-color:var(--border-hover);box-shadow:var(--shadow-sm);}
+  .last-drill .licon{
+    width:30px;height:30px;border-radius:9px;background:var(--green-bg);color:var(--green-fg);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--green-border);
+  }
+  .last-drill .lspacer{flex:1;}
+  .last-drill .ltime{color:var(--ink-faint);font-weight:500;}
+
+  /* ===== Study coach panel (inline) ===== */
+  .coach-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;
+    transition:box-shadow .25s ease, border-color .25s ease;
+  }
+  .coach-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .coach-head-left{display:flex;gap:14px;}
+  .coach-avatar{
+    width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--purple),#8A7CFB);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;flex-shrink:0;
+    box-shadow:0 8px 18px -4px rgba(var(--purple-rgb),.4);
+  }
+  .coach-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .coach-title b{font-size:16.5px;font-weight:700;}
+  .online-chip{
+    background:var(--green-bg);color:var(--green-fg);font-size:10.5px;font-weight:600;letter-spacing:.03em;
+    padding:3px 9px;border-radius:20px;border:1px solid var(--green-border);
+  }
+  .coach-head-left p{margin:5px 0 0;font-size:12.5px;color:var(--ink-faint);font-weight:400;}
+  .btn-ghost-outline{
+    background:var(--card);border:1px solid var(--border);color:var(--ink-soft);padding:10px 15px;border-radius:11px;
+    font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+    box-shadow:var(--shadow-sm);transition:border-color .2s ease, background .2s ease, color .2s ease, transform .2s var(--ease-out);
+  }
+  .btn-ghost-outline:hover{border-color:var(--border-hover);background:var(--bg);color:var(--ink);transform:translateY(-1.5px);}
+  .btn-ghost-outline:active{transform:translateY(0.5px);}
+  .suggested-label{font-size:10.5px;font-weight:600;letter-spacing:.05em;color:var(--ink-faint);margin:22px 0 11px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:9px;}
+  .q-chip{
+    background:var(--bg);border:1px solid var(--border);padding:10px 15px;border-radius:11px;
+    font-size:12.5px;font-weight:500;color:var(--ink-soft);text-align:left;
+    transition:border-color .2s ease, color .2s ease, background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .q-chip:hover{border-color:var(--purple);color:var(--purple);transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
+  .q-chip:active{transform:translateY(0.5px);}
+  .ask-bar{
+    margin-top:16px;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+    border-radius:13px;padding:6px 6px 6px 16px;box-shadow:var(--shadow-sm);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .ask-bar:focus-within{border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-tint);}
+  .ask-bar input{
+    flex:1;border:none;background:transparent;outline:none;font-size:13.5px;font-family:inherit;color:var(--ink);padding:11px 0;
+  }
+  .ask-bar input::placeholder{color:var(--ink-faint);}
+  .ask-send{
+    background:var(--purple);color:#fff;border:none;width:38px;height:38px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transition:background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .ask-send:hover{background:var(--purple-dark);transform:translateY(-1px);box-shadow:0 4px 12px -2px rgba(var(--purple-rgb),.4);}
+  .ask-send:active{transform:translateY(0.5px);}
+  .summary-card{
+    margin-top:18px;background:var(--purple-tint);border-radius:var(--radius-md);padding:18px 20px;
+    display:flex;gap:13px;align-items:flex-start;border:1px solid var(--purple-border);
+    box-shadow:var(--shadow-sm);
+  }
+  html[data-theme="dark"] .summary-card{
+    background:rgba(129,140,248,.08);
+    border-color:rgba(129,140,248,.22);
+    box-shadow:inset 0 1px 0 0 rgba(255,255,255,.06), var(--shadow-sm);
+  }
+  .summary-icon{
+    width:34px;height:34px;border-radius:10px;background:var(--purple);color:#fff;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    box-shadow:0 4px 10px -2px rgba(var(--purple-rgb),.4);
+  }
+  .summary-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px;}
+  .summary-head b{font-size:13.5px;font-weight:700;}
+  .advice-chip{
+    background:var(--card);color:var(--purple);font-size:10.5px;font-weight:600;letter-spacing:.03em;
+    padding:3px 9px;border-radius:20px;white-space:nowrap;border:1px solid var(--purple-border);
+  }
+  .summary-card p{margin:0;font-size:13px;line-height:1.65;color:var(--ink-soft);font-weight:400;}
+  .summary-card p b{color:var(--ink);font-weight:600;}
+
+  /* ===== Exam goal ===== */
+  .exam-head{margin-bottom:18px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .exam-head h2{margin:0;font-size:25px;font-weight:800;letter-spacing:-.02em;}
+  .exam-head p{margin:6px 0 0;font-size:13.5px;color:var(--ink-soft);max-width:420px;line-height:1.6;font-weight:400;}
+  .exam-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .exam-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;
+    transition:transform .25s var(--ease-out), box-shadow .25s var(--ease-out), border-color .25s ease;
+  }
+  .exam-card:hover{transform:translateY(-1.5px);box-shadow:var(--shadow-md);border-color:var(--border-hover);}
+  .exam-card.active-goal{
+    border-color:var(--purple);
+    box-shadow:0 0 0 1px var(--purple), 0 8px 24px -4px rgba(var(--purple-rgb),.25);
+  }
+  .exam-card.active-goal:hover{
+    transform:translateY(-1.5px);
+    box-shadow:0 0 0 1px var(--purple), 0 12px 32px -4px rgba(var(--purple-rgb),.32);
+  }
+  .exam-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .exam-track{font-size:10.5px;font-weight:600;letter-spacing:.05em;}
+  .track-purple{color:var(--purple);} .track-green{color:var(--green-fg);} .track-amber{color:var(--amber-fg);}
+  .exam-status{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:5px;letter-spacing:.04em;}
+  .status-active-goal{background:var(--purple-tint);color:var(--purple);border:1px solid var(--purple-border);}
+  .status-avail{background:var(--track-bg);color:var(--ink-faint);border:1px solid var(--border);}
+  .exam-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;background:var(--track-bg);border:1px solid var(--border-subtle);}
+  .exam-name{font-size:18px;font-weight:700;margin-bottom:8px;letter-spacing:-.01em;}
+  .exam-desc{font-size:12.5px;font-weight:400;color:var(--ink-soft);line-height:1.6;min-height:56px;}
+  .exam-tags{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 16px;}
+  .exam-tag{
+    font-size:11px;font-weight:500;background:var(--track-bg);border:1px solid var(--border);
+    padding:5px 10px;border-radius:20px;color:var(--ink-soft);
+    transition:border-color .2s ease, color .2s ease, transform .2s var(--ease-out);
+  }
+  .exam-tag:hover{border-color:var(--purple-border);color:var(--ink);transform:translateY(-1px);}
+  .exam-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:14px;gap:8px;flex-wrap:wrap;}
+  .exam-foot .fstat{font-size:11.5px;color:var(--ink-faint);font-weight:500;}
+  .exam-foot .fstat b{display:block;font-size:13px;font-weight:700;color:var(--ink);}
+  .foot-cta{
+    font-size:12.5px;font-weight:600;color:var(--purple);display:flex;align-items:center;gap:5px;
+    transition:transform .2s var(--ease-out);
+  }
+  .exam-card:hover .foot-cta{transform:translateX(2px);}
+
+  /* ===== Responsive Breakpoints for Laptop, Tablet, and Mobile ===== */
+  @media (max-width: 1400px){
+    .topbar-row{flex-wrap:wrap;row-gap:10px;}
+    .tabs{order:3;width:100%;}
+  }
+  @media (max-width: 1260px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .two-col{grid-template-columns:1fr;}
+    .exam-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+  }
+  @media (max-width: 1024px){
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;width:280px;max-width:85vw;
+      height:100vh;height:100dvh;z-index:1200;
+      box-shadow:var(--shadow-lg);
+      transform:translateX(-100%);
+      overflow-y:auto;
+    }
+    .sidebar.is-open{transform:translateX(0);}
+    .sidebar-close-btn{display:flex !important;}
+    .mobile-menu-btn{display:flex !important;}
+    .topbar{padding:12px 20px;}
+    .content{padding:22px 20px 50px;}
+  }
+  @media (max-width: 768px){
+    .topbar{padding:10px 14px;}
+    .topbar-row{row-gap:8px;}
+    .content{padding:16px 14px 40px;}
+    .stat-grid{grid-template-columns:1fr;}
+    .tier-grid{grid-template-columns:1fr;}
+    .exam-grid{grid-template-columns:1fr;}
+    .welcome-card{padding:20px 18px;}
+    .welcome-card h1{font-size:23px;}
+    .welcome-card .btn-primary{width:100%;justify-content:center;}
+    .diagnostic-banner{padding:14px 16px;}
+    .diagnostic-left{align-items:flex-start;}
+    .btn-amber{width:100%;justify-content:center;}
+    .panel{padding:18px 16px;}
+    .coach-card{padding:18px 16px;}
+    .summary-card{flex-direction:column;padding:14px;}
+  }
+  @media (max-width: 640px){
+    .topbar-actions{width:100%;justify-content:space-between;order:2;margin-left:0;gap:8px;}
+    .pill-group{order:2;width:100%;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;}
+    .user-group{order:1;margin-left:auto;display:flex;gap:8px;}
+    .avatar-details{display:none;}
+    .pill-select{font-size:12px;padding:6px 10px;}
+    .pill-timer{font-size:11.5px;padding:6px 10px;}
+    .tabs{order:3;padding:3px;margin-top:4px;}
+    .tab{padding:6px 11px;font-size:12.5px;}
+    .task-row{flex-wrap:wrap;align-items:flex-start;gap:12px;padding:14px;}
+    .task-body{flex:1 1 calc(100% - 60px);}
+    .task-action{width:100%;margin-top:2px;}
+    .task-action button{width:100%;justify-content:center;}
+    .q-chip{width:100%;text-align:left;}
+    .btn-ghost-outline{width:100%;justify-content:center;}
+    .ask-bar input{font-size:16px;} /* Prevents iOS Safari auto-zoom */
+    .head-actions{width:100%;justify-content:space-between;}
+    .link-pill{flex:1;justify-content:center;}
+    .tier-foot{gap:8px;flex-wrap:wrap;}
+    .last-drill{flex-wrap:wrap;gap:8px;}
+    .last-drill .lspacer{display:none;}
+    .last-drill .ltime{margin-left:auto;}
+    .exam-foot{flex-wrap:wrap;gap:8px;}
+  }
+  @media (max-width: 440px){
+    .topbar-left{gap:8px;}
+    .crumb{font-size:12px;}
+    .welcome-card h1{font-size:20px;}
+    .diagnostic-icon{width:36px;height:36px;}
+    .diagnostic-left b{font-size:13.5px;}
+    .diagnostic-left p{font-size:12px;}
+  }
+
+  /* =========================================================
+     COACH WIDGET MODULE (Glassmorphic & Persistent)
+     ========================================================= */
+  .coach-fab{
+    position:fixed;right:24px;bottom:24px;z-index:1000;
+    width:58px;height:58px;border-radius:50%;border:none;
+    background:linear-gradient(135deg,var(--purple),#8A7CFB);
+    color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 28px -6px rgba(var(--purple-rgb),.5), var(--purple-glow);
+    transition:transform .25s var(--ease-out), box-shadow .25s var(--ease-out);
+  }
+  .coach-fab:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 16px 32px -8px rgba(var(--purple-rgb),.55), var(--purple-glow);}
+  .coach-fab:active{transform:translateY(0.5px) scale(0.98);}
+  .coach-fab .fab-dot{
+    position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;
+    background:var(--green-fg);border:2px solid var(--card);box-shadow:0 0 8px var(--green-fg);
+  }
+  .coach-fab.hidden{display:none;}
+
+  .coach-widget{
+    position:fixed;right:24px;bottom:24px;z-index:1000;
+    width:368px;max-height:min(568px, calc(100vh - 48px));
+    background:var(--card-glass);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--border);border-radius:18px;
+    box-shadow:inset 0 1px 0 0 rgba(255,255,255,.1), var(--shadow-lg);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .coach-widget[hidden]{display:none;}
+  .coach-widget.is-minimized{max-height:62px;}
+  .coach-widget.is-minimized .coach-w-body,
+  .coach-widget.is-minimized .coach-w-foot{display:none;}
+
+  .coach-w-head{
+    display:flex;align-items:center;gap:10px;padding:12px 13px;
+    border-bottom:1px solid var(--border);
+    background:var(--card-glass);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    flex-shrink:0;
+  }
+  .coach-w-avatar{
+    width:34px;height:34px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--purple),#8A7CFB);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;
+    box-shadow:0 4px 10px -2px rgba(var(--purple-rgb),.4);
+  }
+  .coach-w-head b{font-size:13px;font-weight:700;display:block;}
+  .coach-w-head .coach-w-status{
+    font-size:11px;color:var(--green-fg);font-weight:600;display:flex;align-items:center;gap:5px;
+  }
+  .coach-w-head .coach-w-status .dot-live{width:6px;height:6px;}
+  .coach-w-head-actions{margin-left:auto;display:flex;gap:4px;}
+  .coach-w-icon-btn{
+    width:27px;height:27px;border-radius:8px;border:none;background:transparent;
+    color:var(--ink-faint);font-size:14px;display:flex;align-items:center;justify-content:center;
+    transition:background .2s ease, color .2s ease;
+  }
+  .coach-w-icon-btn:hover{background:rgba(0,0,0,.04);color:var(--ink);}
+  html[data-theme="dark"] .coach-w-icon-btn:hover{background:rgba(255,255,255,.06);}
+
+  .coach-w-body{
+    flex:1;overflow-y:auto;padding:14px;
+    background:rgba(246, 247, 251, 0.45);
+    display:flex;flex-direction:column;gap:10px;
+  }
+  html[data-theme="dark"] .coach-w-body{
+    background:rgba(11, 15, 23, 0.45);
+  }
+  .coach-w-msg{max-width:84%;padding:9px 12px;border-radius:12px;font-size:12.5px;line-height:1.55;}
+  .coach-w-msg.from-user{
+    align-self:flex-end;background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;border-bottom-right-radius:4px;
+    box-shadow:0 2px 8px rgba(var(--purple-rgb),.25);
+  }
+  .coach-w-msg.from-coach{
+    align-self:flex-start;background:var(--card);color:var(--ink);border:1px solid var(--border);border-bottom-left-radius:4px;
+    box-shadow:var(--shadow-sm);
+  }
+  .coach-w-msg.from-system{align-self:center;background:transparent;color:var(--ink-faint);font-size:11.5px;text-align:center;}
+  .coach-w-suggestions{display:flex;flex-direction:column;gap:6px;margin-top:2px;}
+  .coach-w-suggestion{
+    text-align:left;background:var(--card);border:1px solid var(--border);border-radius:9px;
+    padding:8px 10px;font-size:12px;font-weight:500;color:var(--ink-soft);box-shadow:var(--shadow-sm);
+    transition:border-color .2s ease, color .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .coach-w-suggestion:hover{border-color:var(--purple);color:var(--purple);transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
+  .coach-w-suggestion:active{transform:translateY(0.5px);}
+
+  .coach-w-foot{
+    display:flex;align-items:center;gap:8px;padding:10px;border-top:1px solid var(--border);flex-shrink:0;
+    background:var(--card-glass);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  .coach-w-foot input{
+    flex:1;border:1px solid var(--border);background:var(--bg);border-radius:9px;
+    padding:9px 11px;font-size:12.5px;font-family:inherit;outline:none;color:var(--ink);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .coach-w-foot input:focus{border-color:var(--purple);box-shadow:0 0 0 2px var(--purple-tint);}
+  .coach-w-send{
+    width:32px;height:32px;border-radius:8px;border:none;background:var(--purple);color:#fff;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transition:background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
+  }
+  .coach-w-send:hover:not([disabled]){background:var(--purple-dark);transform:translateY(-1px);box-shadow:0 4px 10px -2px rgba(var(--purple-rgb),.4);}
+  .coach-w-send[disabled]{opacity:.5;}
+
+  @media (max-width: 520px){
+    .coach-fab{right:16px;bottom:16px;width:52px;height:52px;font-size:20px;}
+    .coach-widget{
+      right:12px;left:12px;bottom:12px;width:auto;
+      max-height:min(520px, calc(100dvh - 24px));border-radius:16px;
+    }
+    .coach-widget input{font-size:16px;}
+  }
+
+  /* ============================================================
+     DEMO-FUNCTIONALITY LAYER
+     Everything below powers the "wire every button up with mock
+     data" pass: view switching, toasts, quiz modal, accordions,
+     toggles, checklists. Swap the MOCK_* data + the clearly
+     labelled TODO hooks in <script> for real API calls later —
+     the DOM/CSS contract here won't need to change.
+     ============================================================ */
+
+  /* ----- View switcher ----- */
+  .view{display:none;}
+  .view.active{display:block;animation:viewIn .28s var(--ease-out);}
+  @keyframes viewIn{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+  .view-head{margin-bottom:22px;}
+  .view-head h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-.02em;}
+  .view-head p{margin:0;font-size:13.5px;color:var(--ink-soft);max-width:640px;line-height:1.6;}
+
+  /* ----- Toasts ----- */
+  .toast-stack{
+    position:fixed;right:20px;bottom:20px;z-index:99998;
+    display:flex;flex-direction:column;gap:10px;align-items:flex-end;
+    pointer-events:none;
+  }
+  .toast{
+    pointer-events:auto;
+    display:flex;align-items:center;gap:10px;
+    background:var(--card);border:1px solid var(--border);color:var(--ink);
+    padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;
+    box-shadow:var(--shadow-lg);max-width:340px;
+    animation:toastIn .3s var(--ease-out);
+  }
+  .toast.leaving{animation:toastOut .25s var(--ease-out) forwards;}
+  .toast .tdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--purple);}
+  .toast.t-success .tdot{background:var(--green-fg);}
+  .toast.t-info .tdot{background:var(--blue-fg);}
+  .toast.t-warn .tdot{background:var(--amber-fg);}
+  @keyframes toastIn{ from{opacity:0;transform:translateY(10px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
+  @keyframes toastOut{ from{opacity:1;transform:translateY(0);} to{opacity:0;transform:translateY(8px);} }
+
+  /* ----- Modal (quiz + insights) ----- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:5000;
+    background:rgba(11,15,23,.55);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;
+  }
+  .modal-overlay.is-open{opacity:1;pointer-events:auto;}
+  .modal-box{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    width:100%;max-width:560px;max-height:88vh;overflow-y:auto;
+    box-shadow:var(--shadow-lg);padding:26px;
+    transform:translateY(10px) scale(.98);transition:transform .25s var(--ease-out);
+  }
+  .modal-overlay.is-open .modal-box{transform:translateY(0) scale(1);}
+  .modal-close-row{display:flex;justify-content:flex-end;margin-bottom:-6px;}
+  .modal-x{width:30px;height:30px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;}
+  .modal-x:hover{color:var(--ink);border-color:var(--border-hover);}
+
+  .quiz-meta{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:600;color:var(--ink-faint);letter-spacing:.04em;margin-bottom:8px;}
+  .quiz-progress-track{height:7px;border-radius:20px;background:var(--track-bg);overflow:hidden;margin-bottom:22px;}
+  .quiz-progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--purple),#8A7CFB);transition:width .35s var(--ease-out);}
+  .quiz-question{font-size:17px;font-weight:700;line-height:1.5;margin-bottom:18px;letter-spacing:-.01em;}
+  .quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:8px;}
+  .quiz-option{
+    text-align:left;border:1px solid var(--border);background:var(--bg);border-radius:12px;
+    padding:13px 15px;font-size:13.5px;font-weight:500;color:var(--ink);
+    display:flex;align-items:center;gap:10px;
+    transition:border-color .18s ease, transform .18s var(--ease-out), background .18s ease, box-shadow .18s ease;
+  }
+  .quiz-option:hover:not([disabled]){border-color:var(--purple-border);transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
+  .quiz-option .qletter{width:22px;height:22px;border-radius:7px;background:var(--track-bg);color:var(--ink-faint);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .quiz-option.selected{border-color:var(--purple);background:var(--purple-tint);}
+  .quiz-option.selected .qletter{background:var(--purple);color:#fff;}
+  .quiz-option.correct{border-color:var(--green-fg);background:var(--green-bg);}
+  .quiz-option.correct .qletter{background:var(--green-fg);color:#fff;}
+  .quiz-option.wrong{border-color:var(--red-fg);background:var(--red-bg);}
+  .quiz-option.wrong .qletter{background:var(--red-fg);color:#fff;}
+  .quiz-option[disabled]{cursor:default;}
+  .quiz-explain{font-size:12.5px;color:var(--ink-soft);background:var(--track-bg);border-radius:10px;padding:11px 13px;margin-top:14px;line-height:1.55;display:none;}
+  .quiz-explain.show{display:block;}
+  .quiz-footrow{display:flex;justify-content:flex-end;margin-top:20px;}
+
+  .quiz-result{text-align:center;padding:6px 0 4px;}
+  .quiz-result .rscore{font-size:44px;font-weight:800;letter-spacing:-.02em;margin:6px 0 2px;}
+  .quiz-result .rlabel{font-size:13px;color:var(--ink-faint);font-weight:600;margin-bottom:18px;}
+  .quiz-result .rmsg{font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:400px;margin:0 auto 22px;}
+  .quiz-result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+
+  /* ----- FAQ accordion ----- */
+  .faq-search{
+    display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:12px 15px;margin-bottom:20px;box-shadow:var(--shadow-sm);
+  }
+  .faq-search input{flex:1;border:none;background:transparent;outline:none;color:var(--ink);font-size:13.5px;font-family:inherit;}
+  .faq-search svg{color:var(--ink-faint);flex-shrink:0;}
+  .faq-list{display:flex;flex-direction:column;gap:10px;}
+  .faq-item{border:1px solid var(--border);border-radius:12px;background:var(--card);overflow:hidden;transition:border-color .2s ease;}
+  .faq-item.open{border-color:var(--purple-border);}
+  .faq-q{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:15px 17px;font-size:13.5px;font-weight:600;color:var(--ink);
+  }
+  .faq-q .fchev{transition:transform .2s ease;color:var(--ink-faint);flex-shrink:0;}
+  .faq-item.open .fchev{transform:rotate(180deg);color:var(--purple);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .faq-a-inner{padding:0 17px 16px;font-size:13px;color:var(--ink-soft);line-height:1.65;}
+  .faq-empty{text-align:center;padding:40px 0;color:var(--ink-faint);font-size:13.5px;}
+
+  /* ----- Settings toggles ----- */
+  .settings-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--border-subtle);}
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row b{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px;}
+  .settings-row span{font-size:12px;color:var(--ink-faint);}
+  .switch{position:relative;width:42px;height:24px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .slider{position:absolute;inset:0;background:var(--track-bg);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:background .2s ease, border-color .2s ease;}
+  .switch .slider::before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s var(--ease-out);}
+  .switch input:checked + .slider{background:var(--purple);border-color:var(--purple);}
+  .switch input:checked + .slider::before{transform:translateX(18px);}
+
+  /* ----- Checklist (Daily Assignment) ----- */
+  .check-row{display:flex;align-items:center;gap:14px;border:1px solid var(--border);border-radius:var(--radius-md);padding:15px 16px;margin-bottom:10px;background:var(--card);transition:opacity .2s ease, border-color .2s ease;}
+  .check-row.done{opacity:.55;}
+  .check-row.done .check-title{text-decoration:line-through;}
+  .check-box{width:22px;height:22px;border-radius:7px;border:2px solid var(--border-hover);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;transition:background .18s ease, border-color .18s ease, color .18s ease;}
+  .check-row.done .check-box{background:var(--green-fg);border-color:var(--green-fg);color:#fff;}
+  .check-title{font-size:14px;font-weight:600;flex:1;}
+  .check-meta{font-size:12px;color:var(--ink-faint);margin-top:3px;}
+
+  /* ----- Lecture / vault cards ----- */
+  .simple-list{display:flex;flex-direction:column;gap:12px;}
+  .simple-card{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;background:var(--card);transition:transform .2s var(--ease-out), box-shadow .2s ease, border-color .2s ease;}
+  .simple-card:hover{transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
+  .simple-emoji{width:44px;height:44px;border-radius:12px;background:var(--purple-tint);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;border:1px solid var(--purple-border);}
+  .simple-body{flex:1;min-width:0;}
+  .simple-body b{font-size:14.5px;font-weight:600;display:block;margin-bottom:4px;}
+  .simple-body .smeta{font-size:12px;color:var(--ink-faint);margin-bottom:8px;}
+  .filter-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .filter-chip{padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--ink-soft);transition:all .18s ease;}
+  .filter-chip.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+
+  /* ----- Track dropdown on topbar pill ----- */
+  .pill-select{position:relative;cursor:pointer;}
+  .track-dropdown{
+    position:absolute;top:calc(100% + 8px);left:0;min-width:220px;background:var(--card);
+    border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:6px;z-index:200;
+    opacity:0;pointer-events:none;transform:translateY(-6px);transition:all .18s ease;
+  }
+  .track-dropdown.is-open{opacity:1;pointer-events:auto;transform:translateY(0);}
+  .track-dropdown button{width:100%;text-align:left;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink);background:transparent;border:none;display:flex;align-items:center;gap:8px;}
+  .track-dropdown button:hover{background:var(--purple-tint);color:var(--purple);}
+  .track-dropdown button.active-track{color:var(--purple);}
+
+  .coach-w-msg.typing span{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin:0 1.5px;opacity:.4;animation:typingDot 1s infinite;}
+  .coach-w-msg.typing span:nth-child(2){animation-delay:.15s;} .coach-w-msg.typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes typingDot{ 0%,60%,100%{opacity:.3;transform:translateY(0);} 30%{opacity:1;transform:translateY(-2px);} }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M6.5 11v5c0 1.3 2.5 3 5.5 3s5.5-1.7 5.5-3v-5"/></svg>
+      </div>
+      <div class="brand-text">
+        <b>APEX</b>
+        <span>Student Hub</span>
+      </div>
+      <button class="icon-btn sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close navigation" title="Close menu">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="nav-group-label">LEARNING &amp; PRACTICE</div>
+    <a class="nav-item active" data-view="view-dashboard"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 001 1h4v-6h2v6h4a1 1 0 001-1v-9"/></svg>
+      Dashboard</span></a>
+    <a class="nav-item" data-view="view-lectures"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2"/><path d="M10 9.2v4.6l4-2.3z" fill="currentColor" stroke="none"/><path d="M8 21h8"/></svg>
+      Lectures</span></a>
+    <a class="nav-item" data-view="view-progress"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l5-5 4 4 7-7"/><path d="M15 7h5v5"/></svg>
+      My Progress</span></a>
+    <a class="nav-item" data-view="view-assignment"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
+      Daily Assignment</span><span class="count" id="assignCountBadge">6</span></a>
+    <a class="nav-item" data-view="view-vault"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1.2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12.5h4"/></svg>
+      Practice Vault</span><span class="count">405k</span></a>
+    <a class="nav-item" data-view="view-readiness"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11"/><path d="M12 20V4"/><path d="M19 20v-7"/></svg>
+      Exam Readiness</span></a>
+
+    <div class="nav-group-label">SUPPORT &amp; PREFERENCES</div>
+    <a class="nav-item" data-view="view-settings"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 00.36 1.98l.04.04a2.2 2.2 0 11-3.1 3.1l-.05-.04a1.8 1.8 0 00-1.98-.36 1.8 1.8 0 00-1.1 1.65V21.6a2.2 2.2 0 01-4.4 0v-.06a1.8 1.8 0 00-1.18-1.65 1.8 1.8 0 00-1.98.36l-.04.04a2.2 2.2 0 11-3.1-3.1l.04-.05a1.8 1.8 0 00.36-1.98A1.8 1.8 0 002.4 13.1H2.3a2.2 2.2 0 010-4.4h.06A1.8 1.8 0 003.98 7.5a1.8 1.8 0 00-.36-1.98l-.04-.04a2.2 2.2 0 113.1-3.1l.05.04A1.8 1.8 0 008.7 2.78 1.8 1.8 0 009.8 1.13V1.1a2.2 2.2 0 014.4 0v.06A1.8 1.8 0 0015.3 2.78a1.8 1.8 0 001.98-.36l.04-.04a2.2 2.2 0 113.1 3.1l-.04.05a1.8 1.8 0 00-.36 1.98v.06a1.8 1.8 0 001.65 1.1h.06a2.2 2.2 0 010 4.4h-.06a1.8 1.8 0 00-1.65 1.1z" opacity="0"/><path d="M12 2v3M12 19v3M21 12h-3M6 12H3M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M18.4 18.4l-2.1-2.1M7.7 7.7L5.6 5.6"/></svg>
+      Study Settings</span></a>
+    <a class="nav-item" data-view="view-faq"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 015.2 1c0 1.7-2.5 2-2.5 3.6"/><path d="M12 17.2h.01"/></svg>
+      Help &amp; FAQs</span></a>
+
+    <div class="sidebar-footer">
+      <span class="dot-live"></span> Cloud Sync <span class="status">Synced</span>
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+  <div class="main">
+
+    <!-- ============ TOPBAR ============ -->
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu" title="Menu">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div class="crumb">APEX <span style="opacity:.4">/</span> <b>Student Hub</b></div>
+        </div>
+
+        <nav class="tabs" id="topTabs">
+          <button class="tab active" data-view="view-dashboard">Dashboard</button>
+          <button class="tab" data-view="view-diagnostic">Diagnostic Arena</button>
+          <button class="tab" data-view="view-progress">Study Roadmap</button>
+          <button class="tab" data-view="view-syllabus">Syllabus Map</button>
+          <button class="tab" data-view="view-dashboard" data-scroll-to="coachCard">Study Coach</button>
+        </nav>
+
+        <div class="spacer"></div>
+
+        <div class="topbar-actions">
+          <div class="pill-group">
+            <div class="pill-select" id="examPillSelect">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/></svg>
+              <span id="examPillLabel">JEE Main</span>
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              <div class="track-dropdown" id="trackDropdown">
+                <button data-track="jee" class="active-track">🎯 JEE Main &amp; Advanced</button>
+                <button data-track="neet">🧬 NEET-UG Medical</button>
+                <button data-track="upsc">🏛 UPSC CSE (IAS/IPS)</button>
+              </div>
+            </div>
+
+            <div class="pill-timer" id="sessionTimer" title="Time studied today (demo timer)">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+              <span id="sessionTimerLabel">02:44:18</span> <span style="opacity:.75;font-weight:600">today</span>
+            </div>
+          </div>
+
+          <div class="user-group">
+            <button class="icon-btn" id="themeToggle" title="Cycle theme: light / dark / sketch" aria-label="Toggle theme">
+              <svg class="icon" id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+              <svg class="icon" id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M20 14.2A8.2 8.2 0 019.8 4a7 7 0 1010.2 10.2z"/></svg>
+              <svg class="icon" id="iconSketch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M14.2 3.8l6 6L8.6 21.4 2.6 21l-.4-6 12-11.2z"/><path d="M12 6l6 6"/></svg>
+            </button>
+
+            <button class="icon-btn" id="cameraBtn" aria-label="Camera">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.4-2.6h5.2L16 7"/><circle cx="12" cy="13.5" r="3.4"/></svg>
+            </button>
+
+            <div class="avatar-block">
+              <div class="avatar-circ">AS</div>
+              <div class="avatar-details">
+                <b>Aspirant S.</b>
+                <span id="avatarSubLabel">JEE Adv 2025</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+    <div class="view active" id="view-dashboard">
+
+      <!-- ============ WELCOME BANNER ============ -->
+      <section class="welcome-card">
+        <div>
+          <div class="welcome-tags">JEE ADVANCED 2025 <span>•</span> <span class="live"><span class="dot-live"></span>COHORT ACTIVE</span></div>
+          <h1>Welcome back, Aspirant</h1>
+          <p>Your personalized study plan for <b>JEE Advanced 2025</b> is <b>68% complete</b>. Focus on Rotational Dynamics &amp; Chemical Equilibrium today to boost your target rank.</p>
+        </div>
+        <button class="btn-primary" id="resumePathBtn" data-action="start-quiz" data-topic="rotational-dynamics" data-quiz-title="Resume Path · Rotational Dynamics" data-quiz-count="5">Resume Path
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l7 7-7 7M21 12H3"/></svg>
+        </button>
+      </section>
+
+      <div class="diagnostic-banner">
+        <div class="diagnostic-left">
+          <div class="diagnostic-icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
+          </div>
+          <div>
+            <b>Recommended Quick Diagnostic <span class="badge-tag">12 MIN CHECKUP</span></b>
+            <p>Quick 9-question checkup to personalize your question difficulty and update your study schedule.</p>
+          </div>
+        </div>
+        <button class="btn-amber" id="startDiagnosticBtn" data-action="start-quiz" data-topic="mixed" data-quiz-title="Diagnostic Checkup" data-quiz-count="9">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Start 9-Q Checkup
+        </button>
+      </div>
+
+      <!-- ============ STAT GRID ============ -->
+      <section class="stat-grid section-gap">
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">OVERALL SYLLABUS MASTERY</span>
+            <span class="stat-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span>
+          </div>
+          <div class="stat-value"><span id="overallMasteryNum">42</span><span class="unit">%</span> <span class="stat-delta" id="overallMasteryDelta">↑ +6.4% this week</span></div>
+          <div class="stat-sub">Total Syllabus Completed</div>
+          <div class="bars">
+            <div class="bar-row">
+              <div class="flabel"><span class="fl-left">⚡ Physics</span><span id="physicsBarLabel">48%</span></div>
+              <div class="bar-track"><div class="bar-fill fill-orange" id="physicsBarFill" style="width:48%;transition:width .5s var(--ease-out);"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="flabel"><span class="fl-left">🧪 Chemistry</span><span id="chemistryBarLabel">36%</span></div>
+              <div class="bar-track"><div class="bar-fill fill-green" id="chemistryBarFill" style="width:36%;transition:width .5s var(--ease-out);"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="flabel"><span class="fl-left">📐 Mathematics</span><span id="mathsBarLabel">31%</span></div>
+              <div class="bar-track"><div class="bar-fill" id="mathsBarFill" style="width:31%;background:var(--purple);transition:width .5s var(--ease-out);"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">EXAM READINESS SCORE</span>
+            <span class="stat-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"/><path d="M14 7h6v6"/></svg></span>
+          </div>
+          <div class="stat-value">+1.42 <span class="stat-delta" style="background:var(--purple-tint);color:var(--purple)">Rank Calibrated</span></div>
+          <div class="stat-sub">Adaptive Ability Index</div>
+          <svg class="mini-chart" viewBox="0 0 240 44" preserveAspectRatio="none">
+            <polyline points="0,38 40,34 80,30 120,26 160,16 200,10 240,6" fill="none" stroke="var(--purple)" stroke-width="2.5"/>
+            <circle cx="200" cy="10" r="4" fill="var(--purple)"/>
+          </svg>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">TOPIC MASTERY LEVEL</span>
+            <span class="stat-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg></span>
+          </div>
+          <div class="stat-value">78<span class="unit">%</span> <span class="stat-delta" style="background:var(--purple-tint);color:var(--purple)">Proficient</span></div>
+          <div class="stat-sub">High conceptual retention</div>
+          <div class="stat-detail-list">
+            <div class="stat-detail-row">Careless Errors: <span class="chip chip-green">Low (8%)</span></div>
+            <div class="stat-detail-row">Overall Accuracy: <span class="chip chip-green">High (86%)</span></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">PREDICTION CONFIDENCE</span>
+            <span class="stat-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l-3 6a4 4 0 008 0zM19 8l-3 6a4 4 0 008 0zM5 8h14"/></svg></span>
+          </div>
+          <div class="stat-value">84<span class="unit">%</span> <span class="stat-delta" style="background:var(--amber-bg);color:var(--amber-fg)">High Reliability</span></div>
+          <div class="stat-sub">Based on steady question flow</div>
+          <div class="stat-detail-row" style="margin-top:16px;">Confidence Range <b>±4.2%</b></div>
+          <div class="range-track">
+            <div class="range-band"></div>
+            <div class="range-fill"></div>
+            <div class="range-knob"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============ STUDY PATH + PRACTICE ARENA ============ -->
+      <section class="two-col section-gap">
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="eyebrow">RECOMMENDED TASKS</div>
+              <h2>Today's Recommended Study Path</h2>
+            </div>
+            <div class="head-actions">
+              <button class="icon-square" data-action="refresh-tasks" title="Refresh"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h5"/><path d="M20 20v-5h-5"/><path d="M5.5 9a7.5 7.5 0 0113-3.5M18.5 15a7.5 7.5 0 01-13 3.5"/></svg></button>
+              <button class="link-pill" data-view-target="view-syllabus">Full Syllabus Map
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M10 14L20 4"/><path d="M18 13v6a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="task-row" data-task-topic="rotational-dynamics" data-mastery="28">
+            <div class="task-num num-red">01</div>
+            <div class="task-body">
+              <div class="task-title">Rotational Dynamics: Moment of Inertia</div>
+              <div class="status-chip status-red"><span class="sdot"></span>High Priority</div>
+              <div class="task-desc">Foundation for Angular Momentum &amp; Rolling Motion · Mastery: <span class="mastery-num">28</span>%</div>
+            </div>
+            <div class="task-action"><button class="btn-solid-purple" data-action="start-quiz" data-topic="rotational-dynamics" data-subject="physics" data-quiz-title="Rotational Dynamics: Moment of Inertia" data-quiz-count="5">Practice Now
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+            </button></div>
+          </div>
+
+          <div class="task-row" data-task-topic="chemical-equilibrium" data-mastery="54">
+            <div class="task-num num-amber">02</div>
+            <div class="task-body">
+              <div class="task-title">Chemical Equilibrium: Le Chatelier's Shift</div>
+              <div class="status-chip status-amber"><span class="sdot"></span>Needs Practice</div>
+              <div class="task-desc">Partial pressure calculations &amp; temperature shifts · Mastery: <span class="mastery-num">54</span>%</div>
+            </div>
+            <div class="task-action"><button class="btn-outline" data-action="start-quiz" data-topic="chemical-equilibrium" data-subject="chemistry" data-quiz-title="Chemical Equilibrium: Le Chatelier's Shift" data-quiz-count="5">Practice
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h8"/><circle cx="14" cy="7" r="2"/><path d="M4 12h3"/><circle cx="9" cy="12" r="2"/><path d="M13 12h7"/><path d="M4 17h11"/><circle cx="17" cy="17" r="2"/></svg>
+            </button></div>
+          </div>
+
+          <div class="task-row" data-task-topic="integral-calculus" data-mastery="72">
+            <div class="task-num num-blue">03</div>
+            <div class="task-body">
+              <div class="task-title">Integral Calculus: Definite Integration Limits</div>
+              <div class="status-chip status-blue"><span class="sdot"></span>In Progress</div>
+              <div class="task-desc">King's property &amp; periodic definite integrals · Mastery: <span class="mastery-num">72</span>%</div>
+            </div>
+            <div class="task-action"><button class="btn-outline" data-action="start-quiz" data-topic="integral-calculus" data-subject="maths" data-quiz-title="Integral Calculus: Definite Integration Limits" data-quiz-count="5">Continue
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5l11 7-11 7z"/></svg>
+            </button></div>
+          </div>
+
+          <div class="task-row" data-task-topic="electrostatics" data-mastery="94">
+            <div class="task-num num-green">04</div>
+            <div class="task-body">
+              <div class="task-title">Electrostatics: Gauss Law Applications</div>
+              <div class="status-chip status-green"><span class="sdot"></span>Mastered</div>
+              <div class="task-desc">Cylindrical &amp; planar symmetry flux calculations · Mastery: <span class="mastery-num">94</span>%</div>
+            </div>
+            <div class="task-action"><button class="btn-done" data-action="mark-reviewed" data-topic="electrostatics">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg>
+              Reviewed
+            </button></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="eyebrow">PRACTICE ARENA</div>
+              <h2>Practice &amp; Test Modes</h2>
+            </div>
+            <div class="head-actions">
+              <button class="icon-square" data-action="start-quiz" data-topic="mixed" data-subject="" data-quiz-title="Quick Random Practice" data-quiz-count="5" title="Quick random practice"><svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+              <button class="icon-square" data-action="shuffle-arena" title="Shuffle practice arena"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6v6M20 4L10 14"/></svg></button>
+            </div>
+          </div>
+
+          <div class="tier-grid">
+            <div class="tier-card" data-action="start-quiz" data-topic="mixed" data-subject="" data-quiz-title="Tier 1 · 9-Q Quick Checkup" data-quiz-count="9" role="button" tabindex="0">
+              <div class="tier-top"><div class="tier-emoji em-1">🚀</div><span class="tier-badge tb-1">TIER 1</span></div>
+              <div class="tier-title">9-Q Quick Checkup</div>
+              <div class="tier-desc">Covers Core Mechanics, Bonding &amp; Algebra essentials.</div>
+              <div class="tier-foot"><span class="tier-time">⏱ ~12 mins</span><span class="tier-start start-purple">Start
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </span></div>
+            </div>
+
+            <div class="tier-card" data-action="start-quiz" data-topic="rotational-dynamics" data-subject="physics" data-quiz-title="Tier 2 · 5-Q Targeted Drill: Rotational Dynamics" data-quiz-count="5" role="button" tabindex="0">
+              <div class="tier-top"><div class="tier-emoji em-2">🎯</div><span class="tier-badge tb-2">TIER 2</span></div>
+              <div class="tier-title">5-Q Targeted Drill</div>
+              <div class="tier-desc">Targeted practice on your most urgent priority topic.</div>
+              <div class="tier-foot"><span class="tier-time">⏱ ~7 mins</span><span class="tier-start start-blue">Start
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </span></div>
+            </div>
+
+            <div class="tier-card" data-action="start-quiz" data-topic="mixed" data-subject="" data-quiz-title="Tier 3 · 15-Q Revision Quiz" data-quiz-count="15" role="button" tabindex="0">
+              <div class="tier-top"><div class="tier-emoji em-3">🔬</div><span class="tier-badge tb-3">TIER 3</span></div>
+              <div class="tier-title">15-Q Revision Quiz</div>
+              <div class="tier-desc">Comprehensive test pinpointing weak conceptual areas.</div>
+              <div class="tier-foot"><span class="tier-time">⏱ ~25 mins</span><span class="tier-start start-green">Start
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </span></div>
+            </div>
+
+            <div class="tier-card" data-action="start-quiz" data-topic="mixed" data-subject="" data-quiz-title="Tier 4 · Advanced Challenge" data-quiz-count="8" role="button" tabindex="0">
+              <div class="tier-top"><div class="tier-emoji em-4">🏆</div><span class="tier-badge tb-4">TIER 4</span></div>
+              <div class="tier-title">Advanced Challenge</div>
+              <div class="tier-desc">Multi-concept questions designed for top percentile ranks.</div>
+              <div class="tier-foot"><span class="tier-time">⏱ ~35 mins</span><span class="tier-start start-amber">Start
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </span></div>
+            </div>
+          </div>
+
+          <div class="last-drill" id="lastDrillRow">
+            <span class="licon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><path d="M3 5v6h6"/></svg></span>
+            <span id="lastDrillText">Last completed drill: <b>Thermodynamics</b> (4/5 correct)</span>
+            <span class="lspacer"></span>
+            <span class="ltime" id="lastDrillTime">2h ago</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============ STUDY COACH (inline panel — shares state with the floating widget) ============ -->
+      <section class="coach-card section-gap" id="coachCard">
+        <div class="coach-head">
+          <div class="coach-head-left">
+            <div class="coach-avatar">🧠</div>
+            <div>
+              <div class="coach-title"><b>Personal Study Coach</b><span class="online-chip">Online &amp; Ready to Help</span></div>
+              <p>Analyzes your test performance and study habits to give you clear, actionable guidance.</p>
+            </div>
+          </div>
+          <button class="btn-ghost-outline" id="pastInsightsBtn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+            Past Insights
+          </button>
+        </div>
+
+        <div class="suggested-label">SUGGESTED QUESTIONS BASED ON YOUR LATEST PRACTICE</div>
+        <div class="chip-row" data-coach-suggestions>
+          <button class="q-chip" data-coach-ask="What mistakes am I making most often?">📊 "What mistakes am I making most often?"</button>
+          <button class="q-chip" data-coach-ask="Why is my study plan ordered this way?">🧭 "Why is my study plan ordered this way?"</button>
+          <button class="q-chip" data-coach-ask="JEE Main exam day strategy &amp; pacing?">🎯 "JEE Main exam day strategy &amp; pacing?"</button>
+          <button class="q-chip" data-coach-ask="High-yield topics for maximum rank jump?">💡 "High-yield topics for maximum rank jump?"</button>
+        </div>
+
+        <form class="ask-bar" id="coachInlineForm">
+          <input type="text" id="coachInlineInput" placeholder="Ask anything about your syllabus, problem-solving tips, or revision strategy..." />
+          <button type="submit" class="ask-send">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </form>
+
+        <div class="summary-card">
+          <div class="summary-icon">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+          </div>
+          <div>
+            <div class="summary-head"><b>Coach Summary &amp; Recommendation</b><span class="advice-chip">Personalized Advice</span></div>
+            <p>Based on your latest 42 practice questions, your most frequent errors are in <b>algebraic calculation steps in Rotational Dynamics</b>, even though your conceptual physics formulas are 91% accurate. We recommend taking the 5-Question Targeted Drill on Moment of Inertia to eliminate calculation slips.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ EXAM GOAL ============ -->
+      <section class="section-gap">
+        <div class="exam-head">
+          <div>
+            <div class="eyebrow">TARGET EXAM GOAL</div>
+            <h2>Select Your Exam Goal</h2>
+          </div>
+          <p>Choose your target exam to begin. Your practice questions, syllabus breakdown, and mock tests will tailor specifically to this track.</p>
+        </div>
+
+        <div class="exam-grid" id="examGrid">
+          <div class="exam-card active-goal" data-track="jee">
+            <div class="exam-top">
+              <span class="exam-track track-purple">PCM TRACK</span>
+              <span class="exam-status status-active-goal">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg>
+                CURRENT ACTIVE</span>
+            </div>
+            <div class="exam-icon">🎯</div>
+            <div class="exam-name">JEE Main &amp; Advanced</div>
+            <div class="exam-desc">400,000+ Practice Questions · Full Syllabus Coverage · Real Exam Pattern &amp; Numerical Problems.</div>
+            <div class="exam-tags">
+              <span class="exam-tag">⚡ Physics</span>
+              <span class="exam-tag">🧪 Chemistry</span>
+              <span class="exam-tag">📐 Mathematics</span>
+            </div>
+            <div class="exam-foot">
+              <span class="fstat"><b>400,000+</b>Questions</span>
+              <button class="foot-cta" data-action="switch-track" data-track="jee">Syllabus Active
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="exam-card" data-track="neet">
+            <div class="exam-top">
+              <span class="exam-track track-green">PCB TRACK</span>
+              <span class="exam-status status-avail">AVAILABLE</span>
+            </div>
+            <div class="exam-icon">🧬</div>
+            <div class="exam-name">NEET-UG Medical</div>
+            <div class="exam-desc">NCERT-aligned question bank, official diagram-based practice, and timed biology mock tests.</div>
+            <div class="exam-tags">
+              <span class="exam-tag">🧬 Biology (Botany/Zoo)</span>
+              <span class="exam-tag">⚡ Physics</span>
+              <span class="exam-tag">🧪 Chemistry</span>
+            </div>
+            <div class="exam-foot">
+              <span class="fstat"><b>Official 2024–2025</b>Paper Bank</span>
+              <button class="foot-cta" data-action="switch-track" data-track="neet">Switch Track
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="exam-card" data-track="upsc">
+            <div class="exam-top">
+              <span class="exam-track track-amber">CIVIL SERVICES</span>
+              <span class="exam-status status-avail">AVAILABLE</span>
+            </div>
+            <div class="exam-icon">🏛</div>
+            <div class="exam-name">UPSC CSE (IAS/IPS)</div>
+            <div class="exam-desc">Prelims MCQ question bank, GS Papers I-IV syllabus tracker, and structured analytical answer writing.</div>
+            <div class="exam-tags">
+              <span class="exam-tag">📚 GS Papers I-IV</span>
+              <span class="exam-tag">🧮 CSAT Aptitude</span>
+              <span class="exam-tag">✍️ Mains Writing</span>
+            </div>
+            <div class="exam-foot">
+              <span class="fstat"><b>Detailed Evaluation</b>Rubric</span>
+              <button class="foot-cta" data-action="switch-track" data-track="upsc">Switch Track
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /view-dashboard -->
+
+    <!-- ============ VIEW: LECTURES ============ -->
+    <div class="view" id="view-lectures">
+      <div class="view-head">
+        <h1>Lectures</h1>
+        <p>Recorded &amp; live video lessons mapped to your JEE syllabus. Progress is tracked per lecture (demo data — wire up your video/CMS backend to replace it).</p>
+      </div>
+      <div class="simple-list" id="lecturesList"></div>
+    </div>
+
+    <!-- ============ VIEW: MY PROGRESS ============ -->
+    <div class="view" id="view-progress">
+      <div class="view-head">
+        <h1>My Progress</h1>
+        <p>A closer look at how your mastery is trending across subjects and weeks.</p>
+      </div>
+      <section class="stat-grid" id="progressStatGrid" style="grid-template-columns:repeat(3,1fr);"></section>
+      <div class="panel section-gap">
+        <div class="panel-head"><div><div class="eyebrow">WEEKLY ACTIVITY</div><h2>Questions Attempted (Last 7 Days)</h2></div></div>
+        <div class="bars" id="weeklyBars" style="gap:14px;"></div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW: DAILY ASSIGNMENT ============ -->
+    <div class="view" id="view-assignment">
+      <div class="view-head">
+        <h1>Daily Assignment</h1>
+        <p><span id="assignSummary">Loading…</span></p>
+      </div>
+      <div class="panel">
+        <div class="bar-track" style="margin-bottom:20px;"><div class="bar-fill fill-green" id="assignProgressBar" style="width:0%;transition:width .4s var(--ease-out);"></div></div>
+        <div id="assignmentList"></div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW: PRACTICE VAULT ============ -->
+    <div class="view" id="view-vault">
+      <div class="view-head">
+        <h1>Practice Vault</h1>
+        <p>405,000+ questions across Physics, Chemistry &amp; Mathematics. Filter by subject and jump straight into a drill.</p>
+      </div>
+      <div class="filter-chips" id="vaultFilters">
+        <button class="filter-chip active" data-subject="">All Subjects</button>
+        <button class="filter-chip" data-subject="physics">⚡ Physics</button>
+        <button class="filter-chip" data-subject="chemistry">🧪 Chemistry</button>
+        <button class="filter-chip" data-subject="maths">📐 Mathematics</button>
+      </div>
+      <div class="simple-list" id="vaultList"></div>
+    </div>
+
+    <!-- ============ VIEW: EXAM READINESS ============ -->
+    <div class="view" id="view-readiness">
+      <div class="view-head">
+        <h1>Exam Readiness</h1>
+        <p>An adaptive estimate of how ready you are for JEE Advanced 2025, based on your practice history.</p>
+      </div>
+      <section class="stat-grid" id="readinessGrid" style="grid-template-columns:repeat(3,1fr);"></section>
+    </div>
+
+    <!-- ============ VIEW: STUDY SETTINGS ============ -->
+    <div class="view" id="view-settings">
+      <div class="view-head">
+        <h1>Study Settings</h1>
+        <p>Preferences are saved locally in this demo. Hook these up to your user-settings API when ready.</p>
+      </div>
+      <div class="panel" style="max-width:640px;">
+        <div class="settings-row">
+          <div><b>Appearance</b><span>Cycle between light, dark and sketch themes</span></div>
+          <button class="btn-outline" id="settingsThemeBtn">Change Theme</button>
+        </div>
+        <div class="settings-row">
+          <div><b>Daily reminder</b><span>Get a nudge if you haven't studied by 8 PM</span></div>
+          <label class="switch"><input type="checkbox" id="toggleReminder" checked><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><b>Sound effects</b><span>Play a sound on correct / incorrect answers</span></div>
+          <label class="switch"><input type="checkbox" id="toggleSound"><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><b>Email weekly report</b><span>A summary of your mastery &amp; readiness trend</span></div>
+          <label class="switch"><input type="checkbox" id="toggleEmail" checked><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><b>Adaptive difficulty</b><span>Let the coach tune question difficulty automatically</span></div>
+          <label class="switch"><input type="checkbox" id="toggleAdaptive" checked><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW: HELP & FAQs ============ -->
+    <div class="view" id="view-faq">
+      <div class="view-head">
+        <h1>Help &amp; FAQs</h1>
+        <p>Answers to the questions students ask most about APEX Student Hub.</p>
+      </div>
+      <div class="faq-search">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="faqSearchInput" placeholder="Search FAQs — e.g. 'mastery', 'diagnostic', 'sync'..." />
+      </div>
+      <div class="faq-list" id="faqList"></div>
+    </div>
+
+    <!-- ============ VIEW: DIAGNOSTIC ARENA ============ -->
+    <div class="view" id="view-diagnostic">
+      <div class="view-head">
+        <h1>Diagnostic Arena</h1>
+        <p>Run a fresh diagnostic any time to recalibrate your question difficulty and study schedule.</p>
+      </div>
+      <div class="tier-grid">
+        <div class="tier-card" data-action="start-quiz" data-topic="mixed" data-subject="" data-quiz-title="Diagnostic Arena · 9-Q Checkup" data-quiz-count="9" role="button" tabindex="0">
+          <div class="tier-top"><div class="tier-emoji em-1">🚀</div><span class="tier-badge tb-1">STANDARD</span></div>
+          <div class="tier-title">9-Q Quick Checkup</div>
+          <div class="tier-desc">Broad calibration across Physics, Chemistry &amp; Maths.</div>
+          <div class="tier-foot"><span class="tier-time">⏱ ~12 mins</span><span class="tier-start start-purple">Start
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span></div>
+        </div>
+        <div class="tier-card" data-action="start-quiz" data-topic="mixed" data-subject="physics" data-quiz-title="Diagnostic Arena · Physics Deep Dive" data-quiz-count="12" role="button" tabindex="0">
+          <div class="tier-top"><div class="tier-emoji em-2">⚡</div><span class="tier-badge tb-2">DEEP DIVE</span></div>
+          <div class="tier-title">Physics Deep Dive</div>
+          <div class="tier-desc">12 questions isolating your Physics weak spots.</div>
+          <div class="tier-foot"><span class="tier-time">⏱ ~20 mins</span><span class="tier-start start-blue">Start
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span></div>
+        </div>
+        <div class="tier-card" data-action="start-quiz" data-topic="mixed" data-subject="chemistry" data-quiz-title="Diagnostic Arena · Chemistry Deep Dive" data-quiz-count="12" role="button" tabindex="0">
+          <div class="tier-top"><div class="tier-emoji em-3">🧪</div><span class="tier-badge tb-3">DEEP DIVE</span></div>
+          <div class="tier-title">Chemistry Deep Dive</div>
+          <div class="tier-desc">12 questions isolating your Chemistry weak spots.</div>
+          <div class="tier-foot"><span class="tier-time">⏱ ~20 mins</span><span class="tier-start start-green">Start
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span></div>
+        </div>
+        <div class="tier-card" data-action="start-quiz" data-topic="mixed" data-subject="maths" data-quiz-title="Diagnostic Arena · Maths Deep Dive" data-quiz-count="12" role="button" tabindex="0">
+          <div class="tier-top"><div class="tier-emoji em-4">📐</div><span class="tier-badge tb-4">DEEP DIVE</span></div>
+          <div class="tier-title">Mathematics Deep Dive</div>
+          <div class="tier-desc">12 questions isolating your Maths weak spots.</div>
+          <div class="tier-foot"><span class="tier-time">⏱ ~20 mins</span><span class="tier-start start-amber">Start
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW: SYLLABUS MAP ============ -->
+    <div class="view" id="view-syllabus">
+      <div class="view-head">
+        <h1>Syllabus Map</h1>
+        <p>Full topic tree for JEE Advanced 2025, with your current mastery per chapter.</p>
+      </div>
+      <div class="simple-list" id="syllabusList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ COACH WIDGET (global floating entry point) ============ -->
+<button class="coach-fab" id="coachFab" aria-label="Open Study Coach">
+  🧠<span class="fab-dot"></span>
+</button>
+
+<div class="coach-widget" id="coachWidget" hidden>
+  <div class="coach-w-head" id="coachWidgetHead">
+    <div class="coach-w-avatar">🧠</div>
+    <div>
+      <b>Study Coach</b>
+      <span class="coach-w-status"><span class="dot-live"></span>Online</span>
+    </div>
+    <div class="coach-w-head-actions">
+      <button class="coach-w-icon-btn" id="coachMinimizeBtn" title="Minimize" aria-label="Minimize">–</button>
+      <button class="coach-w-icon-btn" id="coachCloseBtn" title="Close" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+  <div class="coach-w-body" id="coachMessages"></div>
+
+  <form class="coach-w-foot" id="coachWidgetForm">
+    <input type="text" id="coachWidgetInput" placeholder="Ask your coach anything..." autocomplete="off" />
+    <button type="submit" class="coach-w-send" id="coachWidgetSend" aria-label="Send">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </form>
+</div>
+
+<!-- ============ MODAL (quiz / insights) ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-close-row"><button class="modal-x" id="modalCloseBtn" aria-label="Close">✕</button></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- ============ TOASTS ============ -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+
+/* =============================================================
+   THEME CONTROLLER
+   "Sketch" is default on first visit; persists user choice across sessions.
+   Preserves sketch, light, and dark CSS tokens exactly.
+   ============================================================= */
+(function(){
+  const root = document.documentElement;
+  const sun = document.getElementById('iconSun');
+  const moon = document.getElementById('iconMoon');
+  const sketch = document.getElementById('iconSketch');
+  const btn = document.getElementById('themeToggle');
+  const order = ['sketch', 'light', 'dark'];
+  const STORAGE_KEY = 'apex-theme';
+  const titles = {
+    light: 'Cycle theme: sketch / light / dark',
+    dark: 'Cycle theme: sketch / light / dark',
+    sketch: 'Cycle theme: sketch / light / dark'
+  };
+
+  function apply(theme){
+    root.setAttribute('data-theme', theme);
+    sun.style.display = theme === 'light' ? 'block' : 'none';
+    moon.style.display = theme === 'dark' ? 'block' : 'none';
+    sketch.style.display = theme === 'sketch' ? 'block' : 'none';
+    btn.title = titles[theme];
+  }
+
+  let saved = null;
+  try{ saved = localStorage.getItem(STORAGE_KEY); }catch(e){}
+
+  apply(order.includes(saved) ? saved : 'sketch');
+
+  btn.addEventListener('click', function(){
+    const current = root.getAttribute('data-theme');
+    const next = order[(order.indexOf(current) + 1) % order.length];
+    apply(next);
+    try{ localStorage.setItem(STORAGE_KEY, next); }catch(e){}
+  });
+})();
+
+/* =============================================================
+   CENTRALIZED ASYNCHRONOUS API CLIENT & SESSION STATE
+   ============================================================= */
+const ApiClient = {
+  baseUrl: (window.location.protocol.startsWith('http') && window.location.port === '8000') ? '' : 'http://127.0.0.1:8000',
+
+  async request(endpoint, options = {}) {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+    try {
+      const res = await fetch(url, { ...options, headers });
+      if (!res.ok) {
+        let detail = `HTTP ${res.status}`;
+        try {
+          const j = await res.json();
+          detail = j.detail || j.message || detail;
+        } catch (_) {}
+        throw new Error(detail);
+      }
+      return await res.json();
+    } catch (err) {
+      console.warn(`[ApiClient] Request to ${endpoint} failed:`, err.message);
+      throw err;
+    }
+  },
+
+  get(endpoint, options) {
+    return this.request(endpoint, { method: 'GET', ...options });
+  },
+
+  post(endpoint, data, options) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+      ...options
+    });
+  }
+};
+
+const TRACK_LABELS = {
+  jee: 'JEE Main',
+  neet: 'NEET-UG',
+  upsc: 'UPSC CSE'
+};
+
+const TRACK_AVATAR = {
+  jee: 'JEE Adv 2025',
+  neet: 'NEET-UG 2025',
+  upsc: 'UPSC CSE 2025'
+};
+
+function normalizeSubject(sub, exam) {
+  if (!sub) {
+    if (exam === 'NEET') return 'Biology';
+    if (exam === 'UPSC') return 'Indian Polity & Governance';
+    return 'Physics';
+  }
+  const s = String(sub).trim().toLowerCase();
+  if (s === 'physics') return 'Physics';
+  if (s === 'chemistry') return 'Chemistry';
+  if (s === 'maths' || s === 'mathematics') return 'Mathematics';
+  if (s === 'biology' || s === 'bio') return 'Biology';
+  if (s.includes('polity')) return 'Indian Polity & Governance';
+  if (s.includes('economy')) return 'Economy, Environment & Technology';
+  if (s.includes('ethics')) return 'Ethics, Integrity & Aptitude';
+  if (s.includes('general')) return 'General Studies';
+  return sub;
+}
+
+const AppState = {
+  studentId: localStorage.getItem('student_id') || localStorage.getItem('apex_student_id') || '',
+  targetExam: (localStorage.getItem('target_exam') || localStorage.getItem('apex_target_exam') || 'JEE').toUpperCase(),
+  profile: null,
+  roadmap: null
+};
+
+function toast(message, type){
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const t = document.createElement('div');
+  t.className = 'toast t-' + (type || 'info');
+  t.innerHTML = '<span class="tdot"></span><span></span>';
+  t.querySelector('span:last-child').textContent = message;
+  stack.appendChild(t);
+  setTimeout(function(){
+    t.classList.add('leaving');
+    setTimeout(function(){ t.remove(); }, 260);
+  }, 3200);
+}
+window.apexToast = toast;
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str == null ? '' : String(str);
+  return d.innerHTML;
+}
+
+/* =============================================================
+   STUDY COACH CONTROLLER (FastAPI POST /api/ai/chat/{student_id})
+   ============================================================= */
+const coachState = {
+  messages: [],
+  panelState: 'closed'
+};
+
+const el = {
+  fab: document.getElementById('coachFab'),
+  widget: document.getElementById('coachWidget'),
+  head: document.getElementById('coachWidgetHead'),
+  messages: document.getElementById('coachMessages'),
+  form: document.getElementById('coachWidgetForm'),
+  input: document.getElementById('coachWidgetInput'),
+  sendBtn: document.getElementById('coachWidgetSend'),
+  minimizeBtn: document.getElementById('coachMinimizeBtn'),
+  closeBtn: document.getElementById('coachCloseBtn'),
+  inlineForm: document.getElementById('coachInlineForm'),
+  inlineInput: document.getElementById('coachInlineInput')
+};
+
+const DEFAULT_SUGGESTIONS = [
+  'What mistakes am I making most often?',
+  'Why is my study plan ordered this way?',
+  'JEE Main exam day strategy & pacing?',
+  'High-yield topics for maximum rank jump?'
+];
+
+function openWidget(){
+  coachState.panelState = 'open';
+  el.widget.hidden = false;
+  el.widget.classList.remove('is-minimized');
+  el.fab.classList.add('hidden');
+  if (coachState.messages.length === 0) renderMessages();
+  el.input.focus();
+}
+
+function minimizeWidget(){
+  coachState.panelState = 'minimized';
+  el.widget.classList.add('is-minimized');
+}
+
+function closeWidget(){
+  coachState.panelState = 'closed';
+  el.widget.hidden = true;
+  el.fab.classList.remove('hidden');
+}
+
+function toggleFromMinimized(){
+  if (coachState.panelState === 'minimized'){
+    coachState.panelState = 'open';
+    el.widget.classList.remove('is-minimized');
+  }
+}
+
+function renderMessages(){
+  el.messages.innerHTML = '';
+
+  if (coachState.messages.length === 0){
+    const intro = document.createElement('div');
+    intro.className = 'coach-w-msg from-system';
+    intro.textContent = 'Ask about your syllabus, mistakes, or exam strategy.';
+    el.messages.appendChild(intro);
+
+    const suggestWrap = document.createElement('div');
+    suggestWrap.className = 'coach-w-suggestions';
+    DEFAULT_SUGGESTIONS.forEach(function(q){
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'coach-w-suggestion';
+      b.textContent = q;
+      b.addEventListener('click', function(){ handleUserQuestion(q); });
+      suggestWrap.appendChild(b);
+    });
+    el.messages.appendChild(suggestWrap);
+    return;
+  }
+
+  coachState.messages.forEach(function(m){
+    const bubble = document.createElement('div');
+    bubble.className = 'coach-w-msg from-' + m.role;
+    bubble.textContent = m.text;
+    el.messages.appendChild(bubble);
+  });
+  el.messages.scrollTop = el.messages.scrollHeight;
+}
+
+function appendMessage(role, text){
+  coachState.messages.push({ role: role, text: text });
+  renderMessages();
+}
+
+async function sendToCoach(question){
+  const sid = AppState.studentId || 'general';
+  const data = await ApiClient.post(`/api/ai/chat/${sid}`, {
+    prompt: question,
+    include_student_state: true
+  });
+  return data.response || data.answer || data.reply || 'No reply generated by coach.';
+}
+
+async function handleUserQuestion(question){
+  question = (question || '').trim();
+  if (!question) return;
+
+  openWidget();
+  appendMessage('user', question);
+  el.sendBtn.disabled = true;
+
+  const typingBubble = document.createElement('div');
+  typingBubble.className = 'coach-w-msg from-coach typing';
+  typingBubble.id = 'coachTypingIndicator';
+  typingBubble.innerHTML = '<span></span><span></span><span></span>';
+  el.messages.appendChild(typingBubble);
+  el.messages.scrollTop = el.messages.scrollHeight;
+
+  try {
+    const answer = await sendToCoach(question);
+    typingBubble.remove();
+    appendMessage('coach', answer);
+  } catch (err) {
+    typingBubble.remove();
+    appendMessage('system', 'Could not reach the coach backend (' + err.message + ').');
+  } finally {
+    el.sendBtn.disabled = false;
+  }
+}
+
+el.fab.addEventListener('click', openWidget);
+el.head.addEventListener('click', function(e){
+  if (e.target === el.head || e.target.closest('.coach-w-avatar') || e.target.closest('b') || e.target.closest('.coach-w-status')){
+    toggleFromMinimized();
+  }
+});
+el.minimizeBtn.addEventListener('click', function(e){ e.stopPropagation(); minimizeWidget(); });
+el.closeBtn.addEventListener('click', function(e){ e.stopPropagation(); closeWidget(); });
+el.form.addEventListener('submit', function(e){
+  e.preventDefault();
+  const q = el.input.value;
+  el.input.value = '';
+  handleUserQuestion(q);
+});
+
+document.querySelectorAll('[data-coach-ask]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    handleUserQuestion(btn.getAttribute('data-coach-ask'));
+  });
+});
+if (el.inlineForm){
+  el.inlineForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const q = el.inlineInput.value;
+    el.inlineInput.value = '';
+    handleUserQuestion(q);
+  });
+}
+
+/* =============================================================
+   MOBILE NAVIGATION & TABS CONTROLLER
+   ============================================================= */
+(function(){
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const sidebar = document.querySelector('.sidebar');
+  const navItems = document.querySelectorAll('.sidebar .nav-item');
+
+  function openSidebar(){
+    if (sidebar) sidebar.classList.add('is-open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar(){
+    if (sidebar) sidebar.classList.remove('is-open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
+  if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
+  if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
+
+  navItems.forEach(function(item){
+    item.addEventListener('click', function(){
+      navItems.forEach(function(n){ n.classList.remove('active'); });
+      item.classList.add('active');
+      if (window.innerWidth <= 1024){
+        closeSidebar();
+      }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('is-open')){
+      closeSidebar();
+    }
+  });
+
+  const tabs = document.querySelectorAll('.tabs .tab');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.classList.remove('active'); });
+      tab.classList.add('active');
+      if (tab.dataset.view) window.switchView(tab.dataset.view, tab.dataset.scrollTo);
+    });
+  });
+
+  navItems.forEach(function(item){
+    item.addEventListener('click', function(){
+      if (item.dataset.view) window.switchView(item.dataset.view);
+    });
+  });
+})();
+
+/* =============================================================
+   IDENTITY & DASHBOARD HYDRATION
+   ============================================================= */
+async function initSession() {
+  try {
+    if (AppState.studentId) {
+      try {
+        AppState.profile = await ApiClient.get(`/api/auth/profile/${AppState.studentId}`);
+        if (AppState.profile && AppState.profile.target_exam) {
+          AppState.targetExam = AppState.profile.target_exam.toUpperCase();
+        }
+      } catch (err) {
+        console.log('Profile query not found, creating baseline student...');
+        AppState.studentId = '';
+      }
+    }
+
+    if (!AppState.studentId) {
+      const hex = Math.random().toString(36).substring(2, 8);
+      const targetTrack = AppState.targetExam === 'NEET' ? 'PCB TRACK' : (AppState.targetExam === 'UPSC' ? 'CIVIL SERVICES' : 'PCM TRACK');
+      const regRes = await ApiClient.post('/api/auth/register', {
+        name: 'Aspirant S.',
+        email: `aspirant_${hex}@apex.local`,
+        password: 'apex_password_123',
+        target_exam: AppState.targetExam,
+        target_track: targetTrack,
+        daily_available_hours: 4.0
+      });
+      AppState.studentId = regRes.student_id;
+      AppState.profile = regRes;
+      localStorage.setItem('student_id', AppState.studentId);
+      localStorage.setItem('apex_student_id', AppState.studentId);
+      localStorage.setItem('target_exam', AppState.targetExam);
+      localStorage.setItem('apex_target_exam', AppState.targetExam);
+    }
+  } catch (err) {
+    console.error('Session init error:', err);
+    window.apexToast('Network connection failed. Operating in offline standby mode.', 'warn');
+  }
+
+  hydrateTopBar();
+  hydrateDashboardStats();
+  await hydrateRoadmap();
+}
+
+function hydrateTopBar() {
+  const trackKey = AppState.targetExam.toLowerCase();
+  const pillLabel = document.getElementById('examPillLabel');
+  if (pillLabel) pillLabel.textContent = TRACK_LABELS[trackKey] || AppState.targetExam;
+
+  const avatarSub = document.getElementById('avatarSubLabel');
+  if (avatarSub) avatarSub.textContent = TRACK_AVATAR[trackKey] || `${AppState.targetExam} 2025`;
+
+  if (AppState.profile && AppState.profile.name) {
+    const avatarBlock = document.querySelector('.avatar-details b');
+    if (avatarBlock) avatarBlock.textContent = AppState.profile.name;
+    const avatarCirc = document.querySelector('.avatar-circ');
+    if (avatarCirc) {
+      const parts = AppState.profile.name.trim().split(/\s+/);
+      avatarCirc.textContent = parts.map(p => p[0].toUpperCase()).slice(0, 2).join('');
+    }
+  }
+
+  document.querySelectorAll('#trackDropdown button').forEach(function(b) {
+    b.classList.toggle('active-track', b.dataset.track === trackKey);
+  });
+
+  document.querySelectorAll('#examGrid .exam-card').forEach(function(card) {
+    const isActive = card.dataset.track === trackKey;
+    card.classList.toggle('active-goal', isActive);
+    const statusEl = card.querySelector('.exam-status');
+    const ctaEl = card.querySelector('.foot-cta');
+    if (statusEl && ctaEl) {
+      if (isActive) {
+        statusEl.className = 'exam-status status-active-goal';
+        statusEl.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg> CURRENT ACTIVE';
+        ctaEl.innerHTML = 'Syllabus Active <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg>';
+      } else {
+        statusEl.className = 'exam-status status-avail';
+        statusEl.textContent = 'AVAILABLE';
+        ctaEl.innerHTML = 'Switch Track <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>';
+      }
+    }
+  });
+}
+
+function hydrateDashboardStats() {
+  if (!AppState.profile) return;
+  const prof = AppState.profile;
+
+  // 1. Overall Syllabus Mastery
+  const overallNum = document.getElementById('overallMasteryNum');
+  if (overallNum) {
+    overallNum.textContent = Math.round((prof.overall_mastery || 0) * 100);
+  }
+
+  // Subject bars
+  if (prof.subject_masteries) {
+    const subs = Object.keys(prof.subject_masteries);
+    if (subs.length >= 1) {
+      const s1 = subs[0];
+      const pct1 = Math.round(prof.subject_masteries[s1] * 100);
+      const l1 = document.getElementById('physicsBarLabel');
+      const f1 = document.getElementById('physicsBarFill');
+      if (l1) l1.textContent = pct1 + '%';
+      if (f1) f1.style.width = pct1 + '%';
+      const flLeft1 = l1?.parentElement?.querySelector('.fl-left');
+      if (flLeft1) flLeft1.textContent = `⚡ ${s1}`;
+    }
+    if (subs.length >= 2) {
+      const s2 = subs[1];
+      const pct2 = Math.round(prof.subject_masteries[s2] * 100);
+      const l2 = document.getElementById('chemistryBarLabel');
+      const f2 = document.getElementById('chemistryBarFill');
+      if (l2) l2.textContent = pct2 + '%';
+      if (f2) f2.style.width = pct2 + '%';
+      const flLeft2 = l2?.parentElement?.querySelector('.fl-left');
+      if (flLeft2) flLeft2.textContent = `🧪 ${s2}`;
+    }
+    if (subs.length >= 3) {
+      const s3 = subs[2];
+      const pct3 = Math.round(prof.subject_masteries[s3] * 100);
+      const l3 = document.getElementById('mathsBarLabel');
+      const f3 = document.getElementById('mathsBarFill');
+      if (l3) l3.textContent = pct3 + '%';
+      if (f3) f3.style.width = pct3 + '%';
+      const flLeft3 = l3?.parentElement?.querySelector('.fl-left');
+      if (flLeft3) flLeft3.textContent = `📐 ${s3}`;
+    }
+  }
+
+  // 2. Latent Ability Index Theta
+  const statCards = document.querySelectorAll('.stat-grid .stat-card');
+  if (statCards[1]) {
+    const thetaVal = prof.latent_ability_theta !== undefined && prof.latent_ability_theta !== null
+      ? ((prof.latent_ability_theta >= 0 ? '+' : '') + Number(prof.latent_ability_theta).toFixed(2))
+      : '+1.42';
+    const valEl = statCards[1].querySelector('.stat-value');
+    if (valEl) {
+      valEl.innerHTML = `${thetaVal} <span class="stat-delta" style="background:var(--purple-tint);color:var(--purple)">Rank Calibrated</span>`;
+    }
+  }
+
+  // 3. Topic Mastery Level / Consistency
+  if (statCards[2]) {
+    const valEl = statCards[2].querySelector('.stat-value');
+    const consistency = Math.round((prof.consistency_score || 0.86) * 100);
+    if (valEl) {
+      valEl.innerHTML = `${consistency}<span class="unit">%</span> <span class="stat-delta" style="background:var(--purple-tint);color:var(--purple)">Proficient</span>`;
+    }
+  }
+
+  // 4. Prediction Confidence
+  if (statCards[3]) {
+    const valEl = statCards[3].querySelector('.stat-value');
+    const conf = Math.round((prof.overall_confidence || 0.84) * 100);
+    if (valEl) {
+      valEl.innerHTML = `${conf}<span class="unit">%</span> <span class="stat-delta" style="background:var(--amber-bg);color:var(--amber-fg)">High Reliability</span>`;
+    }
+  }
+}
+
+async function hydrateRoadmap() {
+  if (!AppState.studentId) return;
+  try {
+    const data = await ApiClient.get(`/api/roadmap/active/${AppState.studentId}`);
+    AppState.roadmap = data;
+
+    const roadmapPanel = document.querySelector('.two-col .panel:first-child');
+    if (!roadmapPanel) return;
+
+    const existingTasks = roadmapPanel.querySelectorAll('.task-row');
+    existingTasks.forEach(t => t.remove());
+
+    const actions = data.actions || [];
+    if (actions.length === 0) {
+      const emptyRow = document.createElement('div');
+      emptyRow.className = 'task-row';
+      emptyRow.innerHTML = '<div class="task-body"><div class="task-title">No pending tasks. Great job!</div><div class="task-desc">Click refresh to generate the next study milestone.</div></div>';
+      roadmapPanel.appendChild(emptyRow);
+      return;
+    }
+
+    actions.slice(0, 6).forEach((act, idx) => {
+      const seq = String(idx + 1).padStart(2, '0');
+      let numClass = 'num-blue';
+      let statusClass = 'status-blue';
+      let statusLabel = 'In Progress';
+      let btnHtml = '';
+
+      if (act.is_completed) {
+        numClass = 'num-green';
+        statusClass = 'status-green';
+        statusLabel = 'Mastered';
+        btnHtml = `<button class="btn-done" data-action="mark-reviewed" data-action-id="${act.id || act.action_id}">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg>
+          Reviewed
+        </button>`;
+      } else if (act.priority_score > 75) {
+        numClass = 'num-red';
+        statusClass = 'status-red';
+        statusLabel = 'High Priority';
+        btnHtml = `<button class="btn-solid-purple" data-action="start-quiz" data-tier="2" data-concept-id="${act.concept_id}" data-subject="${act.subject}" data-quiz-title="${escapeHtml(act.concept_name)}" data-quiz-count="${act.target_questions_count || 5}" data-action-id="${act.id || act.action_id}">
+          Practice Now
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+        </button>`;
+      } else if (act.priority_score > 50) {
+        numClass = 'num-amber';
+        statusClass = 'status-amber';
+        statusLabel = 'Needs Practice';
+        btnHtml = `<button class="btn-outline" data-action="start-quiz" data-tier="2" data-concept-id="${act.concept_id}" data-subject="${act.subject}" data-quiz-title="${escapeHtml(act.concept_name)}" data-quiz-count="${act.target_questions_count || 5}" data-action-id="${act.id || act.action_id}">
+          Practice
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h8"/><circle cx="14" cy="7" r="2"/><path d="M4 12h3"/><circle cx="9" cy="12" r="2"/><path d="M13 12h7"/><path d="M4 17h11"/><circle cx="17" cy="17" r="2"/></svg>
+        </button>`;
+      } else {
+        btnHtml = `<button class="btn-outline" data-action="start-quiz" data-tier="2" data-concept-id="${act.concept_id}" data-subject="${act.subject}" data-quiz-title="${escapeHtml(act.concept_name)}" data-quiz-count="${act.target_questions_count || 5}" data-action-id="${act.id || act.action_id}">
+          Continue
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5l11 7-11 7z"/></svg>
+        </button>`;
+      }
+
+      const row = document.createElement('div');
+      row.className = 'task-row';
+      row.dataset.taskTopic = act.concept_id;
+      row.dataset.actionId = act.id || act.action_id;
+      row.innerHTML = `
+        <div class="task-num ${numClass}">${seq}</div>
+        <div class="task-body">
+          <div class="task-title">${escapeHtml(act.concept_name)}</div>
+          <div class="status-chip ${statusClass}"><span class="sdot"></span>${statusLabel}</div>
+          <div class="task-desc">${escapeHtml(act.subject)} · Estimated: ${act.estimated_minutes || 15} min · Priority Score: ${Math.round(act.priority_score || 50)}</div>
+        </div>
+        <div class="task-action">${btnHtml}</div>
+      `;
+      roadmapPanel.appendChild(row);
+    });
+  } catch (err) {
+    console.warn('Could not load active roadmap:', err);
+  }
+}
+
+/* =============================================================
+   MODAL & QUIZ ENGINE (FastAPI /api/assessments/*)
+   ============================================================= */
+const overlay = document.getElementById('modalOverlay');
+const modalContent = document.getElementById('modalContent');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+function openModal(html){
+  modalContent.innerHTML = html;
+  overlay.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(){
+  overlay.classList.remove('is-open');
+  document.body.style.overflow = '';
+  setTimeout(function(){ modalContent.innerHTML = ''; }, 200);
+}
+
+modalCloseBtn.addEventListener('click', closeModal);
+overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeModal(); });
+
+async function startQuiz(opts) {
+  const title = opts.title || 'Practice Session';
+  openModal(`
+    <div style="text-align:center;padding:36px 12px;">
+      <div class="quiz-meta" style="justify-content:center;"><span>Generating Adaptive Assessment...</span></div>
+      <p style="font-size:13.5px;color:var(--ink-soft);margin-top:12px;">Connecting to backend IRT assessment engine...</p>
+    </div>
+  `);
+
+  let session = null;
+  const exam = AppState.targetExam;
+  const normSub = normalizeSubject(opts.subject, exam);
+
+  // Map tier based on explicit tier or opts.title/topic
+  let targetTier = String(opts.tier || '');
+  if (!targetTier) {
+    const tLower = title.toLowerCase();
+    if (tLower.includes('tier 4') || tLower.includes('advanced')) targetTier = '4';
+    else if (tLower.includes('tier 3') || tLower.includes('revision') || tLower.includes('full scan')) targetTier = '3';
+    else if (tLower.includes('tier 2') || tLower.includes('targeted drill') || opts.concept_id || opts.subject) targetTier = '2';
+    else targetTier = '1';
+  }
+
+  try {
+    if (targetTier === '2') {
+      session = await ApiClient.post('/api/assessments/start-drill', {
+        student_id: AppState.studentId,
+        exam: exam,
+        subject: normSub,
+        chapter_id: opts.chapter_id || null,
+        duration_minutes: opts.count ? Math.round(opts.count * 1.5) : 15
+      });
+    } else if (targetTier === '3') {
+      session = await ApiClient.post('/api/assessments/start-full-scan', {
+        student_id: AppState.studentId,
+        exam: exam,
+        duration_minutes: 25
+      });
+    } else if (targetTier === '4') {
+      session = await ApiClient.post('/api/assessments/start-advanced', {
+        student_id: AppState.studentId,
+        exam: exam,
+        subject: normSub,
+        duration_minutes: 35
+      });
+    } else {
+      session = await ApiClient.post('/api/assessments/start', {
+        student_id: AppState.studentId,
+        exam: exam,
+        assessment_type: 'DIAGNOSTIC',
+        stage: 1,
+        duration_minutes: opts.count ? Math.round(opts.count * 1.4) : 12,
+        target_concept_id: opts.concept_id || null
+      });
+    }
+  } catch (err) {
+    console.error('Quiz start error:', err);
+    window.apexToast(`Failed to start assessment: ${err.message}`, 'warn');
+    closeModal();
+    return;
+  }
+
+  if (!session || !session.questions || session.questions.length === 0) {
+    window.apexToast('No questions available for this module yet.', 'info');
+    closeModal();
+    return;
+  }
+
+  const questions = session.questions;
+  const attemptId = session.attempt_id;
+  const responses = [];
+  let currentIndex = 0;
+  let questionStartTime = Date.now();
+
+  function renderCurrentQuestion() {
+    const q = questions[currentIndex];
+    questionStartTime = Date.now();
+    const pct = Math.round((currentIndex / questions.length) * 100);
+
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    let optionsHtml = '';
+    const rawOptions = q.options || [];
+
+    rawOptions.forEach((opt, idx) => {
+      const optText = typeof opt === 'object' ? (opt.text || opt.content || JSON.stringify(opt)) : String(opt);
+      const optId = typeof opt === 'object' && opt.id ? opt.id : letters[idx] || String(idx + 1);
+      optionsHtml += `
+        <button class="quiz-option" data-opt-id="${escapeHtml(optId)}" data-opt-idx="${idx}">
+          <span class="qletter">${letters[idx] || (idx + 1)}</span>
+          <span>${escapeHtml(optText)}</span>
+        </button>
+      `;
+    });
+
+    modalContent.innerHTML = `
+      <div class="quiz-meta">
+        <span>${escapeHtml(title)}</span>
+        <span>Question ${currentIndex + 1} / ${questions.length}</span>
+      </div>
+      <div class="quiz-progress-track">
+        <div class="quiz-progress-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="quiz-question">${escapeHtml(q.content || q.question_text || 'Question Prompt')}</div>
+      <div class="quiz-options" id="quizOptions">${optionsHtml}</div>
+      <div class="quiz-footrow">
+        <button class="btn-solid-purple" id="quizNextBtn" disabled>
+          ${currentIndex === questions.length - 1 ? 'Submit Assessment' : 'Next Question'}
+        </button>
+      </div>
+    `;
+
+    let answered = false;
+    const optBtns = modalContent.querySelectorAll('.quiz-option');
+    const nextBtn = document.getElementById('quizNextBtn');
+
+    optBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (answered) return;
+        answered = true;
+        const selectedOptId = btn.dataset.optId;
+        btn.classList.add('selected');
+
+        const elapsedSeconds = Math.max(1, Math.round((Date.now() - questionStartTime) / 1000));
+        responses.push({
+          question_id: q.question_id,
+          student_answer: selectedOptId,
+          time_taken_seconds: elapsedSeconds
+        });
+
+        optBtns.forEach(b => b.setAttribute('disabled', 'true'));
+        nextBtn.removeAttribute('disabled');
+      });
+    });
+
+    nextBtn.addEventListener('click', async function() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderCurrentQuestion();
+      } else {
+        await submitAssessment();
+      }
+    });
+  }
+
+  async function submitAssessment() {
+    modalContent.innerHTML = `
+      <div style="text-align:center;padding:36px 12px;">
+        <div class="quiz-meta" style="justify-content:center;"><span>Evaluating and Updating Student Model...</span></div>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-top:12px;">Applying 2PL Item Response Theory &amp; Knowledge Tracing...</p>
+      </div>
+    `;
+
+    try {
+      const submitRes = await ApiClient.post('/api/assessments/submit', {
+        attempt_id: attemptId,
+        responses: responses
+      });
+
+      renderAssessmentResult(submitRes);
+
+      if (opts.actionId) {
+        try {
+          await ApiClient.post(`/api/roadmap/action/complete/${opts.actionId}`);
+        } catch (_) {}
+      }
+
+      try {
+        AppState.profile = await ApiClient.get(`/api/auth/profile/${AppState.studentId}`);
+        hydrateDashboardStats();
+        await hydrateRoadmap();
+      } catch (_) {}
+
+      const lastText = document.getElementById('lastDrillText');
+      const lastTime = document.getElementById('lastDrillTime');
+      if (lastText) lastText.innerHTML = `Last completed drill: <b>${escapeHtml(title)}</b> (${submitRes.correct_count}/${submitRes.total_questions} correct)`;
+      if (lastTime) lastTime.textContent = 'just now';
+
+      window.apexToast(`Evaluation complete: ${submitRes.score_percentage}% score!`, submitRes.score_percentage >= 60 ? 'success' : 'warn');
+
+    } catch (err) {
+      console.error('Submission error:', err);
+      modalContent.innerHTML = `
+        <div class="quiz-result">
+          <div class="rlabel">Evaluation Submission Error</div>
+          <p class="rmsg">${escapeHtml(err.message)}</p>
+          <button class="btn-outline" onclick="closeModal()">Close</button>
+        </div>
+      `;
+    }
+  }
+
+  function renderAssessmentResult(res) {
+    const score = res.score_percentage || 0;
+    const color = score >= 80 ? 'var(--green-fg)' : (score >= 50 ? 'var(--amber-fg)' : 'var(--red-fg)');
+
+    let feedbackItems = '';
+    if (res.items_feedback && res.items_feedback.length > 0) {
+      feedbackItems = '<div style="text-align:left;margin-top:16px;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">';
+      res.items_feedback.slice(0, 6).forEach((fb, idx) => {
+        const icon = fb.is_correct ? '✅' : '❌';
+        const errBadge = fb.error_type ? `<span class="status-chip ${fb.is_correct ? 'status-green' : 'status-red'}" style="margin:0;">${fb.error_type}</span>` : '';
+        feedbackItems += `
+          <div style="font-size:12px;padding:8px 10px;background:var(--track-bg);border-radius:8px;border:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <b>${icon} Q${idx+1}: ${fb.is_correct ? 'Correct' : 'Incorrect'}</b>
+              ${errBadge}
+            </div>
+            <div style="color:var(--ink-soft);font-size:11.5px;">${escapeHtml(fb.explanation || '')}</div>
+          </div>
+        `;
+      });
+      feedbackItems += '</div>';
+    }
+
+    modalContent.innerHTML = `
+      <div class="quiz-result">
+        <div class="rlabel">${escapeHtml(title)} — Results</div>
+        <div class="rscore" style="color:${color};">${res.correct_count} / ${res.total_questions}</div>
+        <div class="rlabel">${score}% Score · Status: ${escapeHtml(res.status)}</div>
+        <p class="rmsg">${score >= 70 ? 'Strong conceptual execution! Masteries updated.' : 'Topic needs targeted reinforcement. Review recommended.'}</p>
+        ${feedbackItems}
+        <div class="quiz-result-actions" style="margin-top:20px;">
+          <button class="btn-solid-purple" id="quizFinishBtn">Return to Dashboard</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('quizFinishBtn')?.addEventListener('click', closeModal);
+  }
+
+  renderCurrentQuestion();
+}
+window.startQuiz = startQuiz;
+
+/* =============================================================
+   VIEW SWITCHER & LAZY VIEW HYDRATION
+   ============================================================= */
+const lazyRendered = {};
+
+function switchView(viewId, scrollToId){
+  const views = document.querySelectorAll('.view');
+  let matched = false;
+  views.forEach(function(v){
+    const on = v.id === viewId;
+    v.classList.toggle('active', on);
+    if (on) matched = true;
+  });
+  if (!matched){
+    document.querySelector('#view-dashboard').classList.add('active');
+    viewId = 'view-dashboard';
+  }
+
+  document.querySelectorAll('.sidebar .nav-item').forEach(function(n){
+    n.classList.toggle('active', n.dataset.view === viewId);
+  });
+  document.querySelectorAll('.tabs .tab').forEach(function(t){
+    t.classList.toggle('active', t.dataset.view === viewId && !t.dataset.scrollTo);
+  });
+
+  if (!lazyRendered[viewId]){
+    renderView(viewId);
+    lazyRendered[viewId] = true;
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (scrollToId){
+    setTimeout(function(){
+      const targetEl = document.getElementById(scrollToId);
+      if (targetEl){
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetEl.style.boxShadow = '0 0 0 3px var(--purple-border)';
+        setTimeout(function(){ targetEl.style.boxShadow = ''; }, 1400);
+      }
+    }, 300);
+  }
+}
+window.switchView = switchView;
+
+function renderView(viewId){
+  if (viewId === 'view-lectures') renderLectures();
+  if (viewId === 'view-progress') renderProgressView();
+  if (viewId === 'view-assignment') renderAssignments();
+  if (viewId === 'view-vault') renderVault('');
+  if (viewId === 'view-readiness') renderReadiness();
+  if (viewId === 'view-faq') renderFAQ('');
+  if (viewId === 'view-syllabus') renderSyllabus();
+}
+
+/* =============================================================
+   DYNAMIC CURRICULUM, SYLLABUS & PRACTICE VAULT
+   ============================================================= */
+async function renderSyllabus() {
+  const list = document.getElementById('syllabusList');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);">Loading syllabus map from curriculum tree...</div>';
+
+  try {
+    const tree = await ApiClient.get(`/api/curriculum/tree/${AppState.targetExam}?student_id=${AppState.studentId}`);
+    list.innerHTML = '';
+    const subjects = tree.subjects || [];
+
+    if (subjects.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);">No syllabus available for this track.</div>';
+      return;
+    }
+
+    subjects.forEach(sub => {
+      (sub.chapters || []).forEach(ch => {
+        const concepts = [];
+        (ch.topics || []).forEach(tp => {
+          (tp.concepts || []).forEach(con => concepts.push(con));
+        });
+
+        const avgMastery = concepts.length > 0
+          ? Math.round((concepts.reduce((acc, c) => acc + (c.mastery || 0), 0) / concepts.length) * 100)
+          : 45;
+
+        const color = avgMastery >= 80 ? 'fill-green' : (avgMastery >= 50 ? 'fill-orange' : '');
+        const card = document.createElement('div');
+        card.className = 'simple-card';
+        card.innerHTML = `
+          <div class="simple-emoji">📚</div>
+          <div class="simple-body">
+            <b>${escapeHtml(ch.name)}</b>
+            <div class="smeta">${escapeHtml(sub.name)} · ${concepts.length} Concepts · Mastery: ${avgMastery}%</div>
+            <div class="bar-track">
+              <div class="bar-fill ${color}" style="width:${avgMastery}%;${color ? '' : 'background:var(--red-fg);'}"></div>
+            </div>
+          </div>
+          <button class="btn-outline" data-action="start-quiz" data-tier="2" data-subject="${escapeHtml(sub.name)}" data-quiz-title="${escapeHtml(ch.name)}" data-quiz-count="5">Practice</button>
+        `;
+        list.appendChild(card);
+      });
+    });
+  } catch (err) {
+    console.warn('Syllabus load error:', err);
+    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--red-fg);">Failed to load syllabus: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+async function renderVault(filterSubject) {
+  const list = document.getElementById('vaultList');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);">Loading practice vault...</div>';
+
+  try {
+    const tree = await ApiClient.get(`/api/curriculum/hierarchy/${AppState.targetExam}?student_id=${AppState.studentId}`);
+    list.innerHTML = '';
+    const subjects = tree.subjects || [];
+
+    const packs = [];
+    subjects.forEach(sub => {
+      const subLower = (sub.name || '').toLowerCase();
+      if (filterSubject && !subLower.includes(filterSubject.toLowerCase())) return;
+
+      (sub.chapters || []).forEach(ch => {
+        packs.push({
+          title: ch.name,
+          subject: sub.name,
+          count: `${Math.floor(Math.random() * 400 + 400)}`,
+          difficulty: 'Medium–Hard'
+        });
+      });
+    });
+
+    if (packs.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);">No practice packs match this filter.</div>';
+      return;
+    }
+
+    packs.slice(0, 12).forEach(pack => {
+      const card = document.createElement('div');
+      card.className = 'simple-card';
+      card.innerHTML = `
+        <div class="simple-emoji">🎯</div>
+        <div class="simple-body">
+          <b>${escapeHtml(pack.title)}</b>
+          <div class="smeta">${escapeHtml(pack.subject)} · ${pack.count} questions · ${pack.difficulty}</div>
+        </div>
+        <button class="btn-solid-purple" data-action="start-quiz" data-tier="2" data-subject="${escapeHtml(pack.subject)}" data-quiz-title="${escapeHtml(pack.title)}" data-quiz-count="6">Practice</button>
+      `;
+      list.appendChild(card);
+    });
+  } catch (err) {
+    console.warn('Vault load error:', err);
+    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--red-fg);">Failed to load vault: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+document.querySelectorAll('#vaultFilters .filter-chip').forEach(function(chip){
+  chip.addEventListener('click', function(){
+    document.querySelectorAll('#vaultFilters .filter-chip').forEach(function(c){ c.classList.remove('active'); });
+    chip.classList.add('active');
+    renderVault(chip.dataset.subject);
+  });
+});
+
+/* =============================================================
+   EXAM TRACK SWITCHING
+   ============================================================= */
+async function switchTrack(track) {
+  AppState.targetExam = track.toUpperCase();
+  localStorage.setItem('target_exam', AppState.targetExam);
+  localStorage.setItem('apex_target_exam', AppState.targetExam);
+
+  hydrateTopBar();
+  window.apexToast(`Switched active track to ${TRACK_LABELS[track] || track}`, 'success');
+
+  try {
+    const targetTrack = AppState.targetExam === 'NEET' ? 'PCB TRACK' : (AppState.targetExam === 'UPSC' ? 'CIVIL SERVICES' : 'PCM TRACK');
+    const hex = Math.random().toString(36).substring(2, 7);
+    const regRes = await ApiClient.post('/api/auth/register', {
+      name: AppState.profile?.name || 'Aspirant S.',
+      email: `aspirant_${hex}@apex.local`,
+      password: 'apex_password_123',
+      target_exam: AppState.targetExam,
+      target_track: targetTrack,
+      daily_available_hours: 4.0
+    });
+    AppState.studentId = regRes.student_id;
+    AppState.profile = regRes;
+    localStorage.setItem('student_id', regRes.student_id);
+    localStorage.setItem('apex_student_id', regRes.student_id);
+  } catch (_) {}
+
+  hydrateDashboardStats();
+  await hydrateRoadmap();
+  lazyRendered['view-syllabus'] = false;
+  lazyRendered['view-vault'] = false;
+}
+
+const examPill = document.getElementById('examPillSelect');
+const trackDropdown = document.getElementById('trackDropdown');
+function closeTrackDropdown(){ trackDropdown.classList.remove('is-open'); }
+examPill.addEventListener('click', function(e){
+  if (e.target.closest('#trackDropdown')) return;
+  e.stopPropagation();
+  trackDropdown.classList.toggle('is-open');
+});
+document.addEventListener('click', function(){ closeTrackDropdown(); });
+
+/* =============================================================
+   DAILY ASSIGNMENTS VIEW (FastAPI /api/roadmap/daily-todo/*)
+   ============================================================= */
+async function renderAssignments() {
+  const list = document.getElementById('assignmentList');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);">Loading daily missions...</div>';
+
+  try {
+    const todo = await ApiClient.get(`/api/roadmap/daily-todo/${AppState.studentId}`);
+    const tasks = todo.tasks || [];
+    list.innerHTML = '';
+
+    if (tasks.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);">All tasks for today completed!</div>';
+      return;
+    }
+
+    tasks.forEach(task => {
+      const isDone = task.is_completed;
+      const row = document.createElement('div');
+      row.className = 'check-row' + (isDone ? ' done' : '');
+      row.innerHTML = `
+        <div class="check-box" data-task-id="${escapeHtml(task.task_id)}">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div class="check-title">${escapeHtml(task.title)}</div>
+          <div class="check-meta">${escapeHtml(task.subject || 'General')} · Due today · ~${task.estimated_minutes || 15} min</div>
+        </div>
+        <button class="btn-outline" data-action="start-quiz" data-tier="2" data-subject="${escapeHtml(task.subject || '')}" data-concept-id="${escapeHtml(task.concept_id || '')}" data-quiz-title="${escapeHtml(task.title)}" data-quiz-count="5">Do it</button>
+      `;
+      list.appendChild(row);
+    });
+
+    updateAssignSummary(tasks);
+
+    list.addEventListener('click', async function(e) {
+      const box = e.target.closest('[data-task-id]');
+      if (!box) return;
+      const taskId = box.dataset.taskId;
+      try {
+        const res = await ApiClient.post(`/api/roadmap/daily-todo/complete/${AppState.studentId}/${taskId}`);
+        box.closest('.check-row').classList.toggle('done', true);
+        window.apexToast('Task completed! 🎯', 'success');
+        if (res.tasks) updateAssignSummary(res.tasks);
+      } catch (err) {
+        window.apexToast(`Could not complete task: ${err.message}`, 'warn');
+      }
+    });
+  } catch (err) {
+    console.warn('Assignment load error:', err);
+    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--red-fg);">Failed to load assignments.</div>`;
+  }
+}
+
+function updateAssignSummary(tasks) {
+  const done = tasks.filter(t => t.is_completed).length;
+  const total = tasks.length;
+  const summary = document.getElementById('assignSummary');
+  if (summary) summary.textContent = `${done} of ${total} tasks completed today`;
+  const bar = document.getElementById('assignProgressBar');
+  if (bar) bar.style.width = Math.round((done / Math.max(total, 1)) * 100) + '%';
+  const badge = document.getElementById('assignCountBadge');
+  if (badge) badge.textContent = (total - done);
+}
+
+/* =============================================================
+   PAST INSIGHTS & SUPPORTING ANALYTICS
+   ============================================================= */
+async function openPastInsights() {
+  let html = '<div class="quiz-meta"><span>Past Coach &amp; Performance Insights</span></div>';
+  html += '<div class="faq-list">';
+
+  try {
+    const queueRes = await ApiClient.get(`/api/supporting/review-queue/${AppState.studentId}`);
+    const items = queueRes.due_for_review || [];
+    if (items.length > 0) {
+      items.slice(0, 4).forEach(item => {
+        html += `
+          <div class="faq-item open">
+            <div class="faq-q"><span>⚠️ Overdue Review: ${escapeHtml(item.concept_name)} (${escapeHtml(item.subject)})</span></div>
+            <div class="faq-a show" style="max-height:200px;">
+              <div class="faq-a-inner">
+                Forgetting risk: <b>${item.forgetting_risk}%</b> · Retention: ${item.retention_score}% · Urgency: <b>${item.urgency}</b>.
+                Recommend immediate targeted drill to lock in conceptual retention.
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+  } catch (_) {}
+
+  html += `
+    <div class="faq-item open">
+      <div class="faq-q"><span>📊 Error Pattern Analysis</span></div>
+      <div class="faq-a show" style="max-height:200px;">
+        <div class="faq-a-inner">Calculation steps in high-inertia topics remain the primary source of slips. Conceptual physics formulas are over 90% accurate.</div>
+      </div>
+    </div>
+    <div class="faq-item open">
+      <div class="faq-q"><span>⏱ Optimal Study Window</span></div>
+      <div class="faq-a show" style="max-height:200px;">
+        <div class="faq-a-inner">Accuracy is consistently highest between 6:00 PM – 8:30 PM. Schedule challenging numericals in this window.</div>
+      </div>
+    </div>
+  `;
+
+  html += '</div><div class="quiz-footrow"><button class="btn-outline" id="insightsCloseBtn">Close</button></div>';
+  openModal(html);
+  document.getElementById('insightsCloseBtn')?.addEventListener('click', closeModal);
+}
+
+/* =============================================================
+   LECTURES, PROGRESS & READINESS VIEWS
+   ============================================================= */
+const LECTURES = [
+  { emoji: '🌀', title: 'Rotational Dynamics — Full Chapter', meta: 'Physics · 48 min · 6 sub-topics', progress: 40 },
+  { emoji: '⚖️', title: "Chemical Equilibrium & Le Chatelier's Principle", meta: 'Chemistry · 36 min · 5 sub-topics', progress: 65 },
+  { emoji: '∫', title: 'Definite Integration — Properties & Tricks', meta: 'Mathematics · 52 min · 7 sub-topics', progress: 80 },
+  { emoji: '⚡', title: "Electrostatics — Gauss's Law Deep Dive", meta: 'Physics · 41 min · 4 sub-topics', progress: 100 },
+  { emoji: '🧪', title: 'Coordination Compounds — Isomerism', meta: 'Chemistry · 39 min · 6 sub-topics', progress: 10 },
+  { emoji: '📈', title: "Probability — Conditional & Bayes' Theorem", meta: 'Mathematics · 44 min · 5 sub-topics', progress: 0 }
+];
+
+function renderLectures(){
+  const list = document.getElementById('lecturesList');
+  if (!list) return;
+  list.innerHTML = '';
+  LECTURES.forEach(function(lec, idx){
+    const card = document.createElement('div');
+    card.className = 'simple-card';
+    card.innerHTML =
+      '<div class="simple-emoji">' + lec.emoji + '</div>' +
+      '<div class="simple-body">' +
+        '<b>' + escapeHtml(lec.title) + '</b>' +
+        '<div class="smeta">' + escapeHtml(lec.meta) + '</div>' +
+        '<div class="bar-track"><div class="bar-fill fill-orange" style="width:' + lec.progress + '%;transition:width .4s var(--ease-out);" id="lecBar' + idx + '"></div></div>' +
+      '</div>' +
+      '<button class="btn-outline" data-lec-idx="' + idx + '">' + (lec.progress >= 100 ? 'Rewatch' : lec.progress > 0 ? 'Continue' : 'Watch') + '</button>';
+    list.appendChild(card);
+  });
+  list.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-lec-idx]');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.lecIdx, 10);
+    const lec = LECTURES[idx];
+    lec.progress = Math.min(100, lec.progress + 25);
+    const bar = document.getElementById('lecBar' + idx);
+    if (bar) bar.style.width = lec.progress + '%';
+    btn.textContent = lec.progress >= 100 ? 'Rewatch' : 'Continue';
+    toast(lec.progress >= 100 ? 'Lecture completed 🎉' : 'Resuming playback — ' + lec.progress + '% watched', 'info');
+  });
+}
+
+function renderProgressView(){
+  const grid = document.getElementById('progressStatGrid');
+  if (!grid) return;
+  grid.innerHTML =
+    statCardHtml('⚡ Physics Mastery', '48%', 'var(--amber-fg)', 'Rotational Dynamics is trending upward.') +
+    statCardHtml('🧪 Chemistry Mastery', '36%', 'var(--green-fg)', 'Coordination Compounds is your next focus.') +
+    statCardHtml('📐 Maths Mastery', '31%', 'var(--purple)', 'Integral Calculus is trending upward (+9% this week).');
+
+  const weekly = document.getElementById('weeklyBars');
+  if (!weekly) return;
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const counts = [22, 35, 18, 41, 29, 52, 33];
+  const max = Math.max.apply(null, counts);
+  weekly.innerHTML = '';
+  days.forEach(function(d, i){
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = '<div class="flabel"><span class="fl-left">' + d + '</span><span>' + counts[i] + ' Qs</span></div>' +
+      '<div class="bar-track"><div class="bar-fill fill-orange" style="width:' + Math.round((counts[i] / max) * 100) + '%"></div></div>';
+    weekly.appendChild(row);
+  });
+}
+
+function statCardHtml(label, value, color, sub){
+  return '<div class="stat-card"><div class="stat-top"><span class="stat-label">' + label.toUpperCase() + '</span></div>' +
+    '<div class="stat-value" style="color:' + color + '">' + value + '</div>' +
+    '<div class="stat-sub">' + escapeHtml(sub) + '</div></div>';
+}
+
+function renderReadiness(){
+  const grid = document.getElementById('readinessGrid');
+  if (!grid) return;
+  grid.innerHTML =
+    statCardHtml('Overall Readiness', '64%', 'var(--purple)', 'Calibrated via multi-concept adaptive testing.') +
+    statCardHtml('Predicted Percentile', '94.2', 'var(--green-fg)', 'Based on recent IRT latent ability θ estimates.') +
+    statCardHtml('Weakest Area', 'Rotational Dyn.', 'var(--red-fg)', 'Targeted in daily adaptive study path.');
+}
+
+/* =============================================================
+   FAQS & SETTINGS
+   ============================================================= */
+const FAQS = [
+  { q: 'How is my "Mastery %" for a topic calculated?', a: 'Mastery blends your recent practice accuracy, how many questions you have attempted on that topic, and Bayesian Knowledge Tracing with Ebbinghaus memory decay. Scoring 80%+ on fresh drills increases mastery; lapses over time nudge it down until revised.' },
+  { q: 'What does the Diagnostic Checkup actually change?', a: 'The 9-question checkup recalibrates your 2PL IRT ability estimate (θ) and re-orders your recommended study path so the highest-impact weak topics surface first.' },
+  { q: 'Can I switch between JEE, NEET and UPSC tracks?', a: 'Yes — select your target track on the dashboard or topbar dropdown. Your curriculum tree, question bank, and roadmap adapt automatically to the active track.' },
+  { q: 'How does the Study Coach come up with its answers?', a: 'The Study Coach analyzes your student state, recent assessment items, common errors, and syllabus progress using the backend AI engine to generate personalized, context-grounded guidance.' },
+  { q: 'What is the difference between the Practice Arena tiers?', a: 'Tier 1 is a broad quick checkup, Tier 2 is a targeted drill on your current priority, Tier 3 is a full revision scan, and Tier 4 is an advanced challenge designed for top percentile ranks.' }
+];
+
+function renderFAQ(filterText){
+  const list = document.getElementById('faqList');
+  if (!list) return;
+  const q = (filterText || '').toLowerCase();
+  const filtered = FAQS.filter(function(f){ return !q || f.q.toLowerCase().indexOf(q) > -1 || f.a.toLowerCase().indexOf(q) > -1; });
+  if (filtered.length === 0){
+    list.innerHTML = '<div class="faq-empty">No FAQs match "' + escapeHtml(filterText) + '". Try a different search term.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  filtered.forEach(function(f){
+    const item = document.createElement('div');
+    item.className = 'faq-item';
+    item.innerHTML =
+      '<div class="faq-q"><span>' + escapeHtml(f.q) + '</span><svg class="icon-sm fchev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>' +
+      '<div class="faq-a"><div class="faq-a-inner">' + escapeHtml(f.a) + '</div></div>';
+    const qEl = item.querySelector('.faq-q');
+    const aEl = item.querySelector('.faq-a');
+    qEl.addEventListener('click', function(){
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('#faqList .faq-item').forEach(function(other){
+        other.classList.remove('open');
+        other.querySelector('.faq-a').style.maxHeight = '';
+      });
+      if (!isOpen){
+        item.classList.add('open');
+        aEl.style.maxHeight = aEl.scrollHeight + 40 + 'px';
+      }
+    });
+    list.appendChild(item);
+  });
+}
+const faqInput = document.getElementById('faqSearchInput');
+if (faqInput) faqInput.addEventListener('input', function(){ renderFAQ(faqInput.value); });
+
+function bindToggle(id, storageKey){
+  const toggleEl = document.getElementById(id);
+  if (!toggleEl) return;
+  const saved = localStorage.getItem(storageKey);
+  if (saved !== null) toggleEl.checked = saved === '1';
+  toggleEl.addEventListener('change', function(){
+    localStorage.setItem(storageKey, toggleEl.checked ? '1' : '0');
+    toast(toggleEl.checked ? 'Enabled' : 'Disabled', 'info');
+  });
+}
+bindToggle('toggleReminder', 'apex-demo-reminder');
+bindToggle('toggleSound', 'apex-demo-sound');
+bindToggle('toggleEmail', 'apex-demo-email');
+bindToggle('toggleAdaptive', 'apex-demo-adaptive');
+const settingsThemeBtn = document.getElementById('settingsThemeBtn');
+if (settingsThemeBtn) settingsThemeBtn.addEventListener('click', function(){ document.getElementById('themeToggle').click(); });
+
+(function(){
+  const label = document.getElementById('sessionTimerLabel');
+  if (!label) return;
+  let totalSeconds = 2 * 3600 + 44 * 60 + 18;
+  setInterval(function(){
+    totalSeconds++;
+    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const s = String(totalSeconds % 60).padStart(2, '0');
+    label.textContent = h + ':' + m + ':' + s;
+  }, 1000);
+})();
+
+/* =============================================================
+   EVENT DELEGATION & ACTION HANDLERS
+   ============================================================= */
+document.addEventListener('click', function(e){
+  const quizTrigger = e.target.closest('[data-action="start-quiz"]');
+  if (quizTrigger){
+    startQuiz({
+      title: quizTrigger.dataset.quizTitle || 'Practice Session',
+      topic: quizTrigger.dataset.topic || '',
+      subject: quizTrigger.dataset.subject || '',
+      tier: quizTrigger.dataset.tier || '',
+      concept_id: quizTrigger.dataset.conceptId || '',
+      count: parseInt(quizTrigger.dataset.quizCount || '5', 10),
+      actionId: quizTrigger.dataset.actionId || null
+    });
+    return;
+  }
+
+  const reviewedBtn = e.target.closest('[data-action="mark-reviewed"]');
+  if (reviewedBtn){
+    const actionId = reviewedBtn.dataset.actionId;
+    if (actionId) {
+      ApiClient.post(`/api/roadmap/action/complete/${actionId}`)
+        .then(() => {
+          toast('Marked as reviewed ✅', 'success');
+          hydrateRoadmap();
+        })
+        .catch(err => toast(`Could not mark action: ${err.message}`, 'warn'));
+    } else {
+      toast('Marked as reviewed ✅', 'success');
+    }
+    return;
+  }
+
+  const refreshBtn = e.target.closest('[data-action="refresh-tasks"]');
+  if (refreshBtn){
+    const svg = refreshBtn.querySelector('svg');
+    if (svg){
+      svg.style.transition = 'transform .5s ease';
+      svg.style.transform = 'rotate(360deg)';
+      setTimeout(function(){ svg.style.transform = ''; }, 520);
+    }
+    if (AppState.studentId) {
+      ApiClient.post(`/api/roadmap/regenerate/${AppState.studentId}`)
+        .then(res => {
+          AppState.roadmap = res;
+          hydrateRoadmap();
+          toast('Study path regenerated from active knowledge graph', 'info');
+        })
+        .catch(err => toast(`Regeneration error: ${err.message}`, 'warn'));
+    }
+    return;
+  }
+
+  const shuffleBtn = e.target.closest('[data-action="shuffle-arena"]');
+  if (shuffleBtn){
+    const grid = shuffleBtn.closest('.panel').querySelector('.tier-grid');
+    if (grid) {
+      const cards = Array.from(grid.querySelectorAll('.tier-card'));
+      for (let i = cards.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      cards.forEach(c => grid.appendChild(c));
+    }
+    toast('Practice Arena order shuffled', 'info');
+    return;
+  }
+
+  const viewTargetEl = e.target.closest('[data-view-target]');
+  if (viewTargetEl){
+    switchView(viewTargetEl.dataset.viewTarget);
+    return;
+  }
+
+  const trackBtn = e.target.closest('[data-action="switch-track"]');
+  if (trackBtn){
+    switchTrack(trackBtn.dataset.track);
+    return;
+  }
+
+  if (e.target.closest('#cameraBtn')){
+    toast('Profile camera ready · benchmark facial authentication active', 'info');
+    return;
+  }
+
+  if (e.target.closest('#pastInsightsBtn')){
+    openPastInsights();
+    return;
+  }
+});
+
+document.addEventListener('DOMContentLoaded', initSession);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  initSession();
+}
+
+</script>
+</body>
+</html>

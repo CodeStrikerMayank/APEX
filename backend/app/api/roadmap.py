@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 
 from backend.app.database.connection import get_db
-from backend.app.models.schema import Roadmap, RoadmapAction, Concept, Chapter, Subject, Topic, Student
+from backend.app.models.schema import Roadmap, RoadmapAction, Concept, Chapter, Subject, Topic, Student, utc_now
 from backend.app.schemas.pydantic_models import RoadmapResponse, NextActionResponse, WeaknessDetail, PriorityItem
 from backend.app.roadmap.next_action import NextActionEngine
 from backend.app.roadmap.generator import RoadmapGenerator
@@ -42,6 +42,8 @@ def get_active_roadmap(student_id: str, db: Session = Depends(get_db)):
         subject = chapter.subject if chapter else None
 
         actions_list.append({
+            "id": act.id,
+            "action_id": act.id,
             "sequence_order": act.sequence_order,
             "action_type": act.action_type,
             "concept_id": act.concept_id,
@@ -76,18 +78,20 @@ def mark_action_completed(action_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Roadmap action not found.")
 
     action.is_completed = True
-    action.completed_at = datetime.datetime.utcnow()
+    action.completed_at = utc_now()
     db.commit()
 
-    EventCollector.log_event(
-        db=db,
-        student_id=action.roadmap.student_id,
-        session_id="roadmap",
-        event_type="ROADMAP_ITEM_COMPLETED",
-        concept_id=action.concept_id,
-        metadata={"action_type": action.action_type}
-    )
-    db.commit()
+    student_id = action.roadmap.student_id if action.roadmap else None
+    if student_id:
+        EventCollector.log_event(
+            db=db,
+            student_id=student_id,
+            session_id="roadmap",
+            event_type="ROADMAP_ITEM_COMPLETED",
+            concept_id=action.concept_id,
+            metadata={"action_type": action.action_type}
+        )
+        db.commit()
 
     return {"status": "SUCCESS", "action_id": action_id}
 
@@ -117,3 +121,36 @@ def regenerate_roadmap(student_id: str, db: Session = Depends(get_db)):
     generator.generate_roadmap(student_id, trigger_event="USER_REGENERATE_REQUEST")
 
     return get_active_roadmap(student_id, db)
+
+
+# --- Locked Daily Mission To-Do Endpoints ---
+
+@router.get("/daily-todo/{student_id}")
+def get_daily_todo(
+    student_id: str,
+    target_date: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves or locks today's 3-5 mission tasks for the student.
+    Does not allow algorithm reshuffling mid-day.
+    """
+    from backend.app.roadmap.daily_todo import DailyTodoEngine
+    engine = DailyTodoEngine(db)
+    return engine.get_or_create_daily_todo(student_id, target_date=target_date)
+
+
+@router.post("/daily-todo/complete/{student_id}/{task_id}")
+def complete_daily_task(
+    student_id: str,
+    task_id: str,
+    target_date: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Marks a specific task completed in today's locked mission.
+    """
+    from backend.app.roadmap.daily_todo import DailyTodoEngine
+    engine = DailyTodoEngine(db)
+    return engine.complete_task(student_id, task_id, target_date=target_date)
+

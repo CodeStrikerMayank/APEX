@@ -72,18 +72,18 @@ async def test_deterministic_llm_generation():
     }
 
     # Test mistake query
-    res = await client.generate_text("Analyze my quiz mistakes", student_context=dummy_ctx)
+    res = await client.generate_text("Analyze my quiz mistakes", student_context=dummy_ctx, use_polish=False)
     assert res["intent"] == INTENT_ANALYZE_MISTAKES
     assert "JEE_PHY_MEC_001" in res["text"]
     assert "CALCULATION SLIP" in res["text"]
     assert "Forgot to square the velocity" in res["text"]
 
     # Test roadmap query
-    res_rm = await client.generate_text("Explain my roadmap", student_context=dummy_ctx)
+    res_rm = await client.generate_text("Explain my roadmap", student_context=dummy_ctx, use_polish=False)
     assert res_rm["intent"] == INTENT_EXPLAIN_ROADMAP
     assert "Kinematics Foundation" in res_rm["text"]
 
     # Test strategy query
-    res_strat = await client.generate_text("Speed and accuracy tips", student_context=dummy_ctx)
+    res_strat = await client.generate_text("Speed and accuracy tips", student_context=dummy_ctx, use_polish=False)
     assert res_strat["intent"] == INTENT_STRATEGY_TIPS
     assert "JEE" in res_strat["text"]

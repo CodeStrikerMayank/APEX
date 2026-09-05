@@ -1,5 +1,6 @@
 import datetime
 from typing import Dict, Any, Optional
+from backend.app.models.schema import utc_now
 
 class AssessmentTimer:
     """
@@ -15,7 +16,7 @@ class AssessmentTimer:
         """
         Validates if submission is within allowable server-side duration.
         """
-        now = submission_time or datetime.datetime.utcnow()
+        now = submission_time or utc_now()
         elapsed_seconds = int((now - started_at).total_seconds())
         allowed_seconds = (duration_minutes * 60) + grace_period_seconds
 

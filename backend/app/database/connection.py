@@ -44,6 +44,26 @@ if DATABASE_URL.startswith("sqlite"):
             conn.commit()
         except Exception:
             pass
+        try:
+            conn.execute(text("ALTER TABLE student_concept_mastery ADD COLUMN fsrs_stability FLOAT DEFAULT 1.0"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE student_concept_mastery ADD COLUMN fsrs_difficulty FLOAT DEFAULT 5.0"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE student_concept_mastery ADD COLUMN fsrs_retrievability FLOAT DEFAULT 1.0"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE student_concept_mastery ADD COLUMN last_fsrs_review DATETIME"))
+            conn.commit()
+        except Exception:
+            pass
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

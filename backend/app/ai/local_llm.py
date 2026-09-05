@@ -5,6 +5,9 @@ Platform Upgrade v3.0 — Offline-First, Zero-Hallucination
 import os
 import httpx
 from typing import Dict, Any, Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from backend.app.ai.intent_classifier import (
     IntentClassifier,
@@ -37,18 +40,20 @@ class LocalLLMClient:
         enabled: Optional[bool] = None
     ):
         self.base_url = base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        self.model_name = model_name or os.getenv("OLLAMA_MODEL", "llama3:latest")
+        self.model_name = model_name or os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
         self.enabled = enabled if enabled is not None else os.getenv("LOCAL_AI_ENABLED", "true").lower() == "true"
+        self.timeout = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "35.0"))
 
     async def generate_text(
         self,
         prompt: str,
         system_prompt: str = "",
-        student_context: Optional[Dict[str, Any]] = None
+        student_context: Optional[Dict[str, Any]] = None,
+        use_polish: Optional[bool] = None
     ) -> Dict[str, Any]:
         """
         Classifies user intent, generates bulletproof grounded response,
-        and optionally polishes via Ollama if available.
+        and optionally polishes via Ollama or Cloud LLM if available.
         """
         if not self.enabled:
             return {
@@ -85,8 +90,31 @@ class LocalLLMClient:
         else:
             grounded_text = format_unknown_fallback(exam)
 
-        # 5. Optional Ollama Polish Pass (tight 2.5s timeout, only if configured)
-        ollama_enabled = os.getenv("USE_OLLAMA_POLISH", "false").lower() == "true"
+        # 5. Cloud Frontier Polish Pass (Gemini / Grok) if enabled
+        should_polish = use_polish if use_polish is not None else True
+        use_gemini = should_polish and os.getenv("USE_GEMINI_POLISH", "true").lower() == "true"
+        if use_gemini:
+            try:
+                from backend.app.ai.cloud_llm import CloudLLMHub
+                hub = CloudLLMHub()
+                polish_prompt = (
+                    f"Polish the following educational response for an Indian {exam} student. "
+                    "Make it encouraging, razor-sharp, and clear. Preserve all mathematical equations, "
+                    f"markdown formatting, and technical accuracy:\n\n{grounded_text}"
+                )
+                cloud_res = await hub.generate_best(polish_prompt)
+                if cloud_res.get("text") and len(cloud_res["text"]) > 50:
+                    return {
+                        "text": cloud_res["text"],
+                        "intent": intent,
+                        "confidence": confidence,
+                        "source": cloud_res["source"]
+                    }
+            except Exception:
+                pass  # Fall through to local Ollama
+
+        # 6. Optional Local Ollama Polish Pass (hardware-optimized timeout on Drive D)
+        ollama_enabled = should_polish and os.getenv("USE_OLLAMA_POLISH", "false").lower() == "true"
         if ollama_enabled:
             try:
                 url = f"{self.base_url}/api/generate"
@@ -95,7 +123,7 @@ class LocalLLMClient:
                     "prompt": f"Polish the following educational response for clarity and tone, preserving all technical details and markdown formatting exactly:\n\n{grounded_text}",
                     "stream": False
                 }
-                async with httpx.AsyncClient(timeout=2.5) as client:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
                     resp = await client.post(url, json=payload)
                     if resp.status_code == 200:
                         data = resp.json()
@@ -115,4 +143,35 @@ class LocalLLMClient:
             "intent": intent,
             "confidence": confidence,
             "source": "DETERMINISTIC_INTENT_ENGINE"
+        }
+
+    async def generate_raw(
+        self,
+        prompt: str,
+        system_prompt: str = ""
+    ) -> Dict[str, Any]:
+        """
+        Direct inference through Ollama for free-form generation.
+        """
+        try:
+            url = f"{self.base_url}/api/generate"
+            payload = {
+                "model": self.model_name,
+                "prompt": prompt,
+                "system": system_prompt,
+                "stream": False
+            }
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.post(url, json=payload)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return {
+                        "text": data.get("response", "").strip(),
+                        "source": f"OLLAMA_DIRECT_{self.model_name}"
+                    }
+        except Exception:
+            pass
+        return {
+            "text": "Direct local LLM generation unavailable.",
+            "source": "FALLBACK"
         }

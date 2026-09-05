@@ -15,6 +15,10 @@ def log_telemetry_event(
     req: TelemetryEventCreate,
     db: Session = Depends(get_db)
 ):
+    if req.event_type not in EventCollector.VALID_EVENT_TYPES:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid event type: {req.event_type}")
+
     event = EventCollector.log_event(
         db=db,
         student_id=student_id,

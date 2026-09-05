@@ -27,7 +27,7 @@
 ## Architecture & 4-Tier Assessment Pipeline
 
 The question bank powers a 4-tier adaptive diagnostic & mastery pipeline:
-- **Tier 1 — Compulsory Diagnostic Screener (9 Qs)**: 3 questions per subject. Evaluates global baseline ability ($\theta$), Bayesian Knowledge Tracing $P(L)$, and flags weak subjects ($< 60\%$ accuracy).
+- **Tier 1 — Adaptive Diagnostic Assessment (9 Qs)**: 3 questions per subject. Evaluates global baseline ability ($\theta$), Bayesian Knowledge Tracing $P(L)$, and flags weak subjects ($< 60\%$ accuracy).
 - **Tier 2 — Targeted Chapter Drills (5 Qs)**: Triggered for flagged weak areas or specific chapters to identify fine-grained prerequisite gaps.
 - **Tier 3 — Full-Syllabus Deep Scan (15 Qs)**: Comprehensive 15-question diagnostic across all major curriculum chapters.
 - **Tier 4 — Advanced Mastery Challenge (6 Qs)**: Triggered for high-performing students who score $\ge 80\%$ on Tier 1 or Tier 3 assessments. Features questions with higher difficulty ($b \in [0.75, 0.92]$) and elevated discrimination ($a \in [1.5, 2.0]$) to prevent ability plateauing and calibrate high Latent Ability ($\theta$).

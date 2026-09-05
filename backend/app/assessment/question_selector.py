@@ -8,7 +8,11 @@ STREAM_SUBJECTS = {
     "JEE": ["Physics", "Chemistry", "Mathematics"],
     "NEET": ["Biology", "Physics", "Chemistry"],
     "CENTRAL_GOVT": ["General Studies", "Mathematics", "Science & Technology"],
-    "UPSC": ["General Studies", "History & Heritage", "Polity & Governance"]
+    "UPSC": [
+        "Indian Polity & Governance",
+        "Economy, Environment & Technology",
+        "Ethics, Integrity & Aptitude"
+    ]
 }
 
 class QuestionSelector:
@@ -135,9 +139,11 @@ class QuestionSelector:
         count: int = 5
     ) -> List[Question]:
         """Selects questions specifically targeting a weak subject and chapter."""
+        from sqlalchemy import func
+        norm_sub = subject.strip()
         query = self.db.query(Question).filter(
             Question.exam == exam,
-            Question.subject == subject
+            func.lower(Question.subject) == norm_sub.lower()
         )
         if chapter_id:
             query = query.filter(Question.chapter_id == chapter_id)
@@ -147,7 +153,13 @@ class QuestionSelector:
             # Fallback to subject-only
             candidates = self.db.query(Question).filter(
                 Question.exam == exam,
-                Question.subject == subject
+                func.lower(Question.subject) == norm_sub.lower()
+            ).all()
+
+        if not candidates:
+            # Fallback to general exam questions if specific subject has no questions
+            candidates = self.db.query(Question).filter(
+                Question.exam == exam
             ).all()
 
         # Shuffle and pick up to count
@@ -165,7 +177,7 @@ class QuestionSelector:
         if not all_q:
             return []
 
-        subjects = ["Physics", "Chemistry", "Mathematics"] if exam == "JEE" else ["Biology", "Physics", "Chemistry"]
+        subjects = STREAM_SUBJECTS.get(exam, ["Physics", "Chemistry", "Mathematics"])
         per_sub = max(1, count // len(subjects))
 
         selected = []

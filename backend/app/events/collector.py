@@ -2,7 +2,7 @@ import uuid
 import datetime
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
-from backend.app.models.schema import LearningEvent
+from backend.app.models.schema import LearningEvent, utc_now
 
 class EventCollector:
     """
@@ -16,7 +16,8 @@ class EventCollector:
         "REVISION_STARTED", "REVISION_COMPLETED",
         "MOCK_STARTED", "MOCK_COMPLETED",
         "ROADMAP_OPENED", "ROADMAP_ITEM_COMPLETED",
-        "UPSC_ESSAY_SUBMITTED"
+        "UPSC_ESSAY_SUBMITTED",
+        "ASSIGNMENT_GENERATED", "ASSIGNMENT_SUBMITTED"
     }
 
     @classmethod
@@ -35,7 +36,7 @@ class EventCollector:
         Appends a validated interaction event to the learning_events table.
         """
         event_id = f"evt_{uuid.uuid4().hex[:16]}"
-        timestamp = timestamp or datetime.datetime.utcnow()
+        timestamp = timestamp or utc_now()
 
         event = LearningEvent(
             event_id=event_id,

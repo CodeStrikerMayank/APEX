@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.models.schema import (
     Assessment, AssessmentAttempt, StudentAttemptItem, Question,
-    StudentConceptMastery, StudentErrorLog, Student
+    StudentConceptMastery, StudentErrorLog, Student, utc_now
 )
 from backend.app.assessment.question_selector import QuestionSelector
 from backend.app.assessment.timer import AssessmentTimer
@@ -15,6 +15,9 @@ from backend.app.student_model.bkt import BayesianKnowledgeTracing
 from backend.app.student_model.irt import ItemResponseTheory
 from backend.app.student_model.retention import ForgettingModel
 from backend.app.student_model.error_classifier import ErrorClassifier
+from backend.app.student_model.fsrs_engine import FSRSEngine
+from backend.app.knowledge_graph.graph import CurriculumGraph
+from backend.app.knowledge_graph.propagation import GKTPropagator
 from backend.app.events.collector import EventCollector
 
 class QuizEngine:
@@ -28,6 +31,8 @@ class QuizEngine:
         self.mastery_engine = MasteryEngine(db)
         self.bkt = BayesianKnowledgeTracing()
         self.forgetting_model = ForgettingModel()
+        self.curriculum_graph = CurriculumGraph(db)
+        self.gkt_propagator = GKTPropagator(self.curriculum_graph.graph)
 
     def start_assessment(
         self,
@@ -134,7 +139,7 @@ class QuizEngine:
             assessment_id=assessment_id,
             student_id=student_id,
             session_id=session_id,
-            started_at=datetime.datetime.utcnow(),
+            started_at=utc_now(),
             total_questions=len(questions),
             is_completed=False,
             status="IN_PROGRESS",
@@ -285,7 +290,7 @@ class QuizEngine:
         if attempt.is_completed:
             return {"status": "ALREADY_COMPLETED", "attempt_id": attempt_id}
 
-        now = datetime.datetime.utcnow()
+        now = utc_now()
         assessment = attempt.assessment
         timing_check = AssessmentTimer.verify_attempt_timing(
             started_at=attempt.started_at,
@@ -419,11 +424,47 @@ class QuizEngine:
             ).first()
 
             if not mastery_rec:
+                for obj in self.db.new:
+                    if isinstance(obj, StudentConceptMastery) and getattr(obj, "student_id", None) == attempt.student_id and getattr(obj, "concept_id", None) == cid:
+                        mastery_rec = obj
+                        break
+
+            old_bkt = mastery_rec.bkt_mastery if (mastery_rec and mastery_rec.bkt_mastery is not None) else 0.10
+
+            if not mastery_rec:
                 mastery_rec = StudentConceptMastery(
                     student_id=attempt.student_id,
-                    concept_id=cid
+                    concept_id=cid,
+                    fsrs_stability=1.0,
+                    fsrs_difficulty=5.0,
+                    fsrs_retrievability=1.0,
                 )
                 self.db.add(mastery_rec)
+                self.db.flush()
+
+            # GKT Knowledge Propagation across the DAG
+            delta_bkt = round(bkt_score - old_bkt, 4)
+            if abs(delta_bkt) > 1e-4:
+                self.gkt_propagator.propagate_db(
+                    target_concept_id=cid,
+                    delta_mastery=delta_bkt,
+                    student_id=attempt.student_id,
+                    db=self.db
+                )
+
+            # FSRS-5 Spaced Repetition update
+            is_latest_correct = bool_seq[-1] if bool_seq else True
+            last_review = mastery_rec.last_fsrs_review or mastery_rec.last_practiced_at
+            elapsed_days = (now - last_review).total_seconds() / 86400.0 if last_review else 1.0
+            cur_stab = mastery_rec.fsrs_stability if (mastery_rec.fsrs_stability is not None and mastery_rec.fsrs_stability > 0) else 1.0
+            cur_diff = mastery_rec.fsrs_difficulty if mastery_rec.fsrs_difficulty is not None else 5.0
+
+            fsrs_res = FSRSEngine.step(
+                stability=cur_stab,
+                difficulty=cur_diff,
+                elapsed_days=max(elapsed_days, 0.0),
+                is_correct=is_latest_correct
+            )
 
             mastery_rec.mastery = metrics["mastery"]
             mastery_rec.confidence = metrics["confidence"]
@@ -437,6 +478,10 @@ class QuizEngine:
             mastery_rec.difficulty_success_rate = metrics["difficulty_success"]
             mastery_rec.retention_score = retention_data["retention_score"]
             mastery_rec.forgetting_risk = retention_data["forgetting_risk"]
+            mastery_rec.fsrs_stability = fsrs_res["stability"]
+            mastery_rec.fsrs_difficulty = fsrs_res["difficulty"]
+            mastery_rec.fsrs_retrievability = fsrs_res["retrievability"]
+            mastery_rec.last_fsrs_review = now
             mastery_rec.last_practiced_at = now
 
             updated_masteries.append({
@@ -445,7 +490,10 @@ class QuizEngine:
                 "confidence": metrics["confidence"],
                 "bkt_mastery": bkt_score,
                 "irt_ability": irt_theta,
-                "forgetting_risk": retention_data["forgetting_risk"]
+                "forgetting_risk": retention_data["forgetting_risk"],
+                "fsrs_stability": fsrs_res["stability"],
+                "fsrs_difficulty": fsrs_res["difficulty"],
+                "fsrs_retrievability": fsrs_res["retrievability"]
             })
 
         # Log Quiz Completed Event

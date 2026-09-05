@@ -15,8 +15,12 @@ router = APIRouter(prefix="/upsc", tags=["UPSC Civil Services Subsystem"])
 class WrittenSubmissionInput(BaseModel):
     student_id: str
     question_id: str
-    answer_text: str
+    answer_text: Optional[str] = None
+    student_answer: Optional[str] = None
     time_taken_seconds: int = 420
+
+    def get_text(self) -> str:
+        return (self.answer_text or self.student_answer or "").strip()
 
 
 OFFICIAL_MAINS_PROMPTS = [
@@ -123,7 +127,8 @@ def evaluate_written_answer(
     max_score = prompt["marks"] if prompt else 15.0
     word_limit = prompt["word_limit"] if prompt else 250
 
-    words = req.answer_text.strip().split()
+    answer_content = req.get_text()
+    words = answer_content.split()
     word_count = len(words)
 
     # Multi-dimensional rubric evaluation
@@ -143,8 +148,8 @@ def evaluate_written_answer(
 
     # 2. Structural Organization (0 - 3.0)
     # Check for paragraphs, headings, bullet points
-    has_structure = "\n" in req.answer_text or any(b in req.answer_text for b in ["- ", "• ", "1.", "First", "Secondly", "In conclusion", "Way forward"])
-    if has_structure and len(req.answer_text.split("\n\n")) >= 3:
+    has_structure = "\n" in answer_content or any(b in answer_content for b in ["- ", "• ", "1.", "First", "Secondly", "In conclusion", "Way forward"])
+    if has_structure and len(answer_content.split("\n\n")) >= 3:
         rubrics["structure"] = 2.8
         feedback_points.append("Well-organized response with distinct introduction, core body paragraphs, and forward-looking conclusion.")
     elif has_structure:
@@ -155,7 +160,7 @@ def evaluate_written_answer(
         feedback_points.append("Monolithic block text detected: break into structured headings and bulleted arguments.")
 
     # 3. Content Depth & Key Dimension Match (0 - 3.0)
-    text_lower = req.answer_text.lower()
+    text_lower = answer_content.lower()
     matched_dims = 0
     if prompt:
         for dim in prompt["key_dimensions"]:
@@ -197,7 +202,7 @@ def evaluate_written_answer(
         submission_id=sub_id,
         student_id=req.student_id,
         question_id=req.question_id,
-        student_answer_text=req.answer_text,
+        student_answer_text=answer_content,
         word_count=word_count,
         time_taken_seconds=req.time_taken_seconds,
         rubric_scores=rubrics,

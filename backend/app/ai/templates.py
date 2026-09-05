@@ -9,10 +9,11 @@ def format_mistake_analysis(ctx: Dict[str, Any]) -> str:
     attempt_info = ctx.get("latest_attempt")
     if not attempt_info:
         return (
-            "### 📊 Diagnostic Analysis Not Available Yet\n\n"
-            "You have not completed a diagnostic assessment in this session yet. "
-            "Please take the **9-Question Compulsory Screener** or a **Topic Drill** first "
-            "so I can analyze your cognitive error patterns and time allocations!"
+            f"### 📊 Standby Diagnostic Profile ({exam} Mode)\n\n"
+            f"All adaptive learning and assessment engines are active on standby! No compulsory quiz is required to begin.\n\n"
+            f"- **Adaptive Engines Status:** Active on Standby (CAT, Bayesian Knowledge Tracing, FSRS-5, IRT)\n"
+            f"- **Instant Open Access:** You can immediately work on Daily 3-Subject Assignments, explore Dynamic Roadmaps, or practice Drills\n"
+            f"- **Continuous Real-Time Calibration:** Whenever you choose to solve questions—in any mode—your cognitive error patterns, distractor tendencies, and latent ability $\\theta$ will calibrate dynamically."
         )
 
     items = attempt_info.get("items", [])
@@ -64,7 +65,8 @@ def format_roadmap_explanation(ctx: Dict[str, Any]) -> str:
     ]
 
     if not milestones:
-        lines.append("Your dynamic roadmap will be automatically generated as soon as you submit your diagnostic assessment!")
+        lines.append(f"Your dynamic roadmap is structured automatically from the {exam} curriculum Directed Acyclic Graph (DAG).\n"
+                     "All engines are on standby with zero mandatory quiz requirements. You can begin from foundational concepts immediately!")
         return "\n".join(lines)
 
     lines.append("Our **Dynamic DAG Priority Engine** orders each milestone based on 4 mathematical weights:\n"
@@ -78,7 +80,8 @@ def format_roadmap_explanation(ctx: Dict[str, Any]) -> str:
         step = m.get("order", 1)
         title = m.get("title", "Action")
         atype = m.get("action_type", "").replace("_", " ")
-        reason = m.get("reason", "")
+        reason_val = m.get("reasons") or m.get("reason") or "Foundational curriculum mastery"
+        reason = "; ".join(reason_val) if isinstance(reason_val, list) else str(reason_val)
         mins = m.get("estimated_minutes", 45)
         lines.append(f"- **Step {step}: {title}** ({mins} mins)")
         lines.append(f"  *Type:* `{atype}` | *Why:* {reason}")
@@ -177,11 +180,11 @@ def format_concept_explanation(topic_hint: Optional[str], exam: str) -> str:
 def format_unknown_fallback(exam: str) -> str:
     return (
         f"### 🤖 AI Study Mentor ({exam} Mode)\n\n"
-        "I am trained specifically to help you master your exam preparation through your diagnostic test data and study roadmap. "
+        "I am your offline pedagogical AI study mentor. All adaptive engines are active on standby with zero mandatory gates. "
         "Here are the most powerful queries you can ask right now:\n\n"
-        "- 📊 **Analyze My Mistakes:** Post-mortem of your latest quiz errors with distractor diagnosis.\n"
+        "- 📊 **Analyze My Mistakes:** Error analysis and cognitive diagnosis whenever you take a drill, assignment, or quiz.\n"
         "- 🗺️ **Explain My Roadmap:** Understand why your upcoming milestones are ordered the way they are.\n"
         "- ⚡ **Speed & Accuracy Tips:** Tactical blueprints to minimize negative marking and maximize score.\n"
         "- 🔬 **Explain [Concept Name]:** Crisp conceptual definitions and high-yield problem solving rules.\n\n"
-        "*Tip: Click any of the quick prompt chips above the input box!*"
+        "*Tip: Click any of the quick prompt chips or ask any curriculum question!*"
     )

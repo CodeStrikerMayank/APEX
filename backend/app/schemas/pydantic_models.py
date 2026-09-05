@@ -25,6 +25,9 @@ class StudentProfileResponse(BaseModel):
     current_level: str
     overall_mastery: float = 0.0
     overall_confidence: float = 0.0
+    latent_ability_theta: Optional[float] = 0.0
+    consistency_score: Optional[float] = 0.85
+    subject_masteries: Optional[Dict[str, float]] = None
     created_at: datetime.datetime
 
 # --- Curriculum & Knowledge Graph ---
@@ -78,11 +81,30 @@ class QuestionAnswerSubmission(BaseModel):
     confidence_estimate: Optional[float] = 0.5
 
 class AssessmentStartRequest(BaseModel):
+    student_id: Optional[str] = None
     exam: str = "JEE"
     assessment_type: str = "DIAGNOSTIC"
     stage: int = 1
     duration_minutes: Optional[int] = 30
     target_concept_id: Optional[str] = None
+
+class DrillStartRequest(BaseModel):
+    student_id: Optional[str] = None
+    exam: str = "JEE"
+    subject: Optional[str] = None
+    chapter_id: Optional[str] = None
+    duration_minutes: Optional[int] = 15
+
+class FullScanStartRequest(BaseModel):
+    student_id: Optional[str] = None
+    exam: str = "JEE"
+    duration_minutes: Optional[int] = 40
+
+class AdvancedStartRequest(BaseModel):
+    student_id: Optional[str] = None
+    exam: str = "JEE"
+    subject: Optional[str] = None
+    duration_minutes: Optional[int] = 20
 
 class AssessmentSessionResponse(BaseModel):
     attempt_id: str
@@ -178,6 +200,8 @@ class PriorityItem(BaseModel):
 
 # --- Roadmap & Next Best Action ---
 class RoadmapActionItem(BaseModel):
+    id: Optional[int] = None
+    action_id: Optional[int] = None
     sequence_order: int
     action_type: str
     concept_id: str
@@ -229,9 +253,13 @@ class UPSCWrittenEvaluationResponse(BaseModel):
 
 # --- Offline AI Assistant ---
 class AIChatRequest(BaseModel):
-    prompt: str
+    prompt: Optional[str] = None
+    message: Optional[str] = None
     concept_id: Optional[str] = None
     include_student_state: bool = True
+
+    def get_prompt(self) -> str:
+        return self.prompt or self.message or "Help with exam preparation"
 
 class AIChatResponse(BaseModel):
     response: str
@@ -244,3 +272,29 @@ class AIQuestionGenRequest(BaseModel):
     concept_id: str
     difficulty: float
     question_type: str = "multiple_choice"
+
+
+# --- Computerized Adaptive Testing (CAT) ---
+class CatStartRequest(BaseModel):
+    student_id: str
+    exam: str = "JEE"
+    subject: Optional[str] = None
+
+
+class CatNextQuestionRequest(BaseModel):
+    session_id: str
+    last_question_id: Optional[str] = None
+    student_answer: Optional[str] = None
+    time_taken_seconds: Optional[int] = 0
+
+
+class CatNextQuestionResponse(BaseModel):
+    session_id: str
+    is_complete: bool
+    current_theta: Optional[float] = None
+    final_theta: Optional[float] = None
+    sem: Optional[float] = None
+    items_answered_count: int
+    termination_reason: Optional[str] = None
+    question: Optional[Dict[str, Any]] = None
+

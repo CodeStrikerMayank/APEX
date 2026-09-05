@@ -96,10 +96,19 @@ async def chat_with_assistant(
         # Latest Roadmap
         latest_roadmap = (
             db.query(Roadmap)
-            .filter(Roadmap.student_id == student_id)
-            .order_by(Roadmap.created_at.desc())
+            .filter(Roadmap.student_id == student_id, Roadmap.status == "ACTIVE")
+            .order_by(Roadmap.version.desc())
             .first()
         )
+        if not latest_roadmap:
+            try:
+                from backend.app.roadmap.generator import RoadmapGenerator
+                gen = RoadmapGenerator(db, exam_id=student.target_exam)
+                latest_roadmap = gen.generate_roadmap(student_id, trigger_event="AI_STANDBY_INIT")
+                db.commit()
+            except Exception:
+                db.rollback()
+
         if latest_roadmap:
             actions = (
                 db.query(RoadmapAction)
@@ -108,28 +117,29 @@ async def chat_with_assistant(
                 .limit(6)
                 .all()
             )
-            student_context["roadmap_actions"] = [
-                {
+            student_context["roadmap_actions"] = []
+            for a in actions:
+                c = db.query(Concept).filter(Concept.concept_id == a.concept_id).first()
+                student_context["roadmap_actions"].append({
                     "order": a.sequence_order,
                     "concept_id": a.concept_id,
+                    "title": c.name if c else a.concept_id,
                     "action_type": a.action_type,
                     "priority_score": a.priority_score,
                     "reasons": a.reasons,
                     "target_questions": a.target_questions_count,
                     "estimated_minutes": a.estimated_minutes
-                }
-                for a in actions
-            ]
+                })
 
     system_prompt = (
         f"You are an offline pedagogical AI study mentor for {student.target_exam if student else 'JEE/NEET'}. "
-        "Your role is to deeply analyze the student's recent diagnostic quiz, explain their specific mistakes, "
+        "Your role is to guide the student, explain concepts and error patterns, "
         "explain why their dynamic roadmap was sequenced the way it was, and give direct, rigorous guidance. "
-        "Refer directly to the concepts, questions, and error types they encountered in their quiz."
+        "All adaptive diagnostic engines are active on standby with zero compulsory barriers."
     )
 
     res = await llm.generate_text(
-        prompt=req.prompt,
+        prompt=req.get_prompt(),
         system_prompt=system_prompt,
         student_context=student_context
     )
@@ -154,3 +164,80 @@ async def generate_practice_question(
         target_difficulty=req.difficulty
     )
     return q_data
+
+
+@router.post("/brain-briefing/{student_id}")
+async def get_brain_briefing(
+    student_id: str,
+    page_context: str = "DAILY_PRACTICE",
+    concept_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Powers the global Brain Icon Copilot:
+    - Real-time page context
+    - Performance state
+    - Hidden prerequisite gap assessment (from DAG)
+    - Actionable cover-up drill
+    """
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    exam = student.target_exam if student else "JEE"
+
+    masteries = db.query(StudentConceptMastery).filter(StudentConceptMastery.student_id == student_id).all()
+    avg_m = (sum(m.mastery for m in masteries) / max(len(masteries), 1)) if masteries else 0.50
+    avg_theta = (sum(m.irt_ability for m in masteries) / max(len(masteries), 1)) if masteries else 0.0
+
+    target_concept = None
+    if concept_id:
+        target_concept = db.query(Concept).filter(Concept.concept_id == concept_id).first()
+
+    concept_name = target_concept.name if target_concept else "Current Core Module"
+
+    # Evaluate gap from DAG
+    broken_prereqs = []
+    if concept_id:
+        from backend.app.knowledge_graph.prerequisites import PrerequisiteEngine
+        pe = PrerequisiteEngine(db)
+        status = pe.check_prerequisites_status(student_id, concept_id)
+        broken_prereqs = status.get("missing_prerequisites", [])
+
+    coverup_steps = [
+        f"Review 2-minute visual breakdown of {concept_name}",
+        f"Solve 2 guided warm-up questions to secure foundational mastery"
+    ]
+    if broken_prereqs:
+        coverup_steps.insert(0, f"Prerequisite Bridge: Quick revision of {broken_prereqs[0]}")
+
+    # Generate sharp mentor advice using Cloud / Local LLM
+    from backend.app.ai.cloud_llm import CloudLLMHub
+    hub = CloudLLMHub()
+    prompt = (
+        f"Act as a master tutor for an Indian {exam} student. "
+        f"The student is on the {page_context} page studying '{concept_name}'. "
+        f"Their overall mastery is {round(avg_m * 100, 1)}%. "
+        f"Prerequisite gaps flagged: {', '.join(broken_prereqs) if broken_prereqs else 'None'}. "
+        "Give a 2-sentence sharp, highly motivating, and actionable tutor briefing explaining their exact immediate focus."
+    )
+    cloud_res = await hub.generate_best(prompt)
+    mentor_quote = cloud_res.get("text") if cloud_res.get("text") else (
+        f"You're in the zone for {concept_name}. Focus on setting up coordinate axes clearly before diving into algebra!"
+    )
+
+    return {
+        "page_context": page_context,
+        "concept_name": concept_name,
+        "performance": {
+            "overall_mastery_pct": round(avg_m * 100, 1),
+            "latent_ability_theta": round(avg_theta, 2),
+            "readiness_tier": "READY_FOR_DRILL" if avg_m >= 0.50 else "NEEDS_FOUNDATION_BRIDGE"
+        },
+        "gap_assessment": {
+            "symptom": f"Friction in {concept_name}",
+            "prerequisite_gaps": broken_prereqs,
+            "root_severity": "MODERATE" if broken_prereqs else "LOW"
+        },
+        "coverup_strategy": coverup_steps,
+        "mentor_quote": mentor_quote,
+        "engine_source": cloud_res.get("source", "LOCAL_LLM")
+    }
+

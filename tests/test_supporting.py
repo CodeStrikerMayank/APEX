@@ -1,7 +1,7 @@
 import pytest
 import datetime
 from backend.app.database.connection import SessionLocal, Base, engine
-from backend.app.models.schema import Student, StudentConceptMastery, StudentErrorLog, Concept, Question
+from backend.app.models.schema import Student, StudentConceptMastery, StudentErrorLog, Concept, Question, utc_now
 from backend.app.api.supporting import get_review_queue, get_error_trends, get_report_card
 
 def test_supporting_endpoints():
@@ -39,7 +39,7 @@ def test_supporting_endpoints():
                 mastery=0.45,
                 retention_score=0.40,
                 forgetting_risk=0.60,
-                last_practiced_at=datetime.datetime.utcnow() - datetime.timedelta(days=4)
+                last_practiced_at=utc_now() - datetime.timedelta(days=4)
             )
             db.add(m)
         else:
@@ -53,7 +53,7 @@ def test_supporting_endpoints():
             concept_id=cid,
             error_type="CALCULATION_SLIP",
             details="Sign inversion",
-            timestamp=datetime.datetime.utcnow()
+            timestamp=utc_now()
         )
         db.add(err)
         db.commit()

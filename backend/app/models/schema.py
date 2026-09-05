@@ -5,6 +5,10 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from backend.app.database.connection import Base
 
+def utc_now() -> datetime.datetime:
+    """Returns timezone-naive UTC datetime for SQLite compatibility without Python 3.12+ deprecation warnings."""
+    return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+
 class Student(Base):
     __tablename__ = "students"
 
@@ -17,8 +21,8 @@ class Student(Base):
     target_exam_date = Column(DateTime, nullable=True)
     daily_available_hours = Column(Float, default=3.0)
     current_level = Column(String(32), default="BEGINNER")  # BEGINNER, INTERMEDIATE, ADVANCED
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    last_active = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    last_active = Column(DateTime, default=utc_now)
 
     # Relationships
     attempts = relationship("AssessmentAttempt", back_populates="student", cascade="all, delete-orphan")
@@ -28,6 +32,8 @@ class Student(Base):
     errors = relationship("StudentErrorLog", back_populates="student", cascade="all, delete-orphan")
     upsc_submissions = relationship("UPSCWrittenSubmission", back_populates="student", cascade="all, delete-orphan")
     assignments = relationship("DailyAssignment", back_populates="student", cascade="all, delete-orphan")
+    cat_sessions = relationship("CatSessionState", back_populates="student", cascade="all, delete-orphan")
+    daily_todos = relationship("DailyTodoList", back_populates="student", cascade="all, delete-orphan")
 
 
 class Exam(Base):
@@ -132,7 +138,7 @@ class Question(Base):
     is_prerequisite_check = Column(Boolean, default=False)
     tier = Column(String(32), default="STANDARD", index=True)  # STANDARD, ADVANCED
     image_url = Column(String(512), nullable=True)  # For visual benchmark questions
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     concept = relationship("Concept", back_populates="questions")
 
@@ -147,7 +153,7 @@ class Assessment(Base):
     stage = Column(Integer, default=1)  # 1: Baseline, 2: Concept deep-dive, 3: Difficulty calibration, etc.
     duration_minutes = Column(Integer, default=30)
     is_strict_timed = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     attempts = relationship("AssessmentAttempt", back_populates="assessment", cascade="all, delete-orphan")
 
@@ -159,7 +165,7 @@ class AssessmentAttempt(Base):
     assessment_id = Column(String(64), ForeignKey("assessments.assessment_id"), nullable=False)
     student_id = Column(String(64), ForeignKey("students.student_id"), nullable=False, index=True)
     session_id = Column(String(64), nullable=False, index=True)
-    started_at = Column(DateTime, default=datetime.datetime.utcnow)
+    started_at = Column(DateTime, default=utc_now)
     submitted_at = Column(DateTime, nullable=True)
     time_taken_seconds = Column(Integer, default=0)
     total_questions = Column(Integer, default=0)
@@ -187,7 +193,7 @@ class StudentAttemptItem(Base):
     difficulty = Column(Float, default=0.50)
     confidence_estimate = Column(Float, default=0.50)
     error_type = Column(String(64), nullable=True)  # CONCEPTUAL_ERROR, CALCULATION_ERROR, TIME_PRESSURE, etc.
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=utc_now, index=True)
 
     attempt = relationship("AssessmentAttempt", back_populates="item_responses")
 
@@ -212,7 +218,11 @@ class StudentConceptMastery(Base):
     forgetting_risk = Column(Float, default=0.0)
     learning_velocity = Column(Float, default=0.0)
     last_practiced_at = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    fsrs_stability = Column(Float, default=1.0)
+    fsrs_difficulty = Column(Float, default=5.0)
+    fsrs_retrievability = Column(Float, default=1.0)
+    last_fsrs_review = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     student = relationship("Student", back_populates="masteries")
     concept = relationship("Concept", back_populates="masteries")
@@ -231,7 +241,7 @@ class StudentErrorLog(Base):
     concept_id = Column(String(64), ForeignKey("concepts.concept_id"), nullable=False, index=True)
     error_type = Column(String(64), nullable=False)
     details = Column(Text, nullable=True)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=utc_now, index=True)
 
     student = relationship("Student", back_populates="errors")
 
@@ -247,7 +257,7 @@ class LearningEvent(Base):
     resource_id = Column(String(64), nullable=True)
     concept_id = Column(String(64), nullable=True, index=True)
     metadata_payload = Column(JSON, default=dict)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=utc_now, index=True)
 
     student = relationship("Student", back_populates="events")
 
@@ -260,7 +270,7 @@ class Roadmap(Base):
     version = Column(Integer, default=1)
     status = Column(String(32), default="ACTIVE")  # ACTIVE, ARCHIVED, SUPERSEDED
     trigger_event = Column(String(64), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     student = relationship("Student", back_populates="roadmaps")
     actions = relationship("RoadmapAction", back_populates="roadmap", cascade="all, delete-orphan")
@@ -300,7 +310,7 @@ class UPSCWrittenSubmission(Base):
     max_score = Column(Float, default=15.0)
     ai_feedback_summary = Column(Text, nullable=True)
     evaluator_type = Column(String(32), default="RULE_RUBRIC_AI")  # RULE_RUBRIC_AI, HUMAN_VERIFIED
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     student = relationship("Student", back_populates="upsc_submissions")
 
@@ -320,7 +330,7 @@ class DailyAssignment(Base):
     score_percentage = Column(Float, default=0.0)
     time_taken_seconds = Column(Integer, default=0)
     subject_scores = Column(JSON, default=dict)  # {"Physics": {"correct": 16, "total": 20, "score_pct": 80.0}, ...}
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     submitted_at = Column(DateTime, nullable=True)
 
     student = relationship("Student", back_populates="assignments")
@@ -342,3 +352,48 @@ class DailyAssignmentItem(Base):
 
     assignment = relationship("DailyAssignment", back_populates="items")
     question = relationship("Question")
+
+
+class CatSessionState(Base):
+    __tablename__ = "cat_session_states"
+
+    session_id = Column(String(64), primary_key=True, index=True)
+    student_id = Column(String(64), ForeignKey("students.student_id"), nullable=False, index=True)
+    exam = Column(String(32), default="JEE")
+    subject = Column(String(64), nullable=True)
+    current_theta = Column(Float, default=0.0)
+    current_sem = Column(Float, default=1.50)
+    items_answered_count = Column(Integer, default=0)
+    is_terminated = Column(Boolean, default=False)
+    termination_reason = Column(String(64), nullable=True)
+    answered_history = Column(JSON, default=list)  # [{"question_id": ..., "is_correct": ..., "difficulty_b": ..., "discrimination_a": ..., "guessing_c": ..., "student_answer": ...}]
+    unvisited_question_ids = Column(JSON, default=list)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+    student = relationship("Student", back_populates="cat_sessions")
+
+
+class DailyTodoList(Base):
+    """
+    Locked Daily Mission Contract:
+    - Generates 3-5 prioritized tasks for the student's study day.
+    - Status remains LOCKED_ACTIVE and cannot be reshuffled mid-day.
+    - Transitions to COMPLETED when all tasks are checked off.
+    """
+    __tablename__ = "daily_todo_lists"
+
+    todo_id = Column(String(64), primary_key=True, index=True)
+    student_id = Column(String(64), ForeignKey("students.student_id"), nullable=False, index=True)
+    todo_date = Column(String(16), nullable=False, index=True)  # YYYY-MM-DD
+    status = Column(String(32), default="LOCKED_ACTIVE")  # LOCKED_ACTIVE, COMPLETED, ARCHIVED
+    total_tasks = Column(Integer, default=4)
+    completed_tasks = Column(Integer, default=0)
+    total_estimated_minutes = Column(Integer, default=75)
+    tasks_payload = Column(JSON, default=list)  # [{"task_id": "T1", "title": "...", "type": "...", "estimated_minutes": 15, "is_completed": False}]
+    created_at = Column(DateTime, default=utc_now)
+    completed_at = Column(DateTime, nullable=True)
+
+    student = relationship("Student", back_populates="daily_todos")
+
+

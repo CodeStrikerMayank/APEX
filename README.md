@@ -9,10 +9,11 @@ An offline-first, mathematically-grounded **Adaptive Student Assessment, AI Skil
 
 ## 🌟 Platform v3.0 Core Capabilities
 
-### 1. Compulsory Diagnostic Gateway (First Interface)
-Upon first opening the platform, a compulsory modal enforces candidate onboarding:
+### 1. Modular Standby Architecture (Zero Compulsory Gating)
+All diagnostic, adaptive, and study engines operate on standby from registration with zero mandatory gating:
 * 🔭 **JEE Main Track (PCM)**: Physics, Chemistry, Mathematics (Mechanics, Calculus, Ionic Equilibrium, GOC).
 * 🧬 **NEET-UG Track (PCB)**: Biology, Physics, Chemistry (NCERT Cell Biology, Genetics, Cardiac Physiology, Ray Optics).
+* 🏛️ **UPSC Civil Services Track**: Indian Polity, Economy & Tech, Ethics, Prelims CAT, and Mains Descriptive Writing.
 
 ### 2. Tiered Diagnostic Testing Pipeline
 * **Tier 1 — Screener (9 Questions)**: Balanced 3-subject baseline test (3 Physics + 3 Chemistry + 3 Math for JEE; 3 Biology + 3 Physics + 3 Chemistry for NEET). Automatically detects weak subjects ($< 60\%$ accuracy).

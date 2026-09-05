@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 
 from backend.app.models.schema import (
-    Roadmap, RoadmapAction, StudentConceptMastery, Concept, Topic, Chapter, Subject, Student
+    Roadmap, RoadmapAction, StudentConceptMastery, Concept, Topic, Chapter, Subject, Student, utc_now
 )
 from backend.app.roadmap.priority import PriorityEngine
 from backend.app.knowledge_graph.graph import CurriculumGraph
@@ -175,7 +175,7 @@ class RoadmapGenerator:
             version=version,
             status="ACTIVE",
             trigger_event=trigger_event,
-            created_at=datetime.datetime.utcnow()
+            created_at=utc_now()
         )
         self.db.add(new_roadmap)
         self.db.flush()

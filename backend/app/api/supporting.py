@@ -14,8 +14,11 @@ from typing import Dict, Any, List, Optional
 from backend.app.database.connection import get_db
 from backend.app.models.schema import (
     Student, StudentConceptMastery, StudentErrorLog,
-    AssessmentAttempt, Concept, Roadmap, RoadmapAction
+    AssessmentAttempt, Concept, Roadmap, RoadmapAction,
+    DailyAssignment, DailyAssignmentItem, CatSessionState,
+    UPSCWrittenSubmission, Question, utc_now
 )
+from backend.app.student_model.fsrs_engine import FSRSEngine
 
 router = APIRouter(prefix="/supporting", tags=["Supporting Features"])
 
@@ -37,6 +40,10 @@ def reset_database(db: Session = Depends(get_db), x_admin_key: Optional[str] = H
     # Delete in FK-safe order (leaf tables first, then parents)
     # Preserves: exams, subjects, chapters, topics, concepts, prerequisites, questions, assessments
     tables_to_clear = [
+        "daily_assignment_items",
+        "daily_assignments",
+        "cat_session_states",
+        "upsc_written_submissions",
         "student_attempt_items",
         "assessment_attempts",
         "student_error_logs",
@@ -62,17 +69,14 @@ def reset_database(db: Session = Depends(get_db), x_admin_key: Optional[str] = H
 @admin_router.get("/stats")
 def get_admin_stats(db: Session = Depends(get_db), x_admin_key: Optional[str] = Header(None)):
     """Admin dashboard stats."""
-    from backend.app.models.schema import AssessmentAttempt, Question
     _verify_admin(x_admin_key or "")
 
     students_all = db.query(Student).order_by(Student.created_at.desc()).limit(20).all()
     total_attempts = db.query(AssessmentAttempt).count()
-    total_questions = db.query(Question).count() if hasattr(db.query(Student), 'count') else 0
-    try:
-        from backend.app.models.schema import Question as Q
-        total_questions = db.query(Q).count()
-    except Exception:
-        total_questions = 0
+    total_questions = db.query(Question).count()
+    total_assignments = db.query(DailyAssignment).count()
+    total_cat_sessions = db.query(CatSessionState).count()
+    total_upsc_submissions = db.query(UPSCWrittenSubmission).count()
 
     students_data = []
     for s in students_all:
@@ -89,6 +93,9 @@ def get_admin_stats(db: Session = Depends(get_db), x_admin_key: Optional[str] = 
         "total_students": db.query(Student).count(),
         "total_attempts": total_attempts,
         "total_questions": total_questions,
+        "total_assignments": total_assignments,
+        "total_cat_sessions": total_cat_sessions,
+        "total_upsc_submissions": total_upsc_submissions,
         "students": students_data
     }
 
@@ -98,10 +105,10 @@ def get_admin_stats(db: Session = Depends(get_db), x_admin_key: Optional[str] = 
 @router.get("/review-queue/{student_id}")
 def get_review_queue(student_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
     """
-    Returns concepts where memory retention has dropped below 60%
-    or forgetting risk is elevated, ordered by review urgency.
+    Returns concepts evaluated dynamically via FSRS-5 power-law forgetting curve,
+    ordered by highest forgetting risk (where retrievability R(t, S) < 0.90).
     """
-    now = datetime.datetime.utcnow()
+    now = utc_now()
     masteries = db.query(StudentConceptMastery).filter(
         StudentConceptMastery.student_id == student_id
     ).all()
@@ -112,26 +119,38 @@ def get_review_queue(student_id: str, db: Session = Depends(get_db)) -> Dict[str
         c_name = concept.name if concept else m.concept_id
         subject = concept.topic.chapter.subject.name if (concept and concept.topic and concept.topic.chapter and concept.topic.chapter.subject) else "General"
 
+        last_time = m.last_fsrs_review or m.last_practiced_at
         days_ago = 0.0
-        if m.last_practiced_at:
-            delta = now - m.last_practiced_at
-            days_ago = round(delta.total_seconds() / 86400.0, 1)
+        if last_time:
+            delta = now - last_time
+            days_ago = max(round(delta.total_seconds() / 86400.0, 2), 0.0)
 
-        retention = m.retention_score if m.retention_score is not None else 1.0
-        # If retention < 0.65 or forgetting_risk > 0.35, queue for review
-        if retention < 0.65 or m.forgetting_risk > 0.35 or days_ago >= 3.0:
+        stability = m.fsrs_stability if (m.fsrs_stability is not None and m.fsrs_stability > 0) else 1.0
+        difficulty = m.fsrs_difficulty if m.fsrs_difficulty is not None else 5.0
+
+        # Compute dynamic FSRS-5 retrievability
+        fsrs_r = FSRSEngine.retrievability(days_ago, stability)
+        m.fsrs_retrievability = fsrs_r
+
+        # Concept is overdue for review if R(t, S) < 0.90
+        if fsrs_r < 0.90 or days_ago >= 3.0:
+            forgetting_risk = round((1.0 - fsrs_r) * 100.0, 1)
+            urgency = "CRITICAL" if fsrs_r < 0.70 else ("HIGH" if fsrs_r < 0.85 else "MODERATE")
             due_for_review.append({
                 "concept_id": m.concept_id,
                 "concept_name": c_name,
                 "subject": subject,
                 "current_mastery": round(m.mastery * 100, 1),
-                "retention_score": round(retention * 100, 1),
-                "forgetting_risk": round(m.forgetting_risk * 100, 1),
+                "retention_score": round(fsrs_r * 100.0, 1),
+                "forgetting_risk": forgetting_risk,
                 "days_since_practice": days_ago,
-                "urgency": "HIGH" if retention < 0.50 else "MODERATE"
+                "fsrs_stability": round(stability, 2),
+                "fsrs_difficulty": round(difficulty, 2),
+                "fsrs_retrievability": round(fsrs_r, 4),
+                "urgency": urgency
             })
 
-    # Sort by lowest retention first
+    # Sort by lowest retention first (highest forgetting risk)
     due_for_review.sort(key=lambda x: x["retention_score"])
 
     return {
@@ -238,14 +257,25 @@ def get_report_card(student_id: str, db: Session = Depends(get_db)) -> Dict[str,
         })
 
     # Latest Roadmap Actions
-    rm = db.query(Roadmap).filter(Roadmap.student_id == student_id).order_by(Roadmap.created_at.desc()).first()
+    rm = db.query(Roadmap).filter(Roadmap.student_id == student_id, Roadmap.status == "ACTIVE").order_by(Roadmap.version.desc()).first()
+    if not rm:
+        try:
+            from backend.app.roadmap.generator import RoadmapGenerator
+            gen = RoadmapGenerator(db, exam_id=student.target_exam)
+            rm = gen.generate_roadmap(student_id, trigger_event="REPORT_CARD_STANDBY_INIT")
+            db.commit()
+        except Exception:
+            db.rollback()
+
     actions_summary = []
     if rm:
         acts = db.query(RoadmapAction).filter(RoadmapAction.roadmap_id == rm.roadmap_id).order_by(RoadmapAction.sequence_order).limit(5).all()
         for a in acts:
+            c = db.query(Concept).filter(Concept.concept_id == a.concept_id).first()
             actions_summary.append({
                 "step": a.sequence_order,
-                "title": a.concept_id,
+                "title": c.name if c else a.concept_id,
+                "concept_id": a.concept_id,
                 "type": a.action_type,
                 "estimated_minutes": a.estimated_minutes
             })
@@ -268,5 +298,5 @@ def get_report_card(student_id: str, db: Session = Depends(get_db)) -> Dict[str,
         "weak_concepts": weak_concepts[:6],
         "strong_concepts": strong_concepts[:6],
         "upcoming_milestones": actions_summary,
-        "generated_at": datetime.datetime.utcnow().strftime("%B %d, %Y - %H:%M UTC")
+        "generated_at": utc_now().strftime("%B %d, %Y - %H:%M UTC")
     }

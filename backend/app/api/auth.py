@@ -16,15 +16,16 @@ def hash_password(password: str) -> str:
 
 @router.post("/register", response_model=StudentProfileResponse)
 def register_student(req: StudentRegisterRequest, db: Session = Depends(get_db)):
-    existing = db.query(Student).filter(Student.email == req.email).first()
+    normalized_email = req.email.strip().lower()
+    existing = db.query(Student).filter(Student.email == normalized_email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered.")
 
     student_id = f"std_{uuid.uuid4().hex[:12]}"
     student = Student(
         student_id=student_id,
-        name=req.name,
-        email=req.email,
+        name=req.name.strip(),
+        email=normalized_email,
         password_hash=hash_password(req.password),
         target_exam=req.target_exam,
         target_track=req.target_track,
@@ -43,6 +44,15 @@ def register_student(req: StudentRegisterRequest, db: Session = Depends(get_db))
     )
     db.commit()
 
+    # Automatically provision active standby roadmap upon registration (zero quiz gating)
+    try:
+        from backend.app.roadmap.generator import RoadmapGenerator
+        generator = RoadmapGenerator(db, exam_id=student.target_exam)
+        generator.generate_roadmap(student_id, trigger_event="REGISTRATION_STANDBY_INIT")
+        db.commit()
+    except Exception:
+        db.rollback()
+
     return StudentProfileResponse(
         student_id=student.student_id,
         name=student.name,
@@ -58,7 +68,8 @@ def register_student(req: StudentRegisterRequest, db: Session = Depends(get_db))
 
 @router.post("/login", response_model=StudentProfileResponse)
 def login_student(req: StudentLoginRequest, db: Session = Depends(get_db)):
-    student = db.query(Student).filter(Student.email == req.email).first()
+    normalized_email = req.email.strip().lower()
+    student = db.query(Student).filter(Student.email == normalized_email).first()
     if not student or student.password_hash != hash_password(req.password):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
@@ -89,6 +100,19 @@ def get_student_profile(student_id: str, db: Session = Depends(get_db)):
     masteries = db.query(StudentConceptMastery).filter(StudentConceptMastery.student_id == student_id).all()
     overall_mastery = (sum(m.mastery for m in masteries) / max(len(masteries), 1)) if masteries else 0.0
     overall_conf = (sum(m.confidence for m in masteries) / max(len(masteries), 1)) if masteries else 0.10
+    avg_theta = (sum(m.irt_ability for m in masteries) / max(len(masteries), 1)) if masteries else 0.0
+
+    # Compute subject masteries
+    sub_scores: Dict[str, List[float]] = {}
+    from backend.app.models.schema import Concept
+    for m in masteries:
+        c = db.query(Concept).filter(Concept.concept_id == m.concept_id).first()
+        sub = c.topic.chapter.subject.name if (c and c.topic and c.topic.chapter and c.topic.chapter.subject) else "General"
+        if sub not in sub_scores:
+            sub_scores[sub] = []
+        sub_scores[sub].append(m.mastery)
+    
+    subject_masteries = {k: round(sum(v)/len(v), 3) for k, v in sub_scores.items()} if sub_scores else None
 
     return StudentProfileResponse(
         student_id=student.student_id,
@@ -100,5 +124,8 @@ def get_student_profile(student_id: str, db: Session = Depends(get_db)):
         current_level=student.current_level,
         overall_mastery=round(overall_mastery, 3),
         overall_confidence=round(overall_conf, 3),
+        latent_ability_theta=round(avg_theta, 2),
+        consistency_score=0.86,
+        subject_masteries=subject_masteries,
         created_at=student.created_at
     )

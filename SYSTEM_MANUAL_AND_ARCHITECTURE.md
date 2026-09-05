@@ -11,7 +11,7 @@
 
 1. [Executive Summary & Core Philosophy](#1-executive-summary--core-philosophy)
 2. [High-Level System Architecture & Flow](#2-high-level-system-architecture--flow)
-3. [Compulsory Diagnostic Gateway & 3-Role Onboarding](#3-compulsory-diagnostic-gateway--3-role-onboarding)
+3. [Modular Onboarding & Role Architecture (Zero Gating)](#3-modular-onboarding--role-architecture-zero-gating)
 4. [Tri-Stream Domain Calibration (JEE, NEET, UPSC)](#4-tri-stream-domain-calibration-jee-neet-upsc)
 5. [Authentic PYQ Question Banks with Modified Data](#5-authentic-pyq-question-banks-with-modified-data)
 6. [External API Pipelines: ExamBench (405k) & Benchmark Crops](#6-external-api-pipelines-exambench-405k--benchmark-crops)
@@ -53,33 +53,30 @@ In contrast, this platform models the candidate's mind as a dynamic probability 
 ```mermaid
 flowchart TD
     A[Student Accesses Platform] --> B{Role Selection}
-    B -->|Guest| C[Exploratory Mode: View DAG & Open Screener]
+    B -->|Guest| C[Exploratory Mode: View DAG & Open Practice]
     B -->|Admin| D[Admin Dashboard: Database Reset & Telemetry]
     B -->|Student| E[Credentials Authentication]
     
     E --> F[Domain & Stream Selection: JEE / NEET / UPSC]
-    F --> G[Sci-Fi HUD Recalibration Buffer]
-    G --> H{First Diagnostic Completed?}
+    F --> G[Instant Access: All Engines on Standby]
     
-    H -->|No| I[Launch Compulsory Diagnostic Screener]
-    H -->|Yes| J[Main Dashboard & Active Milestones]
+    G --> P[Daily 3-Subject Interleaved Assignment Engine]
+    G --> Q[Interactive Knowledge Graph DAG]
+    G --> R[UPSC Civil Services Prelims & Mains Arena]
+    G --> S[Spaced Repetition Review Queue & Report Card]
+    G --> T[AI Study Mentor & Real-Time Chat]
+    G --> U[Adaptive Diagnostic Arena & CAT Engine]
     
-    I --> K[Assessment Arena: 9-Q Balanced Diagnostic]
-    K --> L[Grading Engine: Multi-Factor Mastery, BKT, IRT θ]
+    U --> L[Grading Engine: Multi-Factor Mastery, BKT, IRT θ]
+    P --> L
     L --> M[Cognitive Error Classification: Calculation, Conceptual, Formula]
     M --> N[NetworkX DAG Prerequisite Gating Engine]
-    N --> O[Unlock Dynamic Personalized Roadmap]
-    
-    J --> P[Daily 3-Subject Interleaved Assignment Engine]
-    J --> Q[Interactive HTML5 Canvas Knowledge Graph]
-    J --> R[UPSC Civil Services Prelims & Mains Arena]
-    J --> S[Spaced Repetition Review Queue & Report Card]
-    J --> T[Quiz-Grounded AI Study Mentor]
+    N --> O[Dynamic Personalized Roadmap Recalibration]
 ```
 
 ---
 
-## 3. Compulsory Diagnostic Gateway & 3-Role Onboarding
+## 3. Modular Onboarding & Role Architecture (Zero Gating)
 
 ### 3.1. Identity Portal & Role Segregation
 On initial session launch, candidate access is governed by a 2-step onboarding portal:
@@ -191,7 +188,7 @@ Descriptive written responses are scored across 5 dimensions:
 
 ## 9. Assessment Arena & Diagnostic Testing Pipeline
 
-* **Tier 1 — Compulsory Screener (9 Questions)**: Balanced 3-subject baseline test. Identifies weak subjects ($< 60\%$ accuracy).
+* **Tier 1 — Adaptive Diagnostic Assessment (9 Questions)**: Balanced 3-subject baseline test on standby. Identifies weak subjects ($< 60\%$ accuracy).
 * **Tier 2 — Targeted Topic Drills (5 Questions)**: Focused drills targeting isolated chapters and prerequisite gaps.
 * **Tier 3 — Full Syllabus Deep Scan (15 Questions)**: Comprehensive diagnostic spanning all curriculum chapters to calibrate global Latent Ability ($\theta$).
 

@@ -1,9 +1,6 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-
 from backend.app.database.connection import engine, Base, SessionLocal
 from backend.app.curriculum.loader import seed_curriculum_and_questions
 from backend.app.api import auth, curriculum, assessments, roadmap, ai, telemetry, supporting, assignments, upsc
@@ -43,24 +40,21 @@ app.include_router(upsc.router, prefix="/api")
 app.include_router(supporting.router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 
-# Static frontend files path
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
-
-if os.path.exists(FRONTEND_DIR):
-    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
-    app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
-    app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")), name="js")
-
-    @app.get("/")
-    def serve_frontend_index():
-        index_file = os.path.join(FRONTEND_DIR, "index.html")
-        if os.path.exists(index_file):
-            return FileResponse(
-                index_file,
-                headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
-            )
-        return {"message": "Adaptive Student Intelligence Engine API is active."}
+@app.get("/")
+def root():
+    # If index.html exists in root directory, serve it directly
+    index_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "index.html"))
+    if os.path.exists(index_path):
+        from fastapi.responses import FileResponse
+        return FileResponse(index_path)
+    return {
+        "status": "online",
+        "service": "Adaptive Student Intelligence & Dynamic Roadmap Backend API",
+        "version": "1.3.0",
+        "docs_url": "/docs",
+        "redoc_url": "/redoc",
+        "health_url": "/api/health"
+    }
 
 @app.get("/api/health")
 def health_check():

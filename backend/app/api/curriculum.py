@@ -60,12 +60,27 @@ def get_curriculum_tree(
 
     return tree
 
+@router.get("/hierarchy/{exam_id}")
+def get_curriculum_hierarchy(
+    exam_id: str,
+    student_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Alias for /tree/{exam_id} supporting curriculum hierarchy queries."""
+    return get_curriculum_tree(exam_id=exam_id, student_id=student_id, db=db)
+
+
 @router.get("/graph/{exam_id}")
 def get_knowledge_graph(
     exam_id: str,
     student_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
+    if exam_id != "ALL":
+        exam = db.query(Exam).filter(Exam.exam_id == exam_id).first()
+        if not exam:
+            raise HTTPException(status_code=404, detail=f"Exam '{exam_id}' not found.")
+
     graph = CurriculumGraph(db, exam_id=exam_id)
     mastery_dict = {}
     if student_id:
