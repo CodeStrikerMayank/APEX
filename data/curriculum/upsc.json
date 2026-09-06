@@ -30,6 +30,22 @@
                   "exam_relevance": 0.95,
                   "difficulty_weight": 0.65,
                   "description": "Maneka Gandhi expansion, right to privacy (Puttaswamy) and substantive due process."
+                },
+                {
+                  "concept_id": "c_preamble_sovereignty",
+                  "name": "Preamble & Constitutional Philosophy",
+                  "estimated_minutes": 45,
+                  "exam_relevance": 0.92,
+                  "difficulty_weight": 0.55,
+                  "description": "Sovereign, socialist, secular, democratic republic principles and legal status."
+                },
+                {
+                  "concept_id": "c_emergency_provisions",
+                  "name": "Emergency Provisions & Fundamental Rights",
+                  "estimated_minutes": 50,
+                  "exam_relevance": 0.90,
+                  "difficulty_weight": 0.68,
+                  "description": "Articles 352, 356, 360, 44th Amendment protections and judicial review of proclamations."
                 }
               ]
             }
@@ -50,6 +66,14 @@
                   "exam_relevance": 0.92,
                   "difficulty_weight": 0.68,
                   "description": "Article 280, Finance Commission awards, GST Council dynamic and inter-state councils."
+                },
+                {
+                  "concept_id": "c_parliamentary_committees",
+                  "name": "Parliamentary Committees & Accountability",
+                  "estimated_minutes": 50,
+                  "exam_relevance": 0.88,
+                  "difficulty_weight": 0.62,
+                  "description": "Public Accounts Committee, Estimates Committee, and Committee on Public Undertakings."
                 }
               ]
             }
@@ -76,6 +100,22 @@
                   "exam_relevance": 0.90,
                   "difficulty_weight": 0.65,
                   "description": "RBI Monetary Policy Committee, headline vs core CPI inflation, and liquidity adjustment facility."
+                },
+                {
+                  "concept_id": "c_fiscal_deficit_frbm",
+                  "name": "Fiscal Deficit, Revenue Deficit & FRBM Compliance",
+                  "estimated_minutes": 55,
+                  "exam_relevance": 0.92,
+                  "difficulty_weight": 0.70,
+                  "description": "Budgetary components, debt-to-GDP sustainability, and NK Singh committee targets."
+                },
+                {
+                  "concept_id": "c_balance_of_payments",
+                  "name": "Balance of Payments & Foreign Exchange Reserves",
+                  "estimated_minutes": 45,
+                  "exam_relevance": 0.89,
+                  "difficulty_weight": 0.64,
+                  "description": "Current Account Deficit (CAD), capital account convertibility, and RBI forex operations."
                 }
               ]
             }
@@ -96,6 +136,14 @@
                   "exam_relevance": 0.92,
                   "difficulty_weight": 0.60,
                   "description": "Renewable capacity targets, Nationally Determined Contributions (NDCs), and carbon markets."
+                },
+                {
+                  "concept_id": "c_biodiversity_conservation",
+                  "name": "Biodiversity Hotspots & Wildlife Protection Act",
+                  "estimated_minutes": 50,
+                  "exam_relevance": 0.94,
+                  "difficulty_weight": 0.66,
+                  "description": "Ramsar wetlands, Tiger reserves, IUCN Red List categories, and Wildlife Protection Act 2022 amendments."
                 }
               ]
             }
@@ -122,6 +170,14 @@
                   "exam_relevance": 0.95,
                   "difficulty_weight": 0.62,
                   "description": "Deontological vs utilitarian balancing in administrative discretion and public trust."
+                },
+                {
+                  "concept_id": "c_probity_in_governance",
+                  "name": "Probity in Governance & Citizen's Charter",
+                  "estimated_minutes": 45,
+                  "exam_relevance": 0.90,
+                  "difficulty_weight": 0.58,
+                  "description": "Transparency, Right to Information (RTI), whistle-blower protection, and social audit mechanisms."
                 }
               ]
             }
@@ -137,6 +193,13 @@
       "strength": 0.90,
       "relationship": "prerequisite",
       "description": "Understanding basic structure is essential for analyzing judicial interpretation of fundamental rights."
+    },
+    {
+      "from_concept": "c_preamble_sovereignty",
+      "to_concept": "c_basic_structure_doctrine",
+      "strength": 0.85,
+      "relationship": "prerequisite",
+      "description": "Preamble philosophy forms the core identity evaluated under the basic structure doctrine."
     }
   ]
 }

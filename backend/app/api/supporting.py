@@ -40,6 +40,8 @@ def reset_database(db: Session = Depends(get_db), x_admin_key: Optional[str] = H
     # Delete in FK-safe order (leaf tables first, then parents)
     # Preserves: exams, subjects, chapters, topics, concepts, prerequisites, questions, assessments
     tables_to_clear = [
+        "daily_todo_items",
+        "daily_todo_lists",
         "daily_assignment_items",
         "daily_assignments",
         "cat_session_states",
@@ -54,8 +56,19 @@ def reset_database(db: Session = Depends(get_db), x_admin_key: Optional[str] = H
         "students",
     ]
     try:
+        try:
+            db.execute(sqlalchemy.text("PRAGMA foreign_keys = OFF"))
+        except Exception:
+            pass
         for table in tables_to_clear:
-            db.execute(sqlalchemy.text(f"DELETE FROM {table}"))
+            try:
+                db.execute(sqlalchemy.text(f"DELETE FROM {table}"))
+            except Exception:
+                pass
+        try:
+            db.execute(sqlalchemy.text("PRAGMA foreign_keys = ON"))
+        except Exception:
+            pass
         db.commit()
     except Exception as e:
         db.rollback()

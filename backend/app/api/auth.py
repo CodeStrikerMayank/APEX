@@ -129,3 +129,38 @@ def get_student_profile(student_id: str, db: Session = Depends(get_db)):
         subject_masteries=subject_masteries,
         created_at=student.created_at
     )
+
+@router.post("/switch-exam/{student_id}", response_model=StudentProfileResponse)
+def switch_student_exam(
+    student_id: str,
+    target_exam: str,
+    target_track: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    exam_upper = target_exam.upper()
+    student.target_exam = exam_upper
+    if target_track:
+        student.target_track = target_track
+    elif exam_upper == "NEET":
+        student.target_track = "PCB TRACK"
+    elif exam_upper == "UPSC":
+        student.target_track = "CIVIL SERVICES"
+    else:
+        student.target_track = "PCM TRACK"
+
+    db.commit()
+
+    # Automatically recalibrate roadmap for the newly selected exam track
+    try:
+        from backend.app.roadmap.generator import RoadmapGenerator
+        generator = RoadmapGenerator(db, exam_id=exam_upper)
+        generator.generate_roadmap(student_id, trigger_event="EXAM_TRACK_SWITCHED")
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    return get_student_profile(student_id, db)

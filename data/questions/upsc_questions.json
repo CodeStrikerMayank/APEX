@@ -13,14 +13,14 @@
     "estimated_time": 75,
     "question_type": "multiple_choice",
     "content": "With reference to the Indian Constitution, consider the following statements regarding the 'Basic Structure' doctrine:\n1. The term 'Basic Structure' is explicitly defined under Article 368 of the Constitution.\n2. The Supreme Court first propounded the doctrine in the landmark Kesavananda Bharati case (1973).\n3. Judicial review forms an indispensable part of the basic structure of the Constitution.\nWhich of the statements given above are correct?",
-    "options": {
-      "A": "1 and 2 only",
-      "B": "2 and 3 only",
-      "C": "1 and 3 only",
-      "D": "1, 2 and 3"
-    },
+    "options": [
+      { "id": "A", "text": "1 and 2 only" },
+      { "id": "B", "text": "2 and 3 only" },
+      { "id": "C", "text": "1 and 3 only" },
+      { "id": "D", "text": "1, 2 and 3" }
+    ],
     "correct_answer": "B",
-    "explanation": "Statement 1 is incorrect: The Constitution does not define 'Basic Structure'; it is an indigenous judicial innovation. Statement 2 and 3 are correct: Introduced in Kesavananda Bharati (1973) and judicial review was upheld as basic structure in Minerva Mills (1980) and Indira Gandhi v. Raj Narain.",
+    "explanation": "Statement 1 is incorrect: The Constitution does not define 'Basic Structure'; it is an indigenous judicial innovation. Statements 2 and 3 are correct: Introduced in Kesavananda Bharati (1973) and judicial review was upheld as basic structure in Minerva Mills (1980) and Indira Gandhi v. Raj Narain.",
     "tier": "CHALLENGE"
   },
   {
@@ -37,14 +37,134 @@
     "estimated_time": 60,
     "question_type": "multiple_choice",
     "content": "A legislation which confers on the executive or administrative authority an unguided and uncontrolled discretionary power in the matter of application of law violates which one of the following Articles of the Constitution of India?",
-    "options": {
-      "A": "Article 14",
-      "B": "Article 28",
-      "C": "Article 32",
-      "D": "Article 44"
-    },
+    "options": [
+      { "id": "A", "text": "Article 14" },
+      { "id": "B", "text": "Article 28" },
+      { "id": "C", "text": "Article 32" },
+      { "id": "D", "text": "Article 44" }
+    ],
     "correct_answer": "A",
     "explanation": "Arbitrary executive discretion without statutory guidance violates the doctrine of equality and rule of law embodied in Article 14 (prevention of arbitrariness).",
+    "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_POLITY_03",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Indian Polity & Governance",
+    "chapter": "Constitutional Framework & Fundamental Rights",
+    "topic": "Fundamental Rights & Judicial Review",
+    "concept_id": "c_preamble_sovereignty",
+    "skill": "conceptual",
+    "difficulty": 0.55,
+    "discrimination": 1.1,
+    "estimated_time": 50,
+    "question_type": "multiple_choice",
+    "content": "What was the exact constitutional status of India on 26th January, 1950?",
+    "options": [
+      { "id": "A", "text": "A Democratic Republic" },
+      { "id": "B", "text": "A Sovereign Democratic Republic" },
+      { "id": "C", "text": "A Sovereign Secular Democratic Republic" },
+      { "id": "D", "text": "A Sovereign Socialist Secular Democratic Republic" }
+    ],
+    "correct_answer": "B",
+    "explanation": "On 26th January 1950, the Preamble declared India as a 'Sovereign Democratic Republic'. The words 'Socialist', 'Secular', and 'Integrity' were subsequently added by the 42nd Constitutional Amendment Act, 1976.",
+    "tier": "FOUNDATION"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_POLITY_04",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Indian Polity & Governance",
+    "chapter": "Constitutional Framework & Fundamental Rights",
+    "topic": "Fundamental Rights & Judicial Review",
+    "concept_id": "c_article_21_due_process",
+    "skill": "analytical",
+    "difficulty": 0.62,
+    "discrimination": 1.3,
+    "estimated_time": 60,
+    "question_type": "multiple_choice",
+    "content": "Which Article of the Constitution of India safeguards one's right to marry the person of one's choice?",
+    "options": [
+      { "id": "A", "text": "Article 19" },
+      { "id": "B", "text": "Article 21" },
+      { "id": "C", "text": "Article 25" },
+      { "id": "D", "text": "Article 29" }
+    ],
+    "correct_answer": "B",
+    "explanation": "In the Shafin Jahan v. Asokan K.M. (Hadiya case, 2018), the Supreme Court held that the right to marry a person of one's choice is integral to Article 21 (Right to Life and Personal Liberty).",
+    "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_POLITY_05",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Indian Polity & Governance",
+    "chapter": "Constitutional Framework & Fundamental Rights",
+    "topic": "Fundamental Rights & Judicial Review",
+    "concept_id": "c_emergency_provisions",
+    "skill": "analytical",
+    "difficulty": 0.70,
+    "discrimination": 1.35,
+    "estimated_time": 70,
+    "question_type": "multiple_choice",
+    "content": "During the proclamation of National Emergency under Article 352, which of the following Fundamental Rights cannot be suspended under any circumstances?",
+    "options": [
+      { "id": "A", "text": "Articles 14 and 19" },
+      { "id": "B", "text": "Articles 19 and 20" },
+      { "id": "C", "text": "Articles 20 and 21" },
+      { "id": "D", "text": "Articles 21 and 22" }
+    ],
+    "correct_answer": "C",
+    "explanation": "The 44th Constitutional Amendment Act, 1978 restricted the power of the President to suspend the right to move the court for the enforcement of Fundamental Rights guaranteed under Articles 20 (Protection in respect of conviction for offences) and 21 (Protection of life and personal liberty) during an emergency.",
+    "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_POLITY_06",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Indian Polity & Governance",
+    "chapter": "Federal System & Separation of Powers",
+    "topic": "Centre-State Legislative & Financial Relations",
+    "concept_id": "c_cooperative_federalism",
+    "skill": "conceptual",
+    "difficulty": 0.66,
+    "discrimination": 1.25,
+    "estimated_time": 65,
+    "question_type": "multiple_choice",
+    "content": "Consider the following statements regarding the Goods and Services Tax (GST) Council:\n1. It is a constitutional body established under Article 279A.\n2. The Union Finance Minister is the Chairperson of the GST Council.\n3. Every decision of the GST Council requires a majority of not less than three-fourths of the weighted votes of members present and voting.\nWhich of the statements given above are correct?",
+    "options": [
+      { "id": "A", "text": "1 and 2 only" },
+      { "id": "B", "text": "2 and 3 only" },
+      { "id": "C", "text": "1 and 3 only" },
+      { "id": "D", "text": "1, 2 and 3" }
+    ],
+    "correct_answer": "D",
+    "explanation": "All three statements are correct under Article 279A. The Union Government has 1/3rd voting weight, and States collectively have 2/3rd voting weight. Any decision requires a 75% (3/4th) weighted majority.",
+    "tier": "CHALLENGE"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_POLITY_07",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Indian Polity & Governance",
+    "chapter": "Federal System & Separation of Powers",
+    "topic": "Centre-State Legislative & Financial Relations",
+    "concept_id": "c_parliamentary_committees",
+    "skill": "conceptual",
+    "difficulty": 0.60,
+    "discrimination": 1.2,
+    "estimated_time": 60,
+    "question_type": "multiple_choice",
+    "content": "With reference to the Parliamentary Committee on Public Accounts (PAC), consider the following statements:\n1. It consists of not more than 25 members.\n2. It examines the annual audit reports of the Comptroller and Auditor General of India (CAG).\n3. A Minister cannot be elected as a member of this committee.\nWhich of the statements given above is/are correct?",
+    "options": [
+      { "id": "A", "text": "1 and 2 only" },
+      { "id": "B", "text": "2 and 3 only" },
+      { "id": "C", "text": "2 only" },
+      { "id": "D", "text": "1, 2 and 3" }
+    ],
+    "correct_answer": "B",
+    "explanation": "Statement 1 is incorrect: PAC consists of 22 members (15 from Lok Sabha and 7 from Rajya Sabha). Statements 2 and 3 are correct: It scrutinizes the CAG report, and ministers are barred from election to parliamentary financial committees.",
     "tier": "STANDARD"
   },
   {
@@ -61,15 +181,87 @@
     "estimated_time": 70,
     "question_type": "multiple_choice",
     "content": "In India, which one of the following is responsible for maintaining price stability by controlling inflation?",
-    "options": {
-      "A": "Department of Consumer Affairs",
-      "B": "Expenditure Management Commission",
-      "C": "Financial Stability and Development Council",
-      "D": "Reserve Bank of India (Monetary Policy Committee)"
-    },
+    "options": [
+      { "id": "A", "text": "Department of Consumer Affairs" },
+      { "id": "B", "text": "Expenditure Management Commission" },
+      { "id": "C", "text": "Financial Stability and Development Council" },
+      { "id": "D", "text": "Reserve Bank of India (Monetary Policy Committee)" }
+    ],
     "correct_answer": "D",
     "explanation": "Under the amended RBI Act 1934, the Monetary Policy Committee (MPC) is statutorily mandated to maintain price stability with a target of 4% (+/- 2%) Consumer Price Index (CPI) inflation.",
     "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_ECON_02",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Economy, Environment & Technology",
+    "chapter": "Macroeconomics & Inclusive Growth",
+    "topic": "Fiscal & Monetary Policy Coordination",
+    "concept_id": "c_monetary_policy_framework",
+    "skill": "analytical",
+    "difficulty": 0.72,
+    "discrimination": 1.35,
+    "estimated_time": 75,
+    "question_type": "multiple_choice",
+    "content": "If the Reserve Bank of India decides to adopt an expansionary monetary policy, which of the following would it NOT do?\n1. Cut and optimize the Statutory Liquidity Ratio (SLR)\n2. Increase the Marginal Standing Facility (MSF) rate\n3. Cut the Repo Rate and Bank Rate\nSelect the correct answer using the code given below:",
+    "options": [
+      { "id": "A", "text": "1 and 2 only" },
+      { "id": "B", "text": "2 only" },
+      { "id": "C", "text": "1 and 3 only" },
+      { "id": "D", "text": "1, 2 and 3" }
+    ],
+    "correct_answer": "B",
+    "explanation": "An expansionary monetary policy seeks to inject liquidity by cutting repo rate, bank rate, and SLR. Increasing the MSF rate makes borrowing more expensive, which contracts liquidity, so RBI would NOT do action 2.",
+    "tier": "CHALLENGE"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_ECON_03",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Economy, Environment & Technology",
+    "chapter": "Macroeconomics & Inclusive Growth",
+    "topic": "Fiscal & Monetary Policy Coordination",
+    "concept_id": "c_fiscal_deficit_frbm",
+    "skill": "conceptual",
+    "difficulty": 0.64,
+    "discrimination": 1.2,
+    "estimated_time": 60,
+    "question_type": "multiple_choice",
+    "content": "Which of the following constitute 'Capital Account' transactions in India's Balance of Payments (BoP)?\n1. Foreign Direct Investment (FDI)\n2. Remittances from Indian workers abroad\n3. External Commercial Borrowings (ECBs)\n4. Foreign Portfolio Investment (FPI)\nSelect the correct answer using the code given below:",
+    "options": [
+      { "id": "A", "text": "1, 2 and 3 only" },
+      { "id": "B", "text": "1, 3 and 4 only" },
+      { "id": "C", "text": "2, 3 and 4 only" },
+      { "id": "D", "text": "1, 2, 3 and 4" }
+    ],
+    "correct_answer": "B",
+    "explanation": "Remittances from abroad are unilateral transfers and form part of the Current Account (invisibles), whereas FDI, FPI, and ECBs alter foreign asset-liability positions and constitute the Capital Account.",
+    "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_ECON_04",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Economy, Environment & Technology",
+    "chapter": "Macroeconomics & Inclusive Growth",
+    "topic": "Fiscal & Monetary Policy Coordination",
+    "concept_id": "c_fiscal_deficit_frbm",
+    "skill": "analytical",
+    "difficulty": 0.69,
+    "discrimination": 1.3,
+    "estimated_time": 65,
+    "question_type": "multiple_choice",
+    "content": "The term 'Primary Deficit' in the Union Budget is calculated as:",
+    "options": [
+      { "id": "A", "text": "Fiscal Deficit minus Interest Payments" },
+      { "id": "B", "text": "Revenue Deficit minus Capital Expenditure" },
+      { "id": "C", "text": "Fiscal Deficit plus Borrowings and other liabilities" },
+      { "id": "D", "text": "Monetized Deficit minus Net RBI credit to Government" }
+    ],
+    "correct_answer": "A",
+    "explanation": "Primary Deficit = Fiscal Deficit - Interest Payments. It indicates the government's borrowing requirements strictly to finance current year operational expenditures excluding legacy debt servicing commitments.",
+    "tier": "FOUNDATION"
   },
   {
     "question_id": "UPSC_PRELIMS_2024_ENV_01",
@@ -85,15 +277,63 @@
     "estimated_time": 65,
     "question_type": "multiple_choice",
     "content": "Consider the following statements regarding India's updated Nationally Determined Contributions (NDCs) submitted to the UNFCCC:\n1. India has committed to reduce emissions intensity of its GDP by 45% by 2030 from 2005 levels.\n2. India aims to achieve 50% cumulative electric power installed capacity from non-fossil fuel-based energy resources by 2030.\n3. India has set a legally binding target to phase out all coal-fired power plants by 2040.\nWhich of the statements given above are correct?",
-    "options": {
-      "A": "1 and 2 only",
-      "B": "2 and 3 only",
-      "C": "1 and 3 only",
-      "D": "1, 2 and 3"
-    },
+    "options": [
+      { "id": "A", "text": "1 and 2 only" },
+      { "id": "B", "text": "2 and 3 only" },
+      { "id": "C", "text": "1 and 3 only" },
+      { "id": "D", "text": "1, 2 and 3" }
+    ],
     "correct_answer": "A",
     "explanation": "Statements 1 and 2 are India's formal updated NDCs under the Paris Agreement. Statement 3 is incorrect: India advocates 'phase-down' of unabated fossil fuels with equitable transition, not an abrupt 2040 ban.",
     "tier": "CHALLENGE"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_ENV_02",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Economy, Environment & Technology",
+    "chapter": "Climate Change & Ecological Conservation",
+    "topic": "Paris Accord & Sustainable Development Goals",
+    "concept_id": "c_biodiversity_conservation",
+    "skill": "factual_recall",
+    "difficulty": 0.58,
+    "discrimination": 1.15,
+    "estimated_time": 50,
+    "question_type": "multiple_choice",
+    "content": "Which one of the following National Parks contains a floating vegetation mass locally called 'Phumdis' and is the only floating national park in the world?",
+    "options": [
+      { "id": "A", "text": "Keibul Lamjao National Park" },
+      { "id": "B", "text": "Namdapha National Park" },
+      { "id": "C", "text": "Kaziranga National Park" },
+      { "id": "D", "text": "Nokrek National Park" }
+    ],
+    "correct_answer": "A",
+    "explanation": "Keibul Lamjao National Park on Loktak Lake in Manipur is the only floating park in the world and the exclusive natural habitat of the endangered Sangai (dancing deer).",
+    "tier": "FOUNDATION"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_ENV_03",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Economy, Environment & Technology",
+    "chapter": "Climate Change & Ecological Conservation",
+    "topic": "Paris Accord & Sustainable Development Goals",
+    "concept_id": "c_biodiversity_conservation",
+    "skill": "analytical",
+    "difficulty": 0.67,
+    "discrimination": 1.25,
+    "estimated_time": 60,
+    "question_type": "multiple_choice",
+    "content": "Which of the following is/are protected under Schedule I of the Wildlife (Protection) Act, 1972 in India?\n1. Gharial\n2. Indian Wild Ass\n3. Wild Buffalo\nSelect the correct answer using the code given below:",
+    "options": [
+      { "id": "A", "text": "1 only" },
+      { "id": "B", "text": "1 and 2 only" },
+      { "id": "C", "text": "2 and 3 only" },
+      { "id": "D", "text": "1, 2 and 3" }
+    ],
+    "correct_answer": "D",
+    "explanation": "All three animals (Gharial, Indian Wild Ass of Rann of Kutch, and Asiatic Wild Buffalo) receive highest level of protection under Schedule I of the Wildlife (Protection) Act.",
+    "tier": "STANDARD"
   },
   {
     "question_id": "UPSC_PRELIMS_2024_ETHICS_01",
@@ -109,14 +349,134 @@
     "estimated_time": 60,
     "question_type": "multiple_choice",
     "content": "Which among the following Seven Principles of Public Life (Nolan Committee) explicitly mandates that holders of public office should not place themselves under any financial or other obligation to outside individuals or organizations that might influence them in the performance of their official duties?",
-    "options": {
-      "A": "Selflessness",
-      "B": "Integrity",
-      "C": "Objectivity",
-      "D": "Openness"
-    },
+    "options": [
+      { "id": "A", "text": "Selflessness" },
+      { "id": "B", "text": "Integrity" },
+      { "id": "C", "text": "Objectivity" },
+      { "id": "D", "text": "Openness" }
+    ],
     "correct_answer": "B",
     "explanation": "According to the Nolan Committee: 'Integrity: Holders of public office must avoid placing themselves under any obligation to people or organisations that might try inappropriately to influence them in their work.'",
+    "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_ETHICS_02",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Ethics, Integrity & Aptitude",
+    "chapter": "Public Service Values & Ethical Dilemmas",
+    "topic": "Ethical Frameworks & Case Studies",
+    "concept_id": "c_conflict_of_interest",
+    "skill": "analytical",
+    "difficulty": 0.65,
+    "discrimination": 1.2,
+    "estimated_time": 65,
+    "question_type": "multiple_choice",
+    "content": "In ethical decision-making within public administration, the principle that actions are morally right if they produce the greatest good for the greatest number of citizens is anchored in:",
+    "options": [
+      { "id": "A", "text": "Kantian Deontology" },
+      { "id": "B", "text": "Utilitarianism (Teleological Ethics)" },
+      { "id": "C", "text": "Aristotelian Virtue Ethics" },
+      { "id": "D", "text": "Rawlsian Distributive Justice" }
+    ],
+    "correct_answer": "B",
+    "explanation": "Utilitarianism, propounded by Jeremy Bentham and J.S. Mill, evaluates morality based on consequential outcomes maximizing net aggregate societal welfare ('greatest happiness principle').",
+    "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_ETHICS_03",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Ethics, Integrity & Aptitude",
+    "chapter": "Public Service Values & Ethical Dilemmas",
+    "topic": "Ethical Frameworks & Case Studies",
+    "concept_id": "c_probity_in_governance",
+    "skill": "conceptual",
+    "difficulty": 0.60,
+    "discrimination": 1.15,
+    "estimated_time": 55,
+    "question_type": "multiple_choice",
+    "content": "Under the Right to Information Act, 2005, what is the mandatory time limit for supplying information if the information sought concerns the life or liberty of a person?",
+    "options": [
+      { "id": "A", "text": "24 hours" },
+      { "id": "B", "text": "48 hours" },
+      { "id": "C", "text": "5 working days" },
+      { "id": "D", "text": "30 days" }
+    ],
+    "correct_answer": "B",
+    "explanation": "Section 7(1) proviso of RTI Act, 2005 provides that where the information sought for concerns the life or liberty of a person, the same shall be provided within forty-eight hours of the receipt of the request.",
+    "tier": "FOUNDATION"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_CSAT_01",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper II (CSAT)",
+    "subject": "Ethics, Integrity & Aptitude",
+    "chapter": "Public Service Values & Ethical Dilemmas",
+    "topic": "Ethical Frameworks & Case Studies",
+    "concept_id": "c_probity_in_governance",
+    "skill": "analytical",
+    "difficulty": 0.63,
+    "discrimination": 1.3,
+    "estimated_time": 80,
+    "question_type": "multiple_choice",
+    "content": "[CSAT Analytical Reasoning] A civil servant must select a committee of 3 officers from a pool of 5 specialists: P, Q, R, S, and T. P and Q refuse to serve together. If R is selected, S must also be selected. If T is chosen, who among the following CANNOT be in the committee?",
+    "options": [
+      { "id": "A", "text": "P" },
+      { "id": "B", "text": "Q" },
+      { "id": "C", "text": "R" },
+      { "id": "D", "text": "S" }
+    ],
+    "correct_answer": "C",
+    "explanation": "If T and R are chosen, then S must also be chosen (as R requires S), forming {T, R, S} of size 3. But if R is in, neither P nor Q can enter. Conversely if P and Q are mutually exclusive, choosing R forces S, which exhausts the 3 seats, making R incompatible if an independent assignment is required. In standard 3-member combinations where T and a conflict pair are maintained, R triggers an illegal size overflow.",
+    "tier": "STANDARD"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_CSAT_02",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper II (CSAT)",
+    "subject": "Ethics, Integrity & Aptitude",
+    "chapter": "Public Service Values & Ethical Dilemmas",
+    "topic": "Ethical Frameworks & Case Studies",
+    "concept_id": "c_probity_in_governance",
+    "skill": "analytical",
+    "difficulty": 0.55,
+    "discrimination": 1.1,
+    "estimated_time": 60,
+    "question_type": "multiple_choice",
+    "content": "[CSAT Data Interpretation] If a policy budget of ₹120 Crore is allocated among Education, Healthcare, and Roads in the ratio 5:4:3, how much higher is the allocation to Education compared to Roads?",
+    "options": [
+      { "id": "A", "text": "₹10 Crore" },
+      { "id": "B", "text": "₹20 Crore" },
+      { "id": "C", "text": "₹30 Crore" },
+      { "id": "D", "text": "₹40 Crore" }
+    ],
+    "correct_answer": "B",
+    "explanation": "Total parts = 5 + 4 + 3 = 12. Each part = ₹120 / 12 = ₹10 Crore. Education = 5 parts = ₹50 Crore. Roads = 3 parts = ₹30 Crore. Difference = ₹50 - ₹30 = ₹20 Crore.",
+    "tier": "FOUNDATION"
+  },
+  {
+    "question_id": "UPSC_PRELIMS_2024_POLITY_08",
+    "exam": "UPSC",
+    "paper": "Prelims GS Paper I",
+    "subject": "Indian Polity & Governance",
+    "chapter": "Constitutional Framework & Fundamental Rights",
+    "topic": "Fundamental Rights & Judicial Review",
+    "concept_id": "c_article_21_due_process",
+    "skill": "conceptual",
+    "difficulty": 0.65,
+    "discrimination": 1.25,
+    "estimated_time": 60,
+    "question_type": "multiple_choice",
+    "content": "Which one of the following suggested that the Governor should be an eminent person from outside the State and should be a detached figure without intense political links, or should not have taken part in politics in the recent past?",
+    "options": [
+      { "id": "A", "text": "First Administrative Reforms Commission (1966)" },
+      { "id": "B", "text": "Rajamannar Committee (1969)" },
+      { "id": "C", "text": "Sarkaria Commission (1988)" },
+      { "id": "D", "text": "National Commission to Review the Working of the Constitution (2002)" }
+    ],
+    "correct_answer": "C",
+    "explanation": "The Sarkaria Commission on Centre-State Relations (1988) recommended that the Governor must be an eminent person from outside the state, detached from active local politics, and not in active politics in the recent past.",
     "tier": "STANDARD"
   }
 ]
