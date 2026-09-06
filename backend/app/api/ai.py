@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
 
@@ -166,7 +167,122 @@ async def generate_practice_question(
     return q_data
 
 
+@router.get("/engine-status")
+async def get_engine_status():
+    from backend.app.ai.cloud_llm import CloudLLMHub
+    from backend.app.ai.local_llm import LocalLLMClient
+    
+    hub = CloudLLMHub()
+    gemini_avail = hub.is_gemini_available()
+    grok_avail = hub.is_grok_available()
+    custom_avail = hub.is_custom_available()
+    
+    llm = LocalLLMClient()
+    ollama_ok = await llm.is_available()
+    
+    tier = "CLOUD_PRIMARY"
+    if not gemini_avail and not grok_avail:
+        if custom_avail:
+            tier = "CLOUD_CUSTOM"
+        else:
+            tier = "LOCAL_OLLAMA" if ollama_ok else "DETERMINISTIC_MENTOR"
+        
+    return {
+        "active_tier": tier,
+        "gemini_available": gemini_avail,
+        "grok_available": grok_avail,
+        "custom_available": custom_avail,
+        "ollama_available": ollama_ok,
+        "mentor_failsafe_active": True,
+        "supported_exams": ["JEE", "NEET", "UPSC"],
+        "message": "Cloud LLM (Gemini/Grok/Custom) primary with local Ollama fallback and deterministic mentor fail-safe."
+    }
+
+
+class KeyConfigRequest(BaseModel):
+    gemini_api_key: Optional[str] = None
+    grok_api_key: Optional[str] = None
+    custom_provider: Optional[str] = None
+    custom_api_key: Optional[str] = None
+    custom_base_url: Optional[str] = None
+    custom_model: Optional[str] = None
+    persist_to_env: bool = False
+
+
+class KeyTestRequest(BaseModel):
+    provider: str
+    key: str
+    base_url: Optional[str] = None
+    model: Optional[str] = None
+
+
+@router.get("/keys-config")
+async def get_keys_config():
+    """Returns safe masked configuration of currently active AI provider keys."""
+    from backend.app.ai.cloud_llm import CloudLLMHub
+    return CloudLLMHub.get_masked_config()
+
+
+@router.post("/keys-config")
+async def update_keys_config(req: KeyConfigRequest):
+    """Dynamically applies new AI provider keys to runtime without server restart."""
+    from backend.app.ai.cloud_llm import CloudLLMHub
+    res = CloudLLMHub.update_keys(
+        gemini_key=req.gemini_api_key,
+        grok_key=req.grok_api_key,
+        custom_provider=req.custom_provider,
+        custom_api_key=req.custom_api_key,
+        custom_base_url=req.custom_base_url,
+        custom_model=req.custom_model,
+        persist_to_env=req.persist_to_env
+    )
+    return res
+
+
+@router.post("/test-key")
+async def test_provider_key(req: KeyTestRequest):
+    """Tests live validity of a provided key."""
+    from backend.app.ai.cloud_llm import CloudLLMHub
+    return await CloudLLMHub.test_key(
+        provider=req.provider,
+        key=req.key,
+        base_url=req.base_url,
+        model=req.model
+    )
+
+
+@router.get("/fineweb/readings")
+async def get_fineweb_readings_endpoint(
+    course: Optional[str] = None,
+    subject: Optional[str] = None,
+    min_score: float = 0.0
+):
+    """Returns curated FineWeb-Edu educational readings tailored by course and subject."""
+    from backend.app.knowledge_graph.fineweb_vault import get_fineweb_readings
+    readings = get_fineweb_readings(course=course, subject=subject, min_score=min_score)
+    return {
+        "dataset": "HuggingFaceFW/fineweb-edu",
+        "total_tokens_dataset": "1.3T",
+        "course": course or "ALL",
+        "count": len(readings),
+        "readings": readings
+    }
+
+
+@router.get("/fineweb/reading/{reading_id}")
+async def get_single_fineweb_reading(reading_id: str):
+    """Fetches full academic excerpt by reading ID."""
+    from backend.app.knowledge_graph.fineweb_vault import get_reading_by_id
+    reading = get_reading_by_id(reading_id)
+    if not reading:
+        raise HTTPException(status_code=404, detail=f"Reading {reading_id} not found")
+    return reading
+
+
+
+
 @router.post("/brain-briefing/{student_id}")
+
 async def get_brain_briefing(
     student_id: str,
     page_context: str = "DAILY_PRACTICE",

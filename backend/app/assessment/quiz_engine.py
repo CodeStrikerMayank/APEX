@@ -160,8 +160,24 @@ class QuizEngine:
 
         formatted_questions = []
         for q in questions:
-            shuffled_options = list(q.options) if q.options else []
-            random.shuffle(shuffled_options)
+            opts = q.options
+            normalized_options = []
+            if isinstance(opts, dict):
+                for k, v in opts.items():
+                    normalized_options.append({"id": str(k), "text": str(v)})
+            elif isinstance(opts, list):
+                for idx, o in enumerate(opts):
+                    if isinstance(o, dict):
+                        opt_id = o.get("id") or ["A", "B", "C", "D"][idx] if idx < 4 else str(idx + 1)
+                        opt_text = o.get("text") or o.get("content") or str(o)
+                        normalized_options.append({"id": str(opt_id), "text": str(opt_text)})
+                    else:
+                        letters = ["A", "B", "C", "D", "E", "F"]
+                        letter = letters[idx] if idx < len(letters) else str(idx + 1)
+                        normalized_options.append({"id": letter, "text": str(o)})
+            else:
+                normalized_options = []
+
             formatted_questions.append({
                 "question_id": q.question_id,
                 "exam": q.exam,
@@ -176,7 +192,7 @@ class QuizEngine:
                 "estimated_time": q.estimated_time,
                 "question_type": q.question_type,
                 "content": q.content,
-                "options": shuffled_options,
+                "options": normalized_options,
                 "rubrics": q.rubrics,
                 "image_url": getattr(q, "image_url", None)
             })

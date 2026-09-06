@@ -40,13 +40,20 @@ app.include_router(upsc.router, prefix="/api")
 app.include_router(supporting.router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, JSONResponse
+
 @app.get("/")
-def root():
-    # If index.html exists in root directory, serve it directly
-    index_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "index.html"))
-    if os.path.exists(index_path):
-        from fastapi.responses import FileResponse
-        return FileResponse(index_path)
+def root(request: Request):
+    accept_header = request.headers.get("accept", "").lower()
+    
+    # If a browser requests HTML, serve index.html
+    if "text/html" in accept_header:
+        index_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "index.html"))
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+
+    # Otherwise return system status JSON (for API clients, tests, etc.)
     return {
         "status": "online",
         "service": "Adaptive Student Intelligence & Dynamic Roadmap Backend API",

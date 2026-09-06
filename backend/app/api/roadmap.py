@@ -30,9 +30,16 @@ def get_active_roadmap(student_id: str, db: Session = Depends(get_db)):
         .first()
     )
 
-    if not active_rm:
+    needs_regen = False
+    if active_rm and active_rm.actions:
+        first_c = db.query(Concept).filter(Concept.concept_id == active_rm.actions[0].concept_id).first()
+        sub = first_c.topic.chapter.subject if (first_c and first_c.topic and first_c.topic.chapter) else None
+        if sub and sub.exam_id != student.target_exam:
+            needs_regen = True
+
+    if not active_rm or needs_regen:
         generator = RoadmapGenerator(db, exam_id=student.target_exam)
-        active_rm = generator.generate_roadmap(student_id, trigger_event="API_REQUEST")
+        active_rm = generator.generate_roadmap(student_id, trigger_event="API_REQUEST_EXAM_SYNC")
 
     actions_list = []
     for act in active_rm.actions:
@@ -153,4 +160,21 @@ def complete_daily_task(
     from backend.app.roadmap.daily_todo import DailyTodoEngine
     engine = DailyTodoEngine(db)
     return engine.complete_task(student_id, task_id, target_date=target_date)
+
+
+@router.post("/ai-customize-todo/{student_id}")
+def ai_customize_todo(
+    student_id: str,
+    prompt: Optional[str] = None,
+    target_date: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    AI-Customized Daily Mission Generator:
+    Analyzes student cognitive gaps, Ebbinghaus forgetting rate, and target exam
+    to generate a student-centric locked mission with clear pedagogical reasoning.
+    """
+    from backend.app.roadmap.daily_todo import DailyTodoEngine
+    engine = DailyTodoEngine(db)
+    return engine.ai_customize_daily_todo(student_id, custom_prompt=prompt, target_date=target_date)
 

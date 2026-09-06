@@ -42,7 +42,19 @@ class LocalLLMClient:
         self.base_url = base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         self.model_name = model_name or os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
         self.enabled = enabled if enabled is not None else os.getenv("LOCAL_AI_ENABLED", "true").lower() == "true"
-        self.timeout = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "35.0"))
+        # Responsive 3.5-second timeout for low-end hardware
+        self.timeout = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "3.5"))
+
+    async def is_available(self) -> bool:
+        """Check if local Ollama daemon is reachable and responding."""
+        if not self.enabled:
+            return False
+        try:
+            async with httpx.AsyncClient(timeout=1.0) as client:
+                resp = await client.get(f"{self.base_url}/api/tags")
+                return resp.status_code == 200
+        except Exception:
+            return False
 
     async def generate_text(
         self,
@@ -52,13 +64,16 @@ class LocalLLMClient:
         use_polish: Optional[bool] = None
     ) -> Dict[str, Any]:
         """
-        Classifies user intent, generates bulletproof grounded response,
-        and optionally polishes via Ollama or Cloud LLM if available.
+        Multi-tier Intelligent Generation:
+        1. Cloud LLM Hub (Gemini / Grok) as primary high-speed API engine.
+        2. Seamless fallback to local Ollama (qwen2.5:0.5b) if cloud keys are exhausted.
+        3. Hardened Deterministic Pedagogical Mentor as zero-latency fail-safe.
         """
         if not self.enabled:
             return {
-                "text": "Local AI mentor is disabled.",
-                "source": "DISABLED"
+                "text": "Hello Aspirant! The AI mentor is currently standing by.",
+                "source": "DISABLED",
+                "tier": "OFFLINE_MENTOR"
             }
 
         # 1. Sanitize user input
@@ -78,7 +93,7 @@ class LocalLLMClient:
         if "roadmap_actions" in ctx and "roadmap_milestones" not in ctx:
             ctx["roadmap_milestones"] = ctx["roadmap_actions"]
 
-        # 4. Generate deterministic grounded response
+        # 4. Generate deterministic grounded response as safe foundation
         if intent == INTENT_ANALYZE_MISTAKES:
             grounded_text = format_mistake_analysis(ctx)
         elif intent == INTENT_EXPLAIN_ROADMAP:
@@ -90,38 +105,51 @@ class LocalLLMClient:
         else:
             grounded_text = format_unknown_fallback(exam)
 
-        # 5. Cloud Frontier Polish Pass (Gemini / Grok) if enabled
-        should_polish = use_polish if use_polish is not None else True
-        use_gemini = should_polish and os.getenv("USE_GEMINI_POLISH", "true").lower() == "true"
-        if use_gemini:
+        # 5. Tier 1: Cloud API Models (Gemini / Grok)
+        should_cloud = os.getenv("USE_GEMINI_POLISH", "true").lower() == "true"
+        if should_cloud:
             try:
                 from backend.app.ai.cloud_llm import CloudLLMHub
                 hub = CloudLLMHub()
-                polish_prompt = (
-                    f"Polish the following educational response for an Indian {exam} student. "
-                    "Make it encouraging, razor-sharp, and clear. Preserve all mathematical equations, "
-                    f"markdown formatting, and technical accuracy:\n\n{grounded_text}"
+                mentor_sys_prompt = (
+                    f"You are a warm, supportive, and brilliant mentor for an Indian {exam} student. "
+                    "Address the student as an encouraging coach ('Hello Aspirant!'). "
+                    "Keep explanations clear, structured with bullet points, and mathematically exact."
                 )
-                cloud_res = await hub.generate_best(polish_prompt)
+                cloud_prompt = (
+                    f"User asked: {sanitized_prompt}\n\n"
+                    f"Core curriculum facts and student state to base your response on:\n{grounded_text}\n\n"
+                    "Deliver an encouraging, highly pedagogical, and humanized mentor response. "
+                    "Preserve all LaTeX equations and technical precision."
+                )
+                cloud_res = await hub.generate_best(cloud_prompt, system_instruction=mentor_sys_prompt)
                 if cloud_res.get("text") and len(cloud_res["text"]) > 50:
                     return {
                         "text": cloud_res["text"],
                         "intent": intent,
                         "confidence": confidence,
-                        "source": cloud_res["source"]
+                        "source": cloud_res["source"],
+                        "tier": "CLOUD_PRIMARY"
                     }
             except Exception:
-                pass  # Fall through to local Ollama
+                pass  # Keys exhausted or unavailable -> Proceed to Tier 2
 
-        # 6. Optional Local Ollama Polish Pass (hardware-optimized timeout on Drive D)
-        ollama_enabled = should_polish and os.getenv("USE_OLLAMA_POLISH", "false").lower() == "true"
+        # 6. Tier 2: Local Ollama Model (if running on host machine)
+        ollama_enabled = os.getenv("USE_OLLAMA_POLISH", "true").lower() == "true"
         if ollama_enabled:
             try:
                 url = f"{self.base_url}/api/generate"
+                ollama_prompt = (
+                    f"System: You are an encouraging {exam} study tutor.\n"
+                    f"Student prompt: {sanitized_prompt}\n"
+                    f"Curriculum notes: {grounded_text}\n\n"
+                    "Provide a warm, humanized student mentor reply:"
+                )
                 payload = {
                     "model": self.model_name,
-                    "prompt": f"Polish the following educational response for clarity and tone, preserving all technical details and markdown formatting exactly:\n\n{grounded_text}",
-                    "stream": False
+                    "prompt": ollama_prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.3}
                 }
                 async with httpx.AsyncClient(timeout=self.timeout) as client:
                     resp = await client.post(url, json=payload)
@@ -133,16 +161,19 @@ class LocalLLMClient:
                                 "text": polished,
                                 "intent": intent,
                                 "confidence": confidence,
-                                "source": f"OLLAMA_POLISHED_{self.model_name}"
+                                "source": f"OLLAMA_{self.model_name}",
+                                "tier": "OLLAMA_FALLBACK"
                             }
             except Exception:
-                pass  # Fall through to deterministic text
+                pass  # Ollama not running or timed out -> Proceed to Tier 3
 
+        # 7. Tier 3: Hardened Grounded Pedagogical Mentor (Deterministic zero-hallucination fail-safe)
         return {
             "text": grounded_text,
             "intent": intent,
             "confidence": confidence,
-            "source": "DETERMINISTIC_INTENT_ENGINE"
+            "source": "PEDAGOGICAL_MENTOR_FAILSAFE",
+            "tier": "OFFLINE_MENTOR"
         }
 
     async def generate_raw(
@@ -151,8 +182,23 @@ class LocalLLMClient:
         system_prompt: str = ""
     ) -> Dict[str, Any]:
         """
-        Direct inference through Ollama for free-form generation.
+        Direct generation: Tries Cloud -> Ollama -> Grounded Fallback.
         """
+        # 1. Try Cloud
+        try:
+            from backend.app.ai.cloud_llm import CloudLLMHub
+            hub = CloudLLMHub()
+            c_res = await hub.generate_best(prompt, system_instruction=system_prompt)
+            if c_res.get("text") and len(c_res["text"]) > 20:
+                return {
+                    "text": c_res["text"],
+                    "source": c_res["source"],
+                    "tier": "CLOUD_PRIMARY"
+                }
+        except Exception:
+            pass
+
+        # 2. Try Ollama
         try:
             url = f"{self.base_url}/api/generate"
             payload = {
@@ -165,13 +211,18 @@ class LocalLLMClient:
                 resp = await client.post(url, json=payload)
                 if resp.status_code == 200:
                     data = resp.json()
-                    return {
-                        "text": data.get("response", "").strip(),
-                        "source": f"OLLAMA_DIRECT_{self.model_name}"
-                    }
+                    ans = data.get("response", "").strip()
+                    if ans:
+                        return {
+                            "text": ans,
+                            "source": f"OLLAMA_DIRECT_{self.model_name}",
+                            "tier": "OLLAMA_FALLBACK"
+                        }
         except Exception:
             pass
+
         return {
-            "text": "Direct local LLM generation unavailable.",
-            "source": "FALLBACK"
+            "text": "Hello Aspirant! I am standing by to assist your exam prep. Feel free to ask any question on your syllabus!",
+            "source": "PEDAGOGICAL_MENTOR_FAILSAFE",
+            "tier": "OFFLINE_MENTOR"
         }
