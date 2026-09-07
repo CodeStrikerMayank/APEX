@@ -106,23 +106,27 @@ class LocalLLMClient:
             grounded_text = format_unknown_fallback(exam)
 
         # 5. Tier 1: Cloud API Models (Gemini / Grok)
-        should_cloud = os.getenv("USE_GEMINI_POLISH", "true").lower() == "true"
+        should_cloud = (use_polish is not False) and (os.getenv("USE_GEMINI_POLISH", "true").lower() == "true")
         if should_cloud:
             try:
                 from backend.app.ai.cloud_llm import CloudLLMHub
                 hub = CloudLLMHub()
                 mentor_sys_prompt = (
-                    f"You are a warm, supportive, and brilliant mentor for an Indian {exam} student. "
-                    "Address the student as an encouraging coach ('Hello Aspirant!'). "
-                    "Keep explanations clear, structured with bullet points, and mathematically exact."
+                    f"You are a distinguished, mature, and inspiring academic mentor for an Indian {exam} student. "
+                    "Communicate with pedagogical clarity, intellectual warmth, and precision. "
+                    "Format your answers with clean markdown headings (###), concise bullet points (-), and highlight cards (💡). "
+                    "Avoid robotic jargon, unformatted walls of text, or excessive filler. "
+                    "Use standard LaTeX notation ($...$ and $$...$$) for all formulas and scientific notations. "
+                    "Address the student respectfully as an encouraging coach ('Hello Aspirant!')."
                 )
+                effective_sys_prompt = (mentor_sys_prompt + "\n\n" + system_prompt) if system_prompt else mentor_sys_prompt
                 cloud_prompt = (
                     f"User asked: {sanitized_prompt}\n\n"
                     f"Core curriculum facts and student state to base your response on:\n{grounded_text}\n\n"
                     "Deliver an encouraging, highly pedagogical, and humanized mentor response. "
                     "Preserve all LaTeX equations and technical precision."
                 )
-                cloud_res = await hub.generate_best(cloud_prompt, system_instruction=mentor_sys_prompt)
+                cloud_res = await hub.generate_best(cloud_prompt, system_instruction=effective_sys_prompt)
                 if cloud_res.get("text") and len(cloud_res["text"]) > 50:
                     return {
                         "text": cloud_res["text"],
@@ -135,12 +139,12 @@ class LocalLLMClient:
                 pass  # Keys exhausted or unavailable -> Proceed to Tier 2
 
         # 6. Tier 2: Local Ollama Model (if running on host machine)
-        ollama_enabled = os.getenv("USE_OLLAMA_POLISH", "true").lower() == "true"
+        ollama_enabled = (use_polish is not False) and (os.getenv("USE_OLLAMA_POLISH", "true").lower() == "true")
         if ollama_enabled:
             try:
                 url = f"{self.base_url}/api/generate"
                 ollama_prompt = (
-                    f"System: You are an encouraging {exam} study tutor.\n"
+                    f"System: {system_prompt or ('You are an encouraging ' + exam + ' study tutor.')}\n"
                     f"Student prompt: {sanitized_prompt}\n"
                     f"Curriculum notes: {grounded_text}\n\n"
                     "Provide a warm, humanized student mentor reply:"

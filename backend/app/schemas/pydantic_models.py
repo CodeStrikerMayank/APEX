@@ -256,6 +256,7 @@ class AIChatRequest(BaseModel):
     prompt: Optional[str] = None
     message: Optional[str] = None
     concept_id: Optional[str] = None
+    mode: Optional[str] = "pedagogical"
     include_student_state: bool = True
 
     def get_prompt(self) -> str:

@@ -12,10 +12,11 @@ def format_mistake_analysis(ctx: Dict[str, Any]) -> str:
     
     if not attempt_info:
         return (
-            f"### 👋 Hello {student_name}! Welcome to your {exam} Diagnostic Hub (Standby Diagnostic Profile)\n\n"
-            f"I'm your personal mentor, and all our adaptive learning engines (IRT 2PL, Bayesian Knowledge Tracing, and DAG Roadmap) are completely active and ready on standby for you!\n\n"
-            f"- **No Gating or Blockers:** You don't have to take a mandatory quiz before exploring. Jump straight into daily missions, study paths, or topic drills whenever you feel ready.\n"
-            f"- **Live Cognitive Calibration:** The moment you solve questions, I'll analyze whether errors are from calculation slips, conceptual gaps, or time pressure, and update your personal memory curve.\n\n"
+            f"### 👋 Welcome, {student_name}!\n"
+            f"I'm your personal academic mentor for **{exam}**. Your **Standby Diagnostic Profile** is active and ready on standby for you.\n\n"
+            f"- **No Compulsory Quiz Required:** You don't have to complete a mandatory screening test before exploring. Jump straight into daily practice missions, study paths, or topic drills whenever you feel ready.\n"
+            f"- **Smart Cognitive Calibration:** The moment you solve questions, I'll diagnose whether errors are from calculation slips, conceptual gaps, or time pressure, and calibrate your review schedule accordingly.\n"
+            f"- **Comprehensive Concept Mentoring:** Ask me anytime to unpack complex derivations, clarify tricky syllabus concepts, or advise on exam pacing.\n\n"
             f"💡 *Ready to test your baseline? Take a quick 5-question drill or ask me to explain any tricky chapter!*"
         )
 

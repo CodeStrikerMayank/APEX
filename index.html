@@ -893,101 +893,825 @@
 
   .coach-widget{
     position:fixed;right:24px;bottom:24px;z-index:1000;
-    width:368px;max-height:min(568px, calc(100vh - 48px));
+    width:410px;height:min(600px, calc(100vh - 48px));
+    max-height:min(600px, calc(100vh - 48px));
     background:var(--card-glass);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    border:1px solid var(--border);border-radius:18px;
-    box-shadow:inset 0 1px 0 0 rgba(255,255,255,.1), var(--shadow-lg);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--border);border-radius:20px;
+    box-shadow:inset 0 1px 0 0 rgba(255,255,255,.15), 0 20px 40px -12px rgba(0,0,0,.22);
     display:flex;flex-direction:column;overflow:hidden;
+    transition:width .26s cubic-bezier(0.16, 1, 0.3, 1), height .26s cubic-bezier(0.16, 1, 0.3, 1), max-height .26s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .coach-widget[hidden]{display:none;}
-  .coach-widget.is-minimized{max-height:62px;}
+  .coach-widget.is-minimized{max-height:62px;height:62px;}
   .coach-widget.is-minimized .coach-w-body,
   .coach-widget.is-minimized .coach-w-foot{display:none;}
+  .coach-widget.is-expanded{
+    width:min(600px, calc(100vw - 32px));
+    height:min(740px, calc(100vh - 36px));
+    max-height:min(740px, calc(100vh - 36px));
+  }
 
   .coach-w-head{
-    display:flex;align-items:center;gap:10px;padding:12px 13px;
+    display:flex;align-items:center;gap:10px;padding:12px 15px;
     border-bottom:1px solid var(--border);
     background:var(--card-glass);
     backdrop-filter:blur(14px);
     -webkit-backdrop-filter:blur(14px);
-    flex-shrink:0;
+    flex-shrink:0;user-select:none;
   }
   .coach-w-avatar{
     width:34px;height:34px;border-radius:10px;flex-shrink:0;
     background:linear-gradient(135deg,var(--purple),#8A7CFB);
-    display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;
-    box-shadow:0 4px 10px -2px rgba(var(--purple-rgb),.4);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;
+    box-shadow:0 4px 12px -2px rgba(var(--purple-rgb),.4);
   }
-  .coach-w-head b{font-size:13px;font-weight:700;display:block;}
+  .coach-w-head b{font-size:13.5px;font-weight:700;display:block;letter-spacing:-0.01em;}
   .coach-w-head .coach-w-status{
     font-size:11px;color:var(--green-fg);font-weight:600;display:flex;align-items:center;gap:5px;
   }
   .coach-w-head .coach-w-status .dot-live{width:6px;height:6px;}
   .coach-w-head-actions{margin-left:auto;display:flex;gap:4px;}
   .coach-w-icon-btn{
-    width:27px;height:27px;border-radius:8px;border:none;background:transparent;
+    width:28px;height:28px;border-radius:8px;border:none;background:transparent;
     color:var(--ink-faint);font-size:14px;display:flex;align-items:center;justify-content:center;
-    transition:background .2s ease, color .2s ease;
+    cursor:pointer;transition:background .2s ease, color .2s ease;
   }
-  .coach-w-icon-btn:hover{background:rgba(0,0,0,.04);color:var(--ink);}
-  html[data-theme="dark"] .coach-w-icon-btn:hover{background:rgba(255,255,255,.06);}
+  .coach-w-icon-btn:hover{background:rgba(0,0,0,.05);color:var(--ink);}
+  html[data-theme="dark"] .coach-w-icon-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
 
   .coach-w-body{
-    flex:1;overflow-y:auto;padding:14px;
+    flex:1;overflow-y:auto;padding:16px 14px;
     background:rgba(246, 247, 251, 0.45);
-    display:flex;flex-direction:column;gap:10px;
+    display:flex;flex-direction:column;gap:12px;
+    scroll-behavior:smooth;
   }
   html[data-theme="dark"] .coach-w-body{
     background:rgba(11, 15, 23, 0.45);
   }
-  .coach-w-msg{max-width:84%;padding:9px 12px;border-radius:12px;font-size:12.5px;line-height:1.55;}
+
+  .coach-w-msg{
+    max-width:90%;padding:11px 15px;border-radius:14px;
+    font-size:13.5px;line-height:1.64;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    word-break:break-word;position:relative;
+  }
   .coach-w-msg.from-user{
-    align-self:flex-end;background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;border-bottom-right-radius:4px;
-    box-shadow:0 2px 8px rgba(var(--purple-rgb),.25);
+    align-self:flex-end;background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;
+    border-bottom-right-radius:4px;
+    box-shadow:0 3px 12px rgba(var(--purple-rgb),.28);
+    font-size:13px;
   }
   .coach-w-msg.from-coach{
-    align-self:flex-start;background:var(--card);color:var(--ink);border:1px solid var(--border);border-bottom-left-radius:4px;
+    align-self:flex-start;background:var(--card);color:var(--ink);
+    border:1px solid var(--border);border-bottom-left-radius:4px;
     box-shadow:var(--shadow-sm);
   }
-  .coach-w-msg.from-system{align-self:center;background:transparent;color:var(--ink-faint);font-size:11.5px;text-align:center;}
-  .coach-w-suggestions{display:flex;flex-direction:column;gap:6px;margin-top:2px;}
+  .coach-w-msg.from-system{
+    align-self:center;background:rgba(var(--purple-rgb),.05);color:var(--ink-faint);
+    border:1px dashed var(--border);border-radius:10px;font-size:12px;text-align:center;
+    padding:8px 14px;max-width:92%;
+  }
+
+  /* Rich Markdown Elements inside Coach Replies */
+  .coach-msg-h3{
+    font-size:14.5px;font-weight:700;color:var(--ink);
+    margin:10px 0 6px 0;display:flex;align-items:center;gap:6px;
+    letter-spacing:-0.01em;
+  }
+  .coach-msg-h3:first-child{margin-top:2px;}
+  .coach-msg-h2{
+    font-size:15.5px;font-weight:800;color:var(--ink);
+    margin:12px 0 8px 0;padding-bottom:4px;border-bottom:1px solid var(--border);
+  }
+  .coach-msg-p{
+    margin:6px 0;color:var(--ink);font-size:13.5px;line-height:1.62;
+  }
+  .coach-msg-p:first-child{margin-top:0;}
+  .coach-msg-p:last-child{margin-bottom:0;}
+  .coach-msg-ul, .coach-msg-ol{
+    margin:6px 0 8px 0;padding-left:18px;
+  }
+  .coach-msg-li{
+    margin-bottom:6px;line-height:1.58;color:var(--ink);
+  }
+  .coach-msg-li:last-child{margin-bottom:0;}
+  .coach-msg-li strong{
+    color:var(--ink);font-weight:600;
+  }
+  .coach-callout{
+    display:flex;gap:10px;align-items:flex-start;
+    background:rgba(138, 124, 251, 0.08);
+    border-left:3.5px solid var(--purple);
+    border-radius:8px;padding:9px 12px;margin:8px 0;
+    font-size:13px;line-height:1.55;
+  }
+  html[data-theme="dark"] .coach-callout{
+    background:rgba(138, 124, 251, 0.14);
+  }
+  .coach-callout-icon{font-size:16px;flex-shrink:0;line-height:1.2;margin-top:1px;}
+  .coach-callout-body{flex:1;color:var(--ink);}
+  .coach-callout-body em{font-style:normal;font-weight:500;}
+  .coach-inline-code{
+    font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size:12px;background:rgba(0,0,0,0.06);color:var(--purple-dark);
+    padding:2px 5px;border-radius:5px;border:1px solid rgba(0,0,0,0.06);
+  }
+  html[data-theme="dark"] .coach-inline-code{
+    background:rgba(255,255,255,0.08);color:#B4AAFF;border-color:rgba(255,255,255,0.08);
+  }
+  .coach-code-block{
+    background:#1E1E2E;color:#CDD6F4;padding:10px 12px;border-radius:8px;
+    font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    font-size:12px;overflow-x:auto;margin:8px 0;line-height:1.5;
+  }
+  .coach-math-block{
+    margin:10px 0;padding:6px 0;text-align:center;overflow-x:auto;
+  }
+  .coach-math-inline{
+    display:inline-block;padding:0 2px;
+  }
+  .coach-msg-meta{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    margin-top:8px;padding-top:5px;border-top:1px solid rgba(0,0,0,.05);
+    font-size:11px;color:var(--ink-faint);
+  }
+  html[data-theme="dark"] .coach-msg-meta{border-top-color:rgba(255,255,255,.06);}
+  .coach-msg-meta-actions{display:flex;align-items:center;gap:6px;}
+  .coach-msg-action-btn{
+    background:transparent;border:none;cursor:pointer;color:var(--ink-faint);
+    font-size:11px;padding:2px 7px;border-radius:5px;display:flex;align-items:center;gap:4px;
+    transition:background .2s, color .2s;
+  }
+  .coach-msg-action-btn:hover{
+    background:rgba(0,0,0,.06);color:var(--ink);
+  }
+  html[data-theme="dark"] .coach-msg-action-btn:hover{
+    background:rgba(255,255,255,.08);color:#fff;
+  }
+
+  .coach-w-suggestions{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
   .coach-w-suggestion{
-    text-align:left;background:var(--card);border:1px solid var(--border);border-radius:9px;
-    padding:8px 10px;font-size:12px;font-weight:500;color:var(--ink-soft);box-shadow:var(--shadow-sm);
+    text-align:left;background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:9px 12px;font-size:12.5px;font-weight:500;color:var(--ink);box-shadow:var(--shadow-sm);
+    display:flex;align-items:center;gap:8px;cursor:pointer;
     transition:border-color .2s ease, color .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
   }
   .coach-w-suggestion:hover{border-color:var(--purple);color:var(--purple);transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
   .coach-w-suggestion:active{transform:translateY(0.5px);}
 
   .coach-w-foot{
-    display:flex;align-items:center;gap:8px;padding:10px;border-top:1px solid var(--border);flex-shrink:0;
+    display:flex;align-items:center;gap:8px;padding:11px 13px;border-top:1px solid var(--border);flex-shrink:0;
     background:var(--card-glass);
     backdrop-filter:blur(14px);
     -webkit-backdrop-filter:blur(14px);
   }
   .coach-w-foot input{
-    flex:1;border:1px solid var(--border);background:var(--bg);border-radius:9px;
-    padding:9px 11px;font-size:12.5px;font-family:inherit;outline:none;color:var(--ink);
+    flex:1;border:1px solid var(--border);background:var(--bg);border-radius:10px;
+    padding:9px 13px;font-size:13px;font-family:inherit;outline:none;color:var(--ink);
     transition:border-color .2s ease, box-shadow .2s ease;
   }
   .coach-w-foot input:focus{border-color:var(--purple);box-shadow:0 0 0 2px var(--purple-tint);}
   .coach-w-send{
-    width:32px;height:32px;border-radius:8px;border:none;background:var(--purple);color:#fff;
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    width:34px;height:34px;border-radius:9px;border:none;background:var(--purple);color:#fff;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;
     transition:background .2s ease, transform .2s var(--ease-out), box-shadow .2s ease;
   }
   .coach-w-send:hover:not([disabled]){background:var(--purple-dark);transform:translateY(-1px);box-shadow:0 4px 10px -2px rgba(var(--purple-rgb),.4);}
-  .coach-w-send[disabled]{opacity:.5;}
+  .coach-w-send[disabled]{opacity:.5;cursor:not-allowed;}
 
   @media (max-width: 520px){
     .coach-fab{right:16px;bottom:16px;width:52px;height:52px;font-size:20px;}
     .coach-widget{
-      right:12px;left:12px;bottom:12px;width:auto;
-      max-height:min(520px, calc(100dvh - 24px));border-radius:16px;
+      right:10px;left:10px;bottom:10px;width:auto;
+      max-height:min(540px, calc(100dvh - 20px));border-radius:16px;
+    }
+    .coach-widget.is-expanded{
+      width:auto;height:min(540px, calc(100dvh - 20px));
     }
     .coach-widget input{font-size:16px;}
+  }
+
+  /* ============================================================
+     AI COGNITIVE COCKPIT STUDIO (#view-ai-studio)
+     Conversational layer (warm, human) + Diagnostic Instrument layer (sharp, tabular, hairlines)
+     ============================================================ */
+  #view-ai-studio {
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'SF Mono', Consolas, ui-monospace, monospace;
+    --hud-line: color-mix(in srgb, var(--border) 60%, transparent);
+    --hud-radius: 2px;
+    --status-ok: var(--green-fg, #059669);
+    --status-warn: var(--amber-fg, #D97706);
+    --status-critical: #DC2626;
+  }
+  html[data-theme="dark"] #view-ai-studio {
+    --hud-line: rgba(255, 255, 255, 0.08);
+    --status-ok: #34D399;
+    --status-warn: #FBBF24;
+    --status-critical: #F87171;
+  }
+  html[data-theme="sketch"] #view-ai-studio {
+    --hud-line: #222;
+    --hud-radius: 0px;
+  }
+
+  /* Immersive Full-Screen Studio (True Fullscreen Takeover Covering Topbar & Sidebar) */
+  body.in-studio {
+    overflow: hidden !important;
+  }
+  body.in-studio #view-ai-studio.active {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    background: var(--bg) !important;
+    padding: 16px 24px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  body.in-studio #coachFab,
+  body.in-studio #coachWidget,
+  #view-ai-studio.active ~ #coachFab,
+  #view-ai-studio.active ~ #coachWidget {
+    display: none !important;
+  }
+
+  /* Desktop 3-column Cockpit Rebalance */
+  .studio-grid {
+    display: grid;
+    grid-template-columns: 240px minmax(500px, 1fr) 295px;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
+    height: calc(100vh - 105px);
+    overflow: hidden;
+  }
+  .studio-sidebar-panel,
+  .studio-canvas-panel,
+  .studio-hud-panel {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .studio-sidebar-panel .panel,
+  .studio-hud-panel .panel {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    scrollbar-width: thin;
+  }
+  @media (max-width: 1200px) {
+    .studio-grid {
+      grid-template-columns: 240px 1fr;
+      height: 100%;
+    }
+    .studio-hud-panel {
+      display: none;
+    }
+  }
+  @media (max-width: 860px) {
+    .studio-grid {
+      grid-template-columns: 1fr;
+      height: 100%;
+    }
+    .studio-sidebar-panel {
+      display: none;
+    }
+  }
+
+  /* Exit Button Styling */
+  .studio-exit-btn {
+    transition: background 0.2s, color 0.2s, transform 0.2s, border-color 0.2s;
+  }
+  .studio-exit-btn:hover {
+    background: var(--purple-tint) !important;
+    color: var(--purple) !important;
+    border-color: var(--purple) !important;
+    transform: scale(1.06);
+  }
+
+  /* Chat History List */
+  .studio-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 140px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    padding-right: 2px;
+  }
+  .studio-history-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    transition: background 0.15s ease, color 0.15s ease;
+    text-align: left;
+    width: 100%;
+    user-select: none;
+  }
+  .studio-history-item:hover {
+    background: var(--track-bg);
+    color: var(--ink);
+  }
+  .studio-history-item.active {
+    background: var(--purple-tint);
+    color: var(--purple);
+    border-color: var(--purple-line, rgba(107, 70, 193, 0.2));
+    font-weight: 600;
+  }
+  .studio-history-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+  .studio-history-delete {
+    opacity: 0;
+    padding: 2px 4px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+    transition: opacity 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .studio-history-item:hover .studio-history-delete {
+    opacity: 0.8;
+  }
+  .studio-history-delete:hover {
+    opacity: 1;
+    color: var(--status-critical, #DC2626);
+  }
+
+  /* Section Titles (Subdued, no harsh small caps) */
+  .studio-panel-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    letter-spacing: -0.01em;
+  }
+
+  /* Segmented Control for Modes */
+  .studio-mode-segmented {
+    display: flex;
+    background: var(--track-bg);
+    padding: 3px;
+    border-radius: 8px;
+    border: 1px solid var(--hud-line);
+    gap: 2px;
+  }
+  .studio-mode-pill {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    white-space: nowrap;
+  }
+  .studio-mode-pill:hover {
+    color: var(--ink);
+  }
+  .studio-mode-pill.active {
+    background: var(--card);
+    color: var(--purple-dark, var(--purple));
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    font-weight: 700;
+  }
+  html[data-theme="dark"] .studio-mode-pill.active {
+    color: #C4B5FD;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  /* Prompt list with hairline dividers */
+  .studio-prompt-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--hud-line);
+    border-bottom: 1px solid var(--hud-line);
+  }
+  .studio-prompt-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 8px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--hud-line);
+    text-align: left;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    width: 100%;
+  }
+  .studio-prompt-row:last-child {
+    border-bottom: none;
+  }
+  .studio-prompt-row:hover {
+    background: var(--purple-tint);
+    color: var(--purple);
+  }
+  .studio-prompt-row svg {
+    flex-shrink: 0;
+    color: var(--ink-faint);
+    transition: color 0.15s ease;
+  }
+  .studio-prompt-row:hover svg {
+    color: var(--purple);
+  }
+
+  /* Conversational Mentor Canvas (warm, human, rounded) */
+  .studio-canvas-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 !important;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    box-shadow: var(--shadow-sm);
+  }
+  .studio-messages-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+    background: rgba(246, 247, 251, 0.4);
+  }
+  html[data-theme="dark"] .studio-messages-body {
+    background: rgba(11, 15, 23, 0.4);
+  }
+  .studio-input-area {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--card-glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .studio-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 4px 6px 4px 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .studio-input-wrap:focus-within {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px var(--purple-tint);
+  }
+  .studio-input-wrap input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 13.5px;
+    color: var(--ink);
+    font-family: inherit;
+    padding: 8px 0;
+  }
+  .studio-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .studio-send-btn:hover {
+    background: var(--purple-dark);
+    transform: scale(1.04);
+  }
+
+  /* Chat Messages (Human, warm, rounded) */
+  .studio-msg {
+    max-width: 86%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: viewIn 0.2s var(--ease-out);
+    word-break: break-word;
+  }
+  .studio-msg.from-user {
+    align-self: flex-end;
+    background: var(--purple);
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 12px 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 4px 14px -3px rgba(107, 70, 193, 0.3);
+  }
+  .studio-msg.from-coach {
+    align-self: flex-start;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    border-radius: 16px 16px 16px 4px;
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    box-shadow: var(--shadow-sm);
+  }
+  .studio-msg.from-system {
+    align-self: center;
+    background: var(--track-bg);
+    border: 1px dashed var(--border);
+    color: var(--ink-soft);
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 12.5px;
+    text-align: center;
+    max-width: 90%;
+  }
+  .studio-msg.typing {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+  }
+  .studio-msg.typing span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--purple);
+    animation: typing 0.9s infinite ease-in-out;
+  }
+  .studio-msg.typing span:nth-child(2) { animation-delay: 0.15s; }
+  .studio-msg.typing span:nth-child(3) { animation-delay: 0.3s; }
+
+  /* ============================================================
+     DIAGNOSTIC INSTRUMENT LAYER (Column 3: Telemetry HUD)
+     Sharp corners (2px), hairline dividers, monospace numerals
+     ============================================================ */
+  .studio-hud-panel .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .hud-section {
+    padding-top: 13px;
+    margin-top: 13px;
+    border-top: 1px solid var(--hud-line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .hud-section:first-of-type {
+    padding-top: 0;
+    margin-top: 0;
+    border-top: none;
+  }
+
+  /* θ Radial Arc Gauge Component */
+  .hud-gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 4px 0 2px;
+  }
+  .hud-gauge-svg {
+    width: 140px;
+    height: 105px;
+    overflow: visible;
+  }
+  .hud-gauge-track {
+    fill: none;
+    stroke: var(--track-bg);
+    stroke-width: 7;
+    stroke-linecap: round;
+  }
+  .hud-gauge-arc {
+    fill: none;
+    stroke: var(--purple);
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-dasharray: 188.5;
+    stroke-dashoffset: 94.25;
+    transition: stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hud-gauge-center {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+  }
+  .hud-gauge-val {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .hud-gauge-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .hud-tier-text {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+    margin-top: -6px;
+    margin-bottom: 6px;
+  }
+
+  /* Sparkline */
+  .hud-sparkline-wrap {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 6px;
+    background: var(--track-bg);
+    border-radius: var(--hud-radius);
+    border: 1px solid var(--hud-line);
+  }
+  .hud-sparkline-label {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+  }
+  .hud-sparkline-svg {
+    flex: 1;
+    height: 18px;
+  }
+
+  /* Secondary Syllabus Mastery */
+  .hud-secondary-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+  .hud-mono-val {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* Instrument Telemetry Items with Left Accents */
+  .hud-item {
+    border-radius: var(--hud-radius);
+    padding: 7px 10px;
+    font-size: 11.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: transparent;
+    border: 1px solid var(--hud-line);
+    border-left: 3px solid var(--purple);
+    transition: background 0.15s ease;
+  }
+  .hud-item.is-warn {
+    border-left-color: var(--status-warn);
+    background: rgba(217, 119, 6, 0.04);
+  }
+  .hud-item.is-critical {
+    border-left-color: var(--status-critical);
+    background: rgba(220, 38, 38, 0.04);
+  }
+  .hud-item.is-clickable {
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+  }
+  .hud-item.is-clickable:hover {
+    background: var(--purple-tint);
+  }
+  .hud-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hud-item-name {
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hud-item-pct {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+
+  /* Muted Empty State */
+  .hud-empty-state {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    padding: 6px 2px;
+  }
+  .hud-empty-state svg {
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  /* Academic Footnote Citations */
+  .hud-citation-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 8px;
+    border-left: 2px solid var(--hud-line);
+    font-size: 11px;
+    background: transparent;
+  }
+  .hud-citation-header {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .hud-cite-idx {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--purple);
+    font-weight: 700;
+  }
+  .hud-citation-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+  }
+
+  /* Sketch Theme Overrides */
+  html[data-theme="sketch"] .studio-canvas-card,
+  html[data-theme="sketch"] .studio-mode-segmented,
+  html[data-theme="sketch"] .hud-item {
+    border: 2px solid #222 !important;
+    box-shadow: 2px 2px 0 #222 !important;
+  }
+  html[data-theme="sketch"] .studio-msg.from-coach,
+  html[data-theme="sketch"] .studio-msg.from-user {
+    border: 2px solid #222 !important;
+    box-shadow: 2px 2px 0 #222 !important;
   }
 
   /* ============================================================
@@ -1434,6 +2158,9 @@
     <a class="nav-item" data-view="view-knowledge-vault" id="navKnowledgeVault"><span class="left">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M12 6v6M9 9h6"/></svg>
       Knowledge Vault &amp; Readings</span><span class="count" id="vaultArticleCount">FineWeb</span></a>
+    <a class="nav-item" data-view="view-ai-studio" id="navAiStudio"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 3.36 2.08 6.24 5 7.4V20a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2.6c2.92-1.16 5-4.04 5-7.4a8 8 0 0 0-8-8z"/><path d="M9 13h6"/><path d="M10 17h4"/></svg>
+      AI Mentor Studio</span><span class="count" style="background:linear-gradient(135deg,var(--purple),#8A7CFB);color:#fff;font-weight:700;">PRO</span></a>
     <a class="nav-item" data-view="view-readiness"><span class="left">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11"/><path d="M12 20V4"/><path d="M19 20v-7"/></svg>
       Exam Readiness</span></a>
@@ -1471,6 +2198,7 @@
           <button class="tab" data-view="view-progress">Study Roadmap</button>
           <button class="tab" data-view="view-syllabus">Syllabus Map</button>
           <button class="tab" data-view="view-knowledge-vault" id="topTabKnowledgeVault">📚 Knowledge Vault</button>
+          <button class="tab" data-view="view-ai-studio" id="topTabAiStudio">🤖 AI Studio</button>
           <button class="tab" data-view="view-dashboard" data-scroll-to="coachCard">Study Coach</button>
           <button class="tab" id="upscMainsTab" data-view="view-upsc-mains" style="display:none;">✍️ UPSC Mains Lab</button>
         </nav>
@@ -2001,6 +2729,212 @@
       <section class="stat-grid" id="readinessGrid" style="grid-template-columns:repeat(3,1fr);"></section>
     </div>
 
+    <!-- ============ VIEW: AI MENTOR COGNITIVE STUDIO ============ -->
+    <div class="view" id="view-ai-studio">
+      <div class="view-head" style="margin-bottom:18px;">
+        <div class="welcome-tags">OMNI-CONTEXT ENGINE <span>•</span> <span class="live"><span class="dot-live"></span>GRAPH-RAG &amp; COGNITIVE TELEMETRY</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h1 style="display:flex;align-items:center;gap:10px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--purple);flex-shrink:0;"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h0M16 16h0"/></svg>
+              <span>AI Cognitive Mentor Studio</span>
+            </h1>
+            <p>Dedicated full-screen workspace grounded in your real-time psychometrics, curriculum DAG bottlenecks, past mistake distractor logs, and FineWeb-Edu textbook readings.</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="chip chip-purple" id="studioExamBadge" style="font-weight:700;display:flex;align-items:center;gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <span>JEE Mode</span>
+            </span>
+            <button class="btn-subtle" onclick="window.loadStudioTelemetryHud()" style="padding:6px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;border:1px solid var(--hud-line, var(--border));border-radius:6px;" title="Refresh student cognitive telemetry">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+              <span>Sync Telemetry</span>
+            </button>
+            <button class="btn-subtle studio-exit-btn" id="studioExitBtn" onclick="window.exitStudioMode()" style="padding:6px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;border-radius:18px;border:1.5px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;" title="Return to Dashboard (Esc)" aria-label="Return to Dashboard">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span>Return to Dashboard</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-Column Cockpit Grid -->
+      <div class="studio-grid">
+        <!-- Column 1: Prompt Deck, Modes & History (240px) -->
+        <aside class="studio-sidebar-panel">
+          <div class="panel" style="height:100%;display:flex;flex-direction:column;gap:12px;padding:14px;">
+            <!-- + New Conversation Button -->
+            <button type="button" class="btn-primary studio-new-chat-btn" onclick="window.startNewStudioSession()" style="width:100%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 12px;border-radius:8px;box-shadow:var(--shadow-sm);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>New Conversation</span>
+            </button>
+
+            <!-- Chat History List -->
+            <div class="studio-panel-title" style="margin-top:2px;">
+              <span>RECENT CHATS</span>
+              <span id="studioHistoryCount" style="font-size:9.5px;font-family:var(--font-mono);color:var(--ink-faint);">0</span>
+            </div>
+            <div class="studio-history-list" id="studioHistoryList">
+              <div style="font-size:11.5px;color:var(--ink-faint);padding:6px 2px;">No past sessions yet.</div>
+            </div>
+
+            <div class="studio-panel-title" style="margin-top:4px;">
+              <span>MENTOR MODE</span>
+            </div>
+            <div class="studio-mode-segmented">
+              <button class="studio-mode-pill active" data-mode="pedagogical" onclick="window.setStudioMode('pedagogical', this)" title="Rigorous conceptual derivations and step-by-step physical models">
+                Pedagogical
+              </button>
+              <button class="studio-mode-pill" data-mode="socratic" onclick="window.setStudioMode('socratic', this)" title="Interactive questioning leading you to derive the answer">
+                Socratic
+              </button>
+              <button class="studio-mode-pill" data-mode="forensics" onclick="window.setStudioMode('forensics', this)" title="Deconstruct misconception traps and distractor patterns">
+                Forensics
+              </button>
+            </div>
+
+            <div class="studio-panel-title" style="margin-top:4px;">
+              <span>COGNITIVE DRILLS</span>
+            </div>
+            <div class="studio-prompt-list">
+              <button class="studio-prompt-row" onclick="window.sendStudioPrompt('What specific distractor traps am I falling for most often?')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Analyze Error Traps</span>
+              </button>
+              <button class="studio-prompt-row" onclick="window.sendStudioPrompt('What is the critical prerequisite bottleneck blocking my roadmap right now?')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                <span>Active Bottlenecks</span>
+              </button>
+              <button class="studio-prompt-row" onclick="window.sendStudioPrompt('Give me high-yield speed &amp; accuracy pacing guidelines for exam day.')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Exam Pacing Tactics</span>
+              </button>
+              <button class="studio-prompt-row" onclick="window.sendStudioPrompt('Explain the core formula and physical derivation of my weakest concept.')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span>Derive Weak Concept</span>
+              </button>
+              <button class="studio-prompt-row" onclick="window.sendStudioPrompt('Give me a 5-question targeted recovery drill matched to my ability tier.')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Targeted Recovery Drill</span>
+              </button>
+            </div>
+
+            <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--hud-line, var(--border));display:flex;align-items:center;justify-content:space-between;">
+              <button class="btn-subtle" onclick="window.clearStudioChat()" style="font-size:11.5px;color:var(--ink-faint);padding:4px 8px;display:flex;align-items:center;gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Clear Canvas</span>
+              </button>
+              <span style="font-size:11px;color:var(--status-ok, var(--green-fg));font-weight:600;display:flex;align-items:center;gap:5px;">
+                <span class="dot-live"></span> Telemetry Active
+              </span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Column 2: Grand Mentor Canvas (Center) -->
+        <main class="studio-canvas-panel">
+          <div class="panel studio-canvas-card">
+            <!-- Messages Scroll Area -->
+            <div class="studio-messages-body" id="studioMessages"></div>
+
+            <!-- Input Bar -->
+            <form class="studio-input-area" id="studioForm" onsubmit="window.handleStudioSubmit(event)">
+              <div class="studio-input-wrap">
+                <input type="text" id="studioInput" placeholder="Ask your AI Mentor anything about your syllabus, weak spots, or formulas..." autocomplete="off" />
+                <button type="submit" class="studio-send-btn" id="studioSendBtn" aria-label="Send message">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
+
+        <!-- Column 3: Live Cognitive Telemetry HUD (Right 295px) -->
+        <aside class="studio-hud-panel">
+          <div class="panel" style="height:100%;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:16px;">
+            <div class="studio-panel-title">
+              <span>COGNITIVE TELEMETRY</span>
+              <span style="font-size:10px;font-family:var(--font-mono);color:var(--ink-faint);">IRT-BKT-FSRS</span>
+            </div>
+
+            <!-- Hero Radial Arc Gauge for Latent Ability (θ) -->
+            <div class="hud-gauge-wrap">
+              <svg class="hud-gauge-svg" viewBox="0 0 120 90">
+                <path class="hud-gauge-track" d="M 31.7 76.3 A 40 40 0 1 1 88.3 76.3" />
+                <path class="hud-gauge-arc" id="hudThetaArc" d="M 31.7 76.3 A 40 40 0 1 1 88.3 76.3" />
+              </svg>
+              <div class="hud-gauge-center">
+                <span class="hud-gauge-val" id="hudThetaBadge">+0.00</span>
+                <span class="hud-gauge-label">Latent Ability (&theta;)</span>
+              </div>
+            </div>
+            <div class="hud-tier-text" id="hudAbilityTier">Diagnostic Baseline (Standby)</div>
+
+            <!-- Monospace Sparkline Strip -->
+            <div class="hud-sparkline-wrap">
+              <span class="hud-sparkline-label">HIST</span>
+              <svg class="hud-sparkline-svg" viewBox="0 0 140 18" preserveAspectRatio="none">
+                <polyline id="hudThetaSparkline" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="0,12 25,13 50,11 75,10 100,7 125,6 140,5" />
+              </svg>
+              <span class="hud-sparkline-label" style="color:var(--status-ok);">+0.12</span>
+            </div>
+
+            <!-- Secondary Syllabus Mastery Progress -->
+            <div class="hud-section">
+              <div class="prog-track" style="height:4px;border-radius:var(--hud-radius);">
+                <div class="prog-fill" id="hudMasteryFill" style="width:50%;border-radius:var(--hud-radius);"></div>
+              </div>
+              <div class="hud-secondary-metric">
+                <span>Curriculum Mastery</span>
+                <span class="hud-mono-val" id="hudMasteryPercent">50.0%</span>
+              </div>
+            </div>
+
+            <!-- Weak Concepts Watchlist -->
+            <div class="hud-section">
+              <div class="studio-panel-title">
+                <span>CRITICAL WEAK SPOTS</span>
+                <span class="count" id="hudWeakCount" style="font-size:10px;font-family:var(--font-mono);">0</span>
+              </div>
+              <div id="hudWeakConceptsList" style="display:flex;flex-direction:column;gap:6px;">
+                <div class="hud-empty-state">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>No active weak spots detected.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Prerequisite Bottlenecks -->
+            <div class="hud-section">
+              <div class="studio-panel-title">
+                <span>DAG BOTTLENECKS</span>
+              </div>
+              <div id="hudBottlenecksList" style="display:flex;flex-direction:column;gap:6px;">
+                <div class="hud-empty-state">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                  <span>All prerequisite pathways clear.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- FineWeb Grounding Citations -->
+            <div class="hud-section">
+              <div class="studio-panel-title">
+                <span>EVIDENCE CITATIONS</span>
+                <span style="font-size:9.5px;font-family:var(--font-mono);color:var(--status-ok);">1.3T CORPUS</span>
+              </div>
+              <div id="hudCitationsList" style="display:flex;flex-direction:column;gap:8px;">
+                <div class="hud-empty-state">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>Passage citations appear during chat.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
     <!-- ============ VIEW: STUDY SETTINGS ============ -->
     <div class="view" id="view-settings">
       <div class="view-head">
@@ -2177,6 +3111,8 @@
       <span class="coach-w-status"><span class="dot-live"></span>Online</span>
     </div>
     <div class="coach-w-head-actions">
+      <button class="coach-w-icon-btn" id="coachOpenStudioBtn" title="Open Full Screen Studio" aria-label="Open AI Studio" onclick="window.openStudioFromWidget(event)">↗</button>
+      <button class="coach-w-icon-btn" id="coachExpandBtn" title="Expand to Wide View" aria-label="Expand">⛶</button>
       <button class="coach-w-icon-btn" id="coachMinimizeBtn" title="Minimize" aria-label="Minimize">–</button>
       <button class="coach-w-icon-btn" id="coachCloseBtn" title="Close" aria-label="Close">✕</button>
     </div>
@@ -2524,7 +3460,9 @@ function escapeHtml(str){
    ============================================================= */
 const coachState = {
   messages: [],
-  panelState: 'closed'
+  panelState: 'closed',
+  mode: 'pedagogical',
+  telemetry: null
 };
 
 const el = {
@@ -2535,6 +3473,7 @@ const el = {
   form: document.getElementById('coachWidgetForm'),
   input: document.getElementById('coachWidgetInput'),
   sendBtn: document.getElementById('coachWidgetSend'),
+  expandBtn: document.getElementById('coachExpandBtn'),
   minimizeBtn: document.getElementById('coachMinimizeBtn'),
   closeBtn: document.getElementById('coachCloseBtn'),
   inlineForm: document.getElementById('coachInlineForm'),
@@ -2542,11 +3481,225 @@ const el = {
 };
 
 const DEFAULT_SUGGESTIONS = [
-  'What mistakes am I making most often?',
-  'Why is my study plan ordered this way?',
-  'JEE Main exam day strategy & pacing?',
-  'High-yield topics for maximum rank jump?'
+  { icon: '📊', text: 'What mistakes am I making most often?' },
+  { icon: '🗺️', text: 'Why is my study roadmap ordered this way?' },
+  { icon: '⚡', text: 'High-yield speed & pacing exam strategy' },
+  { icon: '🔬', text: 'Explain high-yield syllabus concepts' }
 ];
+
+/* Rich, Sanitized Markdown & LaTeX Formatter for Academic Mentor */
+function formatCoachMarkdown(raw) {
+  if (!raw) return '';
+  let str = String(raw).trim();
+
+  // 1. Math extraction: Protect LaTeX math ($$ ... $$ and $ ... $) from markdown regex
+  const mathTokens = [];
+  str = str.replace(/\$\$([\s\S]+?)\$\$/g, function(_, math) {
+    const idx = mathTokens.length;
+    mathTokens.push({ display: true, code: math.trim() });
+    return `__MATH_BLOCK_${idx}__`;
+  });
+  str = str.replace(/\$([^\$\n]+?)\$/g, function(_, math) {
+    const idx = mathTokens.length;
+    mathTokens.push({ display: false, code: math.trim() });
+    return `__MATH_INLINE_${idx}__`;
+  });
+
+  // 2. Escape HTML to prevent XSS
+  str = str.replace(/&/g, '&amp;')
+           .replace(/</g, '&lt;')
+           .replace(/>/g, '&gt;');
+
+  // 3. Code blocks (```lang ... ```)
+  const codeBlocks = [];
+  str = str.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    const idx = codeBlocks.length;
+    codeBlocks.push({ lang: lang || '', code: code.trim() });
+    return `__CODE_BLOCK_${idx}__`;
+  });
+
+  // 4. Split into lines to parse headings, callouts, lists, paragraphs
+  const lines = str.split('\n');
+  const out = [];
+  let inUl = false;
+  let inOl = false;
+
+  function closeLists() {
+    if (inUl) { out.push('</ul>'); inUl = false; }
+    if (inOl) { out.push('</ol>'); inOl = false; }
+  }
+
+  function formatInlines(text) {
+    // Bold: **text**
+    let s = text.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+    // Italic: *text* (avoiding double replacements)
+    s = s.replace(/(?:^|[^\*])\*([^\*]+?)\*(?!\*)/g, function(m, p1) {
+      return m.replace(`*${p1}*`, `<em>${p1}</em>`);
+    });
+    // Inline code: `code`
+    s = s.replace(/`([^`]+?)`/g, '<code class="coach-inline-code">$1</code>');
+    return s;
+  }
+
+  const calloutIcons = ['💡', '⚡', '📌', '⚠️', '🎉', '🌟', '⚖️', '🔬', '🧪', '📐', '🧬', '🤝', '🗺️', '📖'];
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    if (!line) {
+      closeLists();
+      continue;
+    }
+
+    // Headings: ### or ## or #
+    const h3Match = line.match(/^###\s+(.+)$/);
+    if (h3Match) {
+      closeLists();
+      out.push(`<div class="coach-msg-h3">${formatInlines(h3Match[1])}</div>`);
+      continue;
+    }
+    const h2Match = line.match(/^##?\s+(.+)$/);
+    if (h2Match) {
+      closeLists();
+      out.push(`<div class="coach-msg-h2">${formatInlines(h2Match[1])}</div>`);
+      continue;
+    }
+
+    // Callout boxes: lines starting with standard callout emojis or blockquote >
+    let isCallout = false;
+    let calloutIcon = '💡';
+    let calloutBody = line;
+
+    if (line.startsWith('&gt;')) {
+      isCallout = true;
+      calloutBody = line.replace(/^&gt;\s*/, '');
+    } else {
+      for (let ci = 0; ci < calloutIcons.length; ci++) {
+        if (line.startsWith(calloutIcons[ci])) {
+          isCallout = true;
+          calloutIcon = calloutIcons[ci];
+          calloutBody = line.slice(calloutIcons[ci].length).trim();
+          break;
+        }
+      }
+    }
+
+    if (isCallout) {
+      closeLists();
+      out.push(`<div class="coach-callout"><span class="coach-callout-icon">${calloutIcon}</span><div class="coach-callout-body">${formatInlines(calloutBody)}</div></div>`);
+      continue;
+    }
+
+    // Unordered list: - item or * item
+    const ulMatch = line.match(/^[-*]\s+(.+)$/);
+    if (ulMatch) {
+      if (inOl) { out.push('</ol>'); inOl = false; }
+      if (!inUl) { out.push('<ul class="coach-msg-ul">'); inUl = true; }
+      out.push(`<li class="coach-msg-li">${formatInlines(ulMatch[1])}</li>`);
+      continue;
+    }
+
+    // Ordered list: 1. item
+    const olMatch = line.match(/^(\d+)\.\s+(.+)$/);
+    if (olMatch) {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (!inOl) { out.push('<ol class="coach-msg-ol">'); inOl = true; }
+      out.push(`<li class="coach-msg-li">${formatInlines(olMatch[2])}</li>`);
+      continue;
+    }
+
+    // Standard paragraph
+    closeLists();
+    out.push(`<p class="coach-msg-p">${formatInlines(line)}</p>`);
+  }
+  closeLists();
+
+  let html = out.join('');
+
+  // 5. Restore Code Blocks
+  html = html.replace(/__CODE_BLOCK_(\d+)__/g, function(_, idx) {
+    const cb = codeBlocks[Number(idx)];
+    return `<pre class="coach-code-block"><code>${cb.code}</code></pre>`;
+  });
+
+  // 6. Restore Math
+  html = html.replace(/__MATH_BLOCK_(\d+)__/g, function(_, idx) {
+    const m = mathTokens[Number(idx)];
+    return `<div class="coach-math-block" data-tex="${m.code}">$$${m.code}$$</div>`;
+  });
+  html = html.replace(/__MATH_INLINE_(\d+)__/g, function(_, idx) {
+    const m = mathTokens[Number(idx)];
+    return `<span class="coach-math-inline" data-tex="${m.code}">$${m.code}$</span>`;
+  });
+
+  return html;
+}
+
+/* KaTeX Math Typesetting with Offline Unicode Fallback */
+function renderCoachMath(element) {
+  if (!element) return;
+  if (window.renderMathInElement) {
+    try {
+      window.renderMathInElement(element, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false }
+        ],
+        throwOnError: false
+      });
+      return;
+    } catch (e) {
+      console.warn('KaTeX auto-render skipped:', e);
+    }
+  }
+
+  // Graceful offline fallback: convert standard LaTeX math symbols into readable unicode
+  element.querySelectorAll('.coach-math-inline, .coach-math-block').forEach(function(el) {
+    let tex = el.getAttribute('data-tex') || '';
+    tex = tex.replace(/\\theta/g, 'θ')
+             .replace(/\\omega/g, 'ω')
+             .replace(/\\pi/g, 'π')
+             .replace(/\\Delta/g, 'Δ')
+             .replace(/\\lambda/g, 'λ')
+             .replace(/\\alpha/g, 'α')
+             .replace(/\\beta/g, 'β')
+             .replace(/\\approx/g, '≈')
+             .replace(/\\neq/g, '≠')
+             .replace(/\\le/g, '≤')
+             .replace(/\\ge/g, '≥')
+             .replace(/\\pm/g, '±')
+             .replace(/\\infty/g, '∞')
+             .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+             .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+             .replace(/\\text\{([^}]+)\}/g, '$1')
+             .replace(/\\implies/g, ' ⟹ ');
+    el.textContent = tex;
+  });
+}
+
+window.copyCoachReply = function(btn) {
+  const msgEl = btn.closest('.coach-w-msg');
+  if (!msgEl) return;
+  const rawText = msgEl.getAttribute('data-raw') || msgEl.innerText;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(rawText).then(function() {
+      if (window.apexToast) window.apexToast('Copied mentor response to clipboard! 📋', 'success');
+    }).catch(function() {
+      fallbackCopy(rawText);
+    });
+  } else {
+    fallbackCopy(rawText);
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    if (window.apexToast) window.apexToast('Copied mentor response to clipboard! 📋', 'success');
+  }
+};
 
 function openWidget(){
   coachState.panelState = 'open';
@@ -2581,17 +3734,17 @@ function renderMessages(){
   if (coachState.messages.length === 0){
     const intro = document.createElement('div');
     intro.className = 'coach-w-msg from-system';
-    intro.textContent = 'Ask about your syllabus, mistakes, or exam strategy.';
+    intro.innerHTML = `<strong>Study Mentor Standing By</strong><br>Ask about tricky formulas, test mistakes, syllabus roadmaps, or exam-day tactics.`;
     el.messages.appendChild(intro);
 
     const suggestWrap = document.createElement('div');
     suggestWrap.className = 'coach-w-suggestions';
-    DEFAULT_SUGGESTIONS.forEach(function(q){
+    DEFAULT_SUGGESTIONS.forEach(function(item){
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'coach-w-suggestion';
-      b.textContent = q;
-      b.addEventListener('click', function(){ handleUserQuestion(q); });
+      b.innerHTML = `<span>${item.icon}</span><span>${item.text}</span>`;
+      b.addEventListener('click', function(){ handleUserQuestion(item.text); });
       suggestWrap.appendChild(b);
     });
     el.messages.appendChild(suggestWrap);
@@ -2601,21 +3754,47 @@ function renderMessages(){
   coachState.messages.forEach(function(m){
     const bubble = document.createElement('div');
     bubble.className = 'coach-w-msg from-' + m.role;
-    bubble.textContent = m.text;
+    bubble.setAttribute('data-raw', m.text);
+
+    if (m.role === 'user') {
+      bubble.textContent = m.text;
+    } else if (m.role === 'coach') {
+      const formattedHtml = formatCoachMarkdown(m.text);
+      const timeStr = m.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      bubble.innerHTML = `
+        <div class="coach-msg-content">${formattedHtml}</div>
+        <div class="coach-msg-meta">
+          <span class="coach-msg-time">${timeStr}</span>
+          <div class="coach-msg-meta-actions">
+            <button type="button" class="coach-msg-action-btn" title="Copy response" onclick="window.copyCoachReply(this)">📋 Copy</button>
+          </div>
+        </div>
+      `;
+      renderCoachMath(bubble);
+    } else {
+      bubble.innerHTML = formatCoachMarkdown(m.text);
+    }
+
     el.messages.appendChild(bubble);
   });
   el.messages.scrollTop = el.messages.scrollHeight;
 }
 
 function appendMessage(role, text){
-  coachState.messages.push({ role: role, text: text });
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  coachState.messages.push({ role: role, text: text, time: time });
+  if (typeof persistActiveStudioSession === 'function') {
+    persistActiveStudioSession(role, text);
+  }
   renderMessages();
+  renderStudioMessages();
 }
 
-async function sendToCoach(question){
+async function sendToCoach(question, mode){
   const sid = AppState.studentId || 'general';
   const data = await ApiClient.post(`/api/ai/chat/${sid}`, {
     prompt: question,
+    mode: mode || coachState.mode || 'pedagogical',
     include_student_state: true
   });
   return data.response || data.answer || data.reply || 'No reply generated by coach.';
@@ -2637,7 +3816,7 @@ async function handleUserQuestion(question){
   el.messages.scrollTop = el.messages.scrollHeight;
 
   try {
-    const answer = await sendToCoach(question);
+    const answer = await sendToCoach(question, coachState.mode);
     typingBubble.remove();
     appendMessage('coach', answer);
   } catch (err) {
@@ -2654,6 +3833,14 @@ el.head.addEventListener('click', function(e){
     toggleFromMinimized();
   }
 });
+if (el.expandBtn) {
+  el.expandBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    const isExpanded = el.widget.classList.toggle('is-expanded');
+    el.expandBtn.textContent = isExpanded ? '❐' : '⛶';
+    el.expandBtn.title = isExpanded ? 'Contract View' : 'Expand to Wide View';
+  });
+}
 el.minimizeBtn.addEventListener('click', function(e){ e.stopPropagation(); minimizeWidget(); });
 el.closeBtn.addEventListener('click', function(e){ e.stopPropagation(); closeWidget(); });
 el.form.addEventListener('submit', function(e){
@@ -2676,6 +3863,448 @@ if (el.inlineForm){
     handleUserQuestion(q);
   });
 }
+
+/* =============================================================
+   DEDICATED AI STUDY STUDIO CONTROLLER (#view-ai-studio)
+   ============================================================= */
+const STUDIO_SESSIONS_STORAGE_KEY = 'apex_studio_sessions_v1';
+
+function getStudioSessions() {
+  try {
+    const raw = localStorage.getItem(STUDIO_SESSIONS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.warn('Could not read studio sessions:', e);
+    return [];
+  }
+}
+
+function saveStudioSessions(sessions) {
+  try {
+    localStorage.setItem(STUDIO_SESSIONS_STORAGE_KEY, JSON.stringify(sessions.slice(0, 30)));
+  } catch (e) {
+    console.warn('Could not save studio sessions:', e);
+  }
+}
+
+function getCurrentStudioSession() {
+  const sessions = getStudioSessions();
+  if (!coachState.activeSessionId) {
+    if (sessions.length > 0) {
+      coachState.activeSessionId = sessions[0].id;
+      return sessions[0];
+    }
+    return createNewStudioSession();
+  }
+  const found = sessions.find(s => s.id === coachState.activeSessionId);
+  return found || createNewStudioSession();
+}
+
+function createNewStudioSession() {
+  const id = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+  const newSession = {
+    id: id,
+    title: 'New Conversation',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    mode: coachState.mode || 'pedagogical',
+    messages: []
+  };
+  const sessions = getStudioSessions();
+  sessions.unshift(newSession);
+  saveStudioSessions(sessions);
+  coachState.activeSessionId = id;
+  return newSession;
+}
+
+function persistActiveStudioSession(role, text) {
+  const sessions = getStudioSessions();
+  if (!coachState.activeSessionId) {
+    createNewStudioSession();
+  }
+  const cur = sessions.find(s => s.id === coachState.activeSessionId);
+  if (cur) {
+    cur.messages = coachState.messages;
+    cur.updatedAt = Date.now();
+    cur.mode = coachState.mode;
+    if ((!cur.title || cur.title === 'New Conversation') && role === 'user' && text) {
+      const clean = text.replace(/[\n\r]+/g, ' ').trim();
+      cur.title = clean.length > 24 ? clean.slice(0, 24) + '…' : clean;
+    }
+    saveStudioSessions(sessions);
+    renderStudioHistoryList();
+  }
+}
+
+window.startNewStudioSession = function() {
+  const newSession = createNewStudioSession();
+  coachState.messages = [];
+  renderMessages();
+  renderStudioMessages();
+  renderStudioHistoryList();
+  const input = document.getElementById('studioInput');
+  if (input) input.focus();
+  if (window.apexToast) window.apexToast('Started new AI conversation.', 'info');
+};
+
+window.loadStudioSession = function(sessionId) {
+  const sessions = getStudioSessions();
+  const session = sessions.find(s => s.id === sessionId);
+  if (!session) return;
+  coachState.activeSessionId = sessionId;
+  coachState.messages = session.messages || [];
+  if (session.mode) {
+    coachState.mode = session.mode;
+    document.querySelectorAll('.studio-mode-pill, .studio-mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === session.mode);
+    });
+  }
+  renderMessages();
+  renderStudioMessages();
+  renderStudioHistoryList();
+  if (window.apexToast) window.apexToast(`Switched chat: ${session.title}`, 'info');
+};
+
+window.deleteStudioSession = function(sessionId, e) {
+  if (e) e.stopPropagation();
+  let sessions = getStudioSessions();
+  sessions = sessions.filter(s => s.id !== sessionId);
+  saveStudioSessions(sessions);
+  if (coachState.activeSessionId === sessionId) {
+    if (sessions.length > 0) {
+      window.loadStudioSession(sessions[0].id);
+    } else {
+      window.startNewStudioSession();
+    }
+  } else {
+    renderStudioHistoryList();
+  }
+  if (window.apexToast) window.apexToast('Conversation removed.', 'info');
+};
+
+function renderStudioHistoryList() {
+  const listEl = document.getElementById('studioHistoryList');
+  const countEl = document.getElementById('studioHistoryCount');
+  if (!listEl) return;
+  const sessions = getStudioSessions();
+  if (countEl) countEl.textContent = sessions.length;
+
+  if (sessions.length === 0) {
+    listEl.innerHTML = '<div style="font-size:11.5px;color:var(--ink-faint);padding:6px 2px;">No past sessions yet.</div>';
+    return;
+  }
+
+  listEl.innerHTML = sessions.map(s => {
+    const isActive = s.id === coachState.activeSessionId;
+    return `
+      <div class="studio-history-item ${isActive ? 'active' : ''}" onclick="window.loadStudioSession('${s.id}')" title="${escapeHtml(s.title)}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.6;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="studio-history-title">${escapeHtml(s.title || 'Conversation')}</span>
+        <button type="button" class="studio-history-delete" onclick="window.deleteStudioSession('${s.id}', event)" title="Delete session" aria-label="Delete session">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+window.renderStudioHistoryList = renderStudioHistoryList;
+
+function renderStudioMessages() {
+  const container = document.getElementById('studioMessages');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (coachState.messages.length === 0) {
+    const welcome = document.createElement('div');
+    welcome.className = 'studio-msg from-system';
+    welcome.innerHTML = `
+      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:6px;">🤖 Welcome to the AI Cognitive Mentor Studio</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;">Grounded in your real-time IRT latent ability ($\theta$), BKT masteries, mistake forensics, and FineWeb-Edu citations. Select a mentor mode or quick prompt chip on the left, or ask any syllabus question below.</div>
+    `;
+    container.appendChild(welcome);
+    renderCoachMath(welcome);
+    return;
+  }
+
+  coachState.messages.forEach(function(m) {
+    const bubble = document.createElement('div');
+    bubble.className = 'studio-msg from-' + m.role;
+    bubble.setAttribute('data-raw', m.text);
+
+    if (m.role === 'user') {
+      bubble.textContent = m.text;
+    } else if (m.role === 'coach') {
+      const formattedHtml = formatCoachMarkdown(m.text);
+      const timeStr = m.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      bubble.innerHTML = `
+        <div class="coach-msg-content">${formattedHtml}</div>
+        <div class="coach-msg-meta">
+          <span class="coach-msg-time">${timeStr}</span>
+          <div class="coach-msg-meta-actions">
+            <button type="button" class="coach-msg-action-btn" title="Copy response" onclick="window.copyCoachReply(this)">📋 Copy</button>
+          </div>
+        </div>
+      `;
+      renderCoachMath(bubble);
+    } else {
+      bubble.innerHTML = formatCoachMarkdown(m.text);
+      renderCoachMath(bubble);
+    }
+
+    container.appendChild(bubble);
+  });
+  container.scrollTop = container.scrollHeight;
+}
+window.renderStudioMessages = renderStudioMessages;
+
+window.loadStudioTelemetryHud = async function() {
+  const sid = AppState.studentId || 'general';
+  try {
+    const hud = await ApiClient.get(`/api/ai/telemetry-hud/${sid}`);
+    coachState.telemetry = hud;
+
+    // 1. Exam badge
+    const examBadge = document.getElementById('studioExamBadge');
+    if (examBadge) {
+      const examName = hud.target_exam || AppState.targetExam || 'JEE';
+      const examLabel = examName === 'NEET' ? 'NEET Mode' : (examName === 'UPSC' ? 'UPSC Mode' : 'JEE Mode');
+      examBadge.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>${escapeHtml(examLabel)}</span>
+      `;
+    }
+
+    // 2. Latent Ability Theta Arc Gauge & Tier
+    const th = hud.latent_ability_theta !== undefined ? Number(hud.latent_ability_theta) : 0.0;
+    const thetaBadge = document.getElementById('hudThetaBadge');
+    const thetaArc = document.getElementById('hudThetaArc');
+    if (thetaBadge) {
+      thetaBadge.textContent = `${th >= 0 ? '+' : ''}${th.toFixed(2)}`;
+      if (th >= 0.7) {
+        thetaBadge.style.color = 'var(--status-ok)';
+      } else if (th < -0.5) {
+        thetaBadge.style.color = 'var(--status-warn)';
+      } else {
+        thetaBadge.style.color = 'var(--ink)';
+      }
+    }
+    if (thetaArc) {
+      // Normalizing th in [-2.5, +2.5] to [0.05, 0.95]
+      const norm = Math.min(Math.max((th + 2.5) / 5.0, 0.05), 0.95);
+      const dashoffset = 188.5 * (1 - norm);
+      thetaArc.style.strokeDashoffset = dashoffset.toFixed(1);
+      if (th >= 0.7) {
+        thetaArc.style.stroke = 'var(--status-ok)';
+      } else if (th < -0.5) {
+        thetaArc.style.stroke = 'var(--status-warn)';
+      } else {
+        thetaArc.style.stroke = 'var(--purple)';
+      }
+    }
+    const abilityTier = document.getElementById('hudAbilityTier');
+    if (abilityTier) {
+      abilityTier.textContent = hud.ability_tier || 'Diagnostic Baseline (Standby)';
+    }
+
+    // 3. Overall Mastery Fill & Percent
+    const masteryFill = document.getElementById('hudMasteryFill');
+    const masteryPercent = document.getElementById('hudMasteryPercent');
+    const mVal = hud.overall_mastery !== undefined ? Number(hud.overall_mastery) : 50.0;
+    if (masteryFill) masteryFill.style.width = `${Math.min(Math.max(mVal, 5), 100)}%`;
+    if (masteryPercent) masteryPercent.textContent = `${mVal.toFixed(1)}%`;
+
+    // 4. Critical Weak Concepts (Instrument left-accent items)
+    const weakListEl = document.getElementById('hudWeakConceptsList');
+    const weakCountEl = document.getElementById('hudWeakCount');
+    const weakConcepts = hud.weak_concepts || [];
+    if (weakCountEl) weakCountEl.textContent = weakConcepts.length;
+    if (weakListEl) {
+      if (weakConcepts.length === 0) {
+        weakListEl.innerHTML = `
+          <div class="hud-empty-state">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>No critical weak spots detected.</span>
+          </div>`;
+      } else {
+        weakListEl.innerHTML = weakConcepts.map(wc => `
+          <button type="button" class="hud-item is-warn is-clickable" onclick="window.sendStudioPrompt('Explain the core derivation and formulas for ${escapeHtml(wc.name)}')" title="Click to unpack derivation">
+            <div class="hud-item-header">
+              <span class="hud-item-name">${escapeHtml(wc.name)}</span>
+              <span class="hud-item-pct" style="color:var(--status-warn);">${wc.mastery}%</span>
+            </div>
+            <div style="font-size:10px;color:var(--ink-faint);display:flex;justify-content:space-between;margin-top:2px;">
+              <span>FSRS Decaying</span>
+              <span style="color:var(--status-warn);font-weight:600;">Drill &rarr;</span>
+            </div>
+          </button>
+        `).join('');
+      }
+    }
+
+    // 5. Active Prerequisite Bottlenecks (Instrument critical-accent items)
+    const bottlenecksEl = document.getElementById('hudBottlenecksList');
+    const bottlenecks = hud.prerequisite_bottlenecks || [];
+    if (bottlenecksEl) {
+      if (bottlenecks.length === 0) {
+        bottlenecksEl.innerHTML = `
+          <div class="hud-empty-state">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            <span>All prerequisite pathways clear.</span>
+          </div>`;
+      } else {
+        bottlenecksEl.innerHTML = bottlenecks.map(b => `
+          <div class="hud-item is-critical">
+            <div class="hud-item-header">
+              <span class="hud-item-name">${escapeHtml(b.target_concept)}</span>
+              <span class="hud-item-pct" style="color:var(--status-critical);">${b.prerequisite_mastery}%</span>
+            </div>
+            <div style="font-size:10.5px;color:var(--ink-soft);margin-top:2px;">
+              Prereq: <b style="color:var(--purple);">${escapeHtml(b.blocking_prerequisite)}</b>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 6. FineWeb-Edu Academic Citations
+    const citationsEl = document.getElementById('hudCitationsList');
+    const citations = hud.fineweb_citations || [];
+    if (citationsEl) {
+      if (citations.length === 0) {
+        citationsEl.innerHTML = `
+          <div class="hud-empty-state">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Passage citations appear during chat.</span>
+          </div>`;
+      } else {
+        citationsEl.innerHTML = citations.map((c, idx) => `
+          <div class="hud-citation-block">
+            <div class="hud-citation-header">
+              <span class="hud-cite-idx">[${idx + 1}]</span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(c.title)}</span>
+            </div>
+            <div class="hud-citation-meta">${escapeHtml(c.chapter)} &bull; ${c.reading_time_mins || 3} min read</div>
+            ${c.formula ? `<div class="coach-math-inline" data-tex="${escapeHtml(c.formula)}" style="margin-top:3px;font-size:11px;color:var(--purple);font-family:var(--font-mono);">$${escapeHtml(c.formula)}$</div>` : ''}
+          </div>
+        `).join('');
+        renderCoachMath(citationsEl);
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load telemetry HUD:', err);
+  }
+};
+
+window.setStudioMode = function(mode, btn) {
+  coachState.mode = mode;
+  document.querySelectorAll('.studio-mode-pill, .studio-mode-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (window.apexToast) {
+    const titles = { pedagogical: 'Pedagogical Mentor', socratic: 'Socratic Coach', forensics: 'Mistake Forensics' };
+    window.apexToast(`Switched mentor mode to ${titles[mode] || mode}`, 'info');
+  }
+};
+
+window.sendStudioPrompt = function(text) {
+  const input = document.getElementById('studioInput');
+  if (input) input.value = text;
+  window.handleStudioSubmit();
+};
+
+window.handleStudioSubmit = async function(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('studioInput');
+  const sendBtn = document.getElementById('studioSendBtn');
+  const question = (input ? input.value : '').trim();
+  if (!question) return;
+
+  if (input) input.value = '';
+  appendMessage('user', question);
+  if (sendBtn) sendBtn.disabled = true;
+
+  const studioMessages = document.getElementById('studioMessages');
+  const typingBubble = document.createElement('div');
+  typingBubble.className = 'studio-msg from-coach typing';
+  typingBubble.id = 'studioTypingIndicator';
+  typingBubble.innerHTML = '<span></span><span></span><span></span>';
+  if (studioMessages) {
+    studioMessages.appendChild(typingBubble);
+    studioMessages.scrollTop = studioMessages.scrollHeight;
+  }
+
+  try {
+    const answer = await sendToCoach(question, coachState.mode);
+    typingBubble.remove();
+    appendMessage('coach', answer);
+  } catch (err) {
+    typingBubble.remove();
+    appendMessage('system', 'Could not reach the mentor backend (' + err.message + ').');
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+    if (input) input.focus();
+  }
+};
+
+window.clearStudioChat = function() {
+  coachState.messages = [];
+  if (coachState.activeSessionId) {
+    const sessions = getStudioSessions();
+    const cur = sessions.find(s => s.id === coachState.activeSessionId);
+    if (cur) {
+      cur.messages = [];
+      cur.title = 'New Conversation';
+      saveStudioSessions(sessions);
+    }
+  }
+  renderMessages();
+  renderStudioMessages();
+  renderStudioHistoryList();
+  if (window.apexToast) window.apexToast('Current conversation cleared.', 'info');
+};
+
+window.openStudioFromWidget = function(e) {
+  if (e) e.stopPropagation();
+  closeWidget();
+  window.switchView('view-ai-studio');
+};
+
+window.exitStudioMode = function() {
+  window.switchView('view-dashboard');
+};
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.body.classList.contains('in-studio')) {
+    window.exitStudioMode();
+  }
+});
+
+function renderAiStudio() {
+  const examBadge = document.getElementById('studioExamBadge');
+  if (examBadge) {
+    const exam = AppState.targetExam || 'JEE';
+    const examLabel = exam === 'NEET' ? 'NEET Mode' : (exam === 'UPSC' ? 'UPSC Mode' : 'JEE Mode');
+    examBadge.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      <span>${escapeHtml(examLabel)}</span>
+    `;
+  }
+  const cur = getCurrentStudioSession();
+  if (cur) {
+    coachState.messages = cur.messages || [];
+    if (cur.mode) {
+      coachState.mode = cur.mode;
+      document.querySelectorAll('.studio-mode-pill, .studio-mode-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === cur.mode);
+      });
+    }
+  }
+  renderStudioMessages();
+  renderStudioHistoryList();
+  window.loadStudioTelemetryHud();
+  const input = document.getElementById('studioInput');
+  if (input) setTimeout(() => input.focus(), 150);
+}
+window.renderAiStudio = renderAiStudio;
 
 /* =============================================================
    MOBILE NAVIGATION & TABS CONTROLLER
@@ -3419,9 +5048,21 @@ function switchView(viewId, scrollToId){
     t.classList.toggle('active', t.dataset.view === viewId && !t.dataset.scrollTo);
   });
 
-  if (!lazyRendered[viewId]){
-    renderView(viewId);
-    lazyRendered[viewId] = true;
+  if (viewId === 'view-ai-studio') {
+    document.body.classList.add('in-studio');
+    const fab = document.getElementById('coachFab');
+    const wid = document.getElementById('coachWidget');
+    if (fab) fab.style.display = 'none';
+    if (wid) wid.classList.remove('is-open', 'is-maximized');
+    renderAiStudio();
+  } else {
+    document.body.classList.remove('in-studio');
+    const fab = document.getElementById('coachFab');
+    if (fab) fab.style.display = '';
+    if (!lazyRendered[viewId]){
+      renderView(viewId);
+      lazyRendered[viewId] = true;
+    }
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3448,6 +5089,7 @@ function renderView(viewId){
   if (viewId === 'view-syllabus') renderSyllabus();
   if (viewId === 'view-upsc-mains') initUpscMainsLab();
   if (viewId === 'view-knowledge-vault') renderKnowledgeVault();
+  if (viewId === 'view-ai-studio') renderAiStudio();
 }
 
 

@@ -12,8 +12,18 @@ from backend.app.schemas.pydantic_models import AIChatRequest, AIChatResponse, A
 from backend.app.ai.local_llm import LocalLLMClient
 from backend.app.ai.explanation import ExplanationGenerator
 from backend.app.ai.question_generator import AIQuestionGenerator
+from backend.app.ai.omni_context import OmniContextHarvester
 
 router = APIRouter(prefix="/ai", tags=["Offline AI Assistant & Tools"])
+
+@router.get("/telemetry-hud/{student_id}")
+async def get_student_telemetry_hud(
+    student_id: str,
+    db: Session = Depends(get_db)
+):
+    """Returns live student cognitive telemetry: IRT ability, weak concepts, DAG bottlenecks, and FineWeb citations."""
+    hud_data = OmniContextHarvester.harvest_full_context(student_id, db)
+    return hud_data
 
 @router.post("/chat/{student_id}", response_model=AIChatResponse)
 async def chat_with_assistant(
@@ -132,8 +142,45 @@ async def chat_with_assistant(
                     "estimated_minutes": a.estimated_minutes
                 })
 
+    # Harvest deep omni-context across psychometrics, weak concepts, DAG bottlenecks, and FineWeb readings
+    try:
+        omni_ctx = OmniContextHarvester.harvest_full_context(student_id, db, req.get_prompt())
+        for k, v in omni_ctx.items():
+            if k not in student_context or not student_context[k]:
+                student_context[k] = v
+    except Exception as e:
+        pass
+
+    mode = (req.mode or "pedagogical").lower()
+    student_context["mode"] = mode
+
+    # Build omni-context grounding block
+    grounding_str = OmniContextHarvester.format_grounding_block(student_context, mode=mode)
+
+    mode_instructions = {
+        "socratic": (
+            "Mode: SOCRATIC COACH. Do NOT provide direct full solutions immediately. "
+            "Ask probing conceptual questions, guide the student step-by-step to deduce formulas or identify errors, "
+            "and encourage active problem solving."
+        ),
+        "forensics": (
+            "Mode: MISTAKE FORENSICS & STRATEGIST. Focus specifically on analyzing error patterns, "
+            "explaining why particular distractor traps were fallen for, contrasting student answers with correct keys, "
+            "and giving pacing and negative marking defense guidelines."
+        ),
+        "pedagogical": (
+            "Mode: PEDAGOGICAL MENTOR. Deliver clear, academically rigorous derivations, "
+            "explain theoretical foundations step-by-step, format all formulas with standard LaTeX ($...$ and $$...$$), "
+            "and provide structured concept summaries."
+        )
+    }
+    mode_guidance = mode_instructions.get(mode, mode_instructions["pedagogical"])
+
+    exam_label = student.target_exam if student and student.target_exam else "JEE"
     system_prompt = (
-        f"You are an offline pedagogical AI study mentor for {student.target_exam if student else 'JEE/NEET'}. "
+        f"You are an offline pedagogical AI study mentor for {exam_label}.\n"
+        f"{mode_guidance}\n\n"
+        f"Real-Time Student Cognitive Grounding:\n{grounding_str}\n\n"
         "Your role is to guide the student, explain concepts and error patterns, "
         "explain why their dynamic roadmap was sequenced the way it was, and give direct, rigorous guidance. "
         "All adaptive diagnostic engines are active on standby with zero compulsory barriers."
