@@ -46,7 +46,8 @@ class OmniContextHarvester:
             "recent_mistakes": [],
             "latest_quiz": None,
             "active_roadmap": None,
-            "fineweb_citations": []
+            "fineweb_citations": [],
+            "lifetime_diagnostics": None
         }
 
         student = db.query(Student).filter(Student.student_id == student_id).first()
@@ -284,7 +285,147 @@ class OmniContextHarvester:
                     break
 
         context["fineweb_citations"] = relevant_readings[:2]
+        # 6. LIFETIME DIAGNOSTIC MEMORY (All Quizzes & Practice History)
+        context["lifetime_diagnostics"] = OmniContextHarvester.harvest_lifetime_diagnostics(student_id, db)
         return context
+
+    @staticmethod
+    def harvest_lifetime_diagnostics(student_id: str, db: Session) -> Dict[str, Any]:
+        """
+        Harvests student's complete historical record across all completed assessments,
+        quizzes, and student attempt items.
+        Returns:
+            - total_assessments: total completed attempts
+            - total_questions_attempted: total items answered
+            - total_correct: correct count
+            - overall_accuracy_pct: percentage
+            - total_time_spent_seconds: sum of time
+            - error_breakdown: { "CALCULATION_ERROR": count, "CONCEPTUAL_ERROR": count, ... }
+            - top_error_types: sorted list of {"error_type": ..., "count": ...}
+            - subject_breakdown: { "Physics": {"total": x, "correct": y, "accuracy_pct": z}, ... }
+            - recurring_traps: list of distinct distractor trap messages
+            - chronological_scores: list of attempts with date, score, correct_count, total_questions
+            - lifetime_mistakes: recent mistakes across all tests
+        """
+        diagnostics: Dict[str, Any] = {
+            "total_assessments": 0,
+            "total_questions_attempted": 0,
+            "total_correct": 0,
+            "overall_accuracy_pct": 0.0,
+            "total_time_spent_seconds": 0,
+            "error_breakdown": {},
+            "top_error_types": [],
+            "subject_breakdown": {},
+            "recurring_traps": [],
+            "chronological_scores": [],
+            "lifetime_mistakes": []
+        }
+
+        attempts = (
+            db.query(AssessmentAttempt)
+            .filter(AssessmentAttempt.student_id == student_id, AssessmentAttempt.is_completed == True)
+            .order_by(AssessmentAttempt.started_at.asc())
+            .all()
+        )
+        if not attempts:
+            return diagnostics
+
+        diagnostics["total_assessments"] = len(attempts)
+        diagnostics["total_time_spent_seconds"] = sum(a.time_taken_seconds or 0 for a in attempts)
+
+        chronological = []
+        attempt_ids = []
+        for a in attempts:
+            attempt_ids.append(a.attempt_id)
+            title = "Practice Assessment"
+            if a.assessment and a.assessment.title:
+                title = a.assessment.title
+            date_str = a.started_at.strftime("%b %d, %H:%M") if a.started_at else "Recent"
+            chronological.append({
+                "attempt_id": a.attempt_id,
+                "title": title,
+                "score_percentage": round(a.score_percentage or 0.0, 1),
+                "correct_count": a.correct_count or 0,
+                "total_questions": a.total_questions or 0,
+                "date": date_str
+            })
+        diagnostics["chronological_scores"] = chronological
+
+        # Query all items
+        items = (
+            db.query(StudentAttemptItem, Question)
+            .join(Question, StudentAttemptItem.question_id == Question.question_id)
+            .filter(StudentAttemptItem.attempt_id.in_(attempt_ids))
+            .all()
+        )
+
+        total_q = len(items)
+        correct_q = sum(1 for item, _ in items if item.is_correct)
+        diagnostics["total_questions_attempted"] = total_q
+        diagnostics["total_correct"] = correct_q
+        if total_q > 0:
+            diagnostics["overall_accuracy_pct"] = round((correct_q / total_q) * 100, 1)
+
+        err_counts: Dict[str, int] = {}
+        trap_notes: Dict[str, int] = {}
+        subject_stats: Dict[str, Dict[str, int]] = {}
+        all_mistakes = []
+
+        for item, q in items:
+            sub = q.subject or "General"
+            if sub not in subject_stats:
+                subject_stats[sub] = {"total": 0, "correct": 0}
+            subject_stats[sub]["total"] += 1
+            if item.is_correct:
+                subject_stats[sub]["correct"] += 1
+            else:
+                etype = item.error_type or "CONCEPTUAL_ERROR"
+                err_counts[etype] = err_counts.get(etype, 0) + 1
+
+                distractor_note = None
+                if q.distractor_explanations and item.student_answer:
+                    distractor_note = q.distractor_explanations.get(item.student_answer)
+                    if distractor_note:
+                        trap_notes[distractor_note] = trap_notes.get(distractor_note, 0) + 1
+
+                all_mistakes.append({
+                    "question_id": q.question_id,
+                    "subject": q.subject,
+                    "concept_id": q.concept_id,
+                    "student_answer": item.student_answer,
+                    "correct_answer": q.correct_answer,
+                    "error_type": etype,
+                    "distractor_note": distractor_note,
+                    "time_taken_seconds": item.time_taken_seconds,
+                    "content_snippet": (q.content[:120] + "...") if q.content and len(q.content) > 120 else q.content,
+                    "explanation": q.explanation
+                })
+
+        diagnostics["error_breakdown"] = err_counts
+        diagnostics["top_error_types"] = sorted(
+            [{"error_type": k, "count": v} for k, v in err_counts.items()],
+            key=lambda x: x["count"],
+            reverse=True
+        )
+
+        for sub, sdata in subject_stats.items():
+            tot = sdata["total"]
+            cor = sdata["correct"]
+            pct = round((cor / tot) * 100, 1) if tot > 0 else 0.0
+            diagnostics["subject_breakdown"][sub] = {
+                "total": tot,
+                "correct": cor,
+                "accuracy_pct": pct
+            }
+
+        diagnostics["recurring_traps"] = sorted(
+            [{"note": k, "frequency": v} for k, v in trap_notes.items()],
+            key=lambda x: x["frequency"],
+            reverse=True
+        )[:5]
+
+        diagnostics["lifetime_mistakes"] = all_mistakes[-20:]
+        return diagnostics
 
     @staticmethod
     def format_grounding_block(context: Dict[str, Any], mode: str = "pedagogical") -> str:
@@ -295,6 +436,20 @@ class OmniContextHarvester:
         lines.append(f"Student: {context.get('student_name', 'Aspirant')} | Target Exam: {context.get('target_exam', 'JEE')}")
         lines.append(f"IRT Latent Ability theta: {context.get('latent_ability_theta', 0.0)} ({context.get('ability_tier', 'Standard')})")
         lines.append(f"Overall Mastery: {context.get('overall_mastery', 0.0)}%")
+
+        life = context.get("lifetime_diagnostics")
+        if life and life.get("total_questions_attempted", 0) > 0:
+            lines.append(
+                f"Lifetime History: {life['total_questions_attempted']} Qs across {life['total_assessments']} assessments ({life['overall_accuracy_pct']}% overall accuracy)"
+            )
+            top_errs = life.get("top_error_types", [])
+            if top_errs:
+                err_str = ", ".join(f"{e['error_type']} ({e['count']}x)" for e in top_errs[:3])
+                lines.append(f"Dominant Lifetime Error Modes: {err_str}")
+            rec_traps = life.get("recurring_traps", [])
+            if rec_traps:
+                trap_str = "; ".join(f"'{t['note']}' (x{t['frequency']})" for t in rec_traps[:2])
+                lines.append(f"Recurring Distractor Traps: {trap_str}")
 
         weak = context.get("weak_concepts", [])
         if weak:

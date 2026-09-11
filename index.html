@@ -3114,7 +3114,20 @@
             </h1>
             <p>Dedicated full-screen workspace grounded in your real-time psychometrics, curriculum DAG bottlenecks, past mistake distractor logs, and FineWeb-Edu textbook readings.</p>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <!-- Studio Workspace View Switcher -->
+            <div class="studio-view-segmented" id="studioViewSelector" style="display:inline-flex;background:var(--track-bg);border:1px solid var(--border);border-radius:18px;padding:2px;gap:2px;">
+              <button type="button" class="studio-view-pill active" id="btnStudioViewChat" onclick="window.setStudioWorkspaceView('chat')" style="padding:4px 11px;font-size:11.5px;font-weight:700;border:none;border-radius:14px;cursor:pointer;background:var(--purple);color:#fff;display:flex;align-items:center;gap:5px;transition:all .15s ease;">
+                <span>💬 Chat</span>
+              </button>
+              <button type="button" class="studio-view-pill" id="btnStudioViewSplit" onclick="window.setStudioWorkspaceView('split')" style="padding:4px 11px;font-size:11.5px;font-weight:700;border:none;border-radius:14px;cursor:pointer;background:transparent;color:var(--ink-soft);display:flex;align-items:center;gap:5px;transition:all .15s ease;">
+                <span>◫ Split View</span>
+              </button>
+              <button type="button" class="studio-view-pill" id="btnStudioViewBoard" onclick="window.setStudioWorkspaceView('board')" style="padding:4px 11px;font-size:11.5px;font-weight:700;border:none;border-radius:14px;cursor:pointer;background:transparent;color:var(--ink-soft);display:flex;align-items:center;gap:5px;transition:all .15s ease;">
+                <span>📋 Smart Board</span>
+              </button>
+            </div>
+
             <span class="chip chip-purple" id="studioExamBadge" style="font-weight:700;display:flex;align-items:center;gap:5px;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               <span>JEE Mode</span>
@@ -3204,9 +3217,10 @@
           </div>
         </aside>
 
-        <!-- Column 2: Grand Mentor Canvas (Center) -->
-        <main class="studio-canvas-panel">
-          <div class="panel studio-canvas-card">
+        <!-- Column 2: Grand Mentor Canvas & Smart Board Area (Center) -->
+        <main class="studio-canvas-panel" id="studioMainCanvasPanel" style="display:flex;gap:12px;overflow:hidden;min-width:0;">
+          <!-- Center Sub-Pane 1: Chat Conversation Card -->
+          <div class="panel studio-canvas-card" id="studioChatContainer" style="flex:1;min-width:0;display:flex;flex-direction:column;width:100%;">
             <!-- Messages Scroll Area -->
             <div class="studio-messages-body" id="studioMessages"></div>
 
@@ -3219,6 +3233,87 @@
                 </button>
               </div>
             </form>
+          </div>
+
+          <!-- Center Sub-Pane 2: Interactive Smart Board Card -->
+          <div class="panel studio-canvas-card" id="studioSmartBoardContainer" style="flex:1;min-width:0;display:none;flex-direction:column;overflow:hidden;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-md);">
+            <!-- Smart Board Control Bar & Navigation Tabs -->
+            <div style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--track-bg);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="font-size:12.5px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:5px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--purple);"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  <span>Smart Board</span>
+                </span>
+                <span class="chip chip-purple" style="font-size:9.5px;padding:1px 6px;">Pure Memory</span>
+              </div>
+
+              <div style="display:inline-flex;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2px;gap:2px;">
+                <button type="button" class="sb-nav-pill active" id="sbTabTopicBtn" onclick="window.setSmartboardTab('topic')" style="padding:3px 8px;font-size:11px;font-weight:700;border:none;border-radius:12px;background:var(--purple);color:#fff;cursor:pointer;">
+                  📌 Topic &amp; Formulas
+                </button>
+                <button type="button" class="sb-nav-pill" id="sbTabMistakesBtn" onclick="window.setSmartboardTab('mistakes')" style="padding:3px 8px;font-size:11px;font-weight:700;border:none;border-radius:12px;background:transparent;color:var(--ink-soft);cursor:pointer;">
+                  ⚠️ Mistake Inspector (<span id="sbMistakesCountBadge">0</span>)
+                </button>
+                <button type="button" class="sb-nav-pill" id="sbTabDerivationBtn" onclick="window.setSmartboardTab('derivation')" style="padding:3px 8px;font-size:11px;font-weight:700;border:none;border-radius:12px;background:transparent;color:var(--ink-soft);cursor:pointer;">
+                  📐 Derivation Canvas
+                </button>
+              </div>
+            </div>
+
+            <!-- Smart Board Scrollable Canvas Container -->
+            <div id="smartboardCanvasBody" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;">
+              <!-- 1. Topic View -->
+              <div id="sbViewTopic" style="display:flex;flex-direction:column;gap:12px;">
+                <div id="sbTopicContent">
+                  <div style="text-align:center;padding:28px 14px;color:var(--ink-soft);">
+                    <div style="font-size:30px;margin-bottom:6px;">📌</div>
+                    <div style="font-weight:700;font-size:13.5px;color:var(--ink);">Project Any Concept Onto the Smart Board</div>
+                    <p style="font-size:12px;margin:4px auto 12px;max-width:320px;">Click any weak concept in the telemetry sidebar, click a mistake in chat, or select a high-yield topic below.</p>
+                    <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;" id="sbQuickTopicPills"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Mistake Inspector View -->
+              <div id="sbViewMistakes" style="display:none;flex-direction:column;gap:12px;">
+                <div id="sbLifetimeSummaryCard" style="background:var(--track-bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;">
+                  <div style="font-size:10.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Lifetime Assessment Telemetry</div>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;" id="sbLifetimeStatsGrid">
+                    <div style="background:var(--card);padding:6px;border-radius:8px;border:1px solid var(--border);">
+                      <div style="font-size:15px;font-weight:800;color:var(--purple);" id="sbStatTotalTests">0</div>
+                      <div style="font-size:9.5px;color:var(--ink-faint);">Total Tests</div>
+                    </div>
+                    <div style="background:var(--card);padding:6px;border-radius:8px;border:1px solid var(--border);">
+                      <div style="font-size:15px;font-weight:800;color:var(--ink);" id="sbStatTotalQs">0</div>
+                      <div style="font-size:9.5px;color:var(--ink-faint);">Questions</div>
+                    </div>
+                    <div style="background:var(--card);padding:6px;border-radius:8px;border:1px solid var(--border);">
+                      <div style="font-size:15px;font-weight:800;color:var(--status-ok);" id="sbStatAccuracy">0.0%</div>
+                      <div style="font-size:9.5px;color:var(--ink-faint);">Accuracy</div>
+                    </div>
+                    <div style="background:var(--card);padding:6px;border-radius:8px;border:1px solid var(--border);">
+                      <div style="font-size:15px;font-weight:800;color:var(--status-warn);" id="sbStatDominantTrap">None</div>
+                      <div style="font-size:9.5px;color:var(--ink-faint);">Dominant Trap</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="sbMistakesList" style="display:flex;flex-direction:column;gap:8px;">
+                  <div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:12px;">Loading lifetime mistakes...</div>
+                </div>
+              </div>
+
+              <!-- 3. Derivation Whiteboard View -->
+              <div id="sbViewDerivation" style="display:none;flex-direction:column;gap:12px;">
+                <div id="sbDerivationContent">
+                  <div style="background:var(--track-bg);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                    <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;" id="sbDerivationTitle">Whiteboard Derivation Canvas</div>
+                    <p style="font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;">Step-by-step rigorous physical and mathematical derivations grounded in standard academic textbooks.</p>
+                    <div id="sbDerivationSteps" style="display:flex;flex-direction:column;gap:8px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
 
@@ -4705,17 +4800,26 @@ window.loadStudioTelemetryHud = async function() {
           </div>`;
       } else {
         weakListEl.innerHTML = weakConcepts.map(wc => `
-          <button type="button" class="hud-item is-warn is-clickable" onclick="window.sendStudioPrompt('Explain the core derivation and formulas for ${escapeHtml(wc.name)}')" title="Click to unpack derivation">
+          <button type="button" class="hud-item is-warn is-clickable" onclick="window.loadSmartboardTopic('${wc.concept_id}'); window.sendStudioPrompt('Explain the core derivation and formulas for ${escapeHtml(wc.name)}')" title="Click to project onto Smart Board & unpack derivation">
             <div class="hud-item-header">
               <span class="hud-item-name">${escapeHtml(wc.name)}</span>
               <span class="hud-item-pct" style="color:var(--status-warn);">${wc.mastery}%</span>
             </div>
             <div style="font-size:10px;color:var(--ink-faint);display:flex;justify-content:space-between;margin-top:2px;">
               <span>FSRS Decaying</span>
-              <span style="color:var(--status-warn);font-weight:600;">Drill &rarr;</span>
+              <span style="color:var(--purple);font-weight:700;">Board &rarr;</span>
             </div>
           </button>
         `).join('');
+
+        const quickPillsEl = document.getElementById('sbQuickTopicPills');
+        if (quickPillsEl && weakConcepts.length > 0) {
+          quickPillsEl.innerHTML = weakConcepts.map(wc => `
+            <button type="button" class="btn-subtle" onclick="window.loadSmartboardTopic('${wc.concept_id}')" style="padding:4px 10px;font-size:11.5px;border-radius:14px;border:1px solid var(--purple-border);color:var(--purple);background:var(--card);cursor:pointer;">
+              📌 ${escapeHtml(wc.name)}
+            </button>
+          `).join('');
+        }
       }
     }
 
@@ -4883,6 +4987,387 @@ function renderAiStudio() {
   if (input) setTimeout(() => input.focus(), 150);
 }
 window.renderAiStudio = renderAiStudio;
+
+/* =============================================================
+   AI COGNITIVE MENTOR: SMART BOARD & WORKSPACE CONTROLLER
+   ============================================================= */
+window.studioWorkspaceState = {
+  view: 'chat',
+  activeTab: 'topic',
+  currentConceptId: null,
+  cachedTopic: null,
+  cachedMistakes: null,
+  cachedDiagnostics: null
+};
+
+window.setStudioWorkspaceView = function(view) {
+  window.studioWorkspaceState.view = view;
+  const chatBtn = document.getElementById('btnStudioViewChat');
+  const splitBtn = document.getElementById('btnStudioViewSplit');
+  const boardBtn = document.getElementById('btnStudioViewBoard');
+  
+  [chatBtn, splitBtn, boardBtn].forEach(b => {
+    if (b) {
+      b.style.background = 'transparent';
+      b.style.color = 'var(--ink-soft)';
+      b.classList.remove('active');
+    }
+  });
+
+  const chatPane = document.getElementById('studioChatContainer');
+  const boardPane = document.getElementById('studioSmartBoardContainer');
+  const mainCanvas = document.getElementById('studioMainCanvasPanel');
+
+  if (view === 'chat') {
+    if (chatBtn) { chatBtn.style.background = 'var(--purple)'; chatBtn.style.color = '#fff'; chatBtn.classList.add('active'); }
+    if (chatPane) { chatPane.style.display = 'flex'; chatPane.style.width = '100%'; }
+    if (boardPane) { boardPane.style.display = 'none'; }
+    if (mainCanvas) { mainCanvas.style.flexDirection = 'row'; }
+  } else if (view === 'board') {
+    if (boardBtn) { boardBtn.style.background = 'var(--purple)'; boardBtn.style.color = '#fff'; boardBtn.classList.add('active'); }
+    if (chatPane) { chatPane.style.display = 'none'; }
+    if (boardPane) { boardPane.style.display = 'flex'; boardPane.style.width = '100%'; }
+    if (mainCanvas) { mainCanvas.style.flexDirection = 'row'; }
+    if (!window.studioWorkspaceState.currentConceptId) {
+      window.loadDefaultSmartboardTopic();
+    }
+    window.loadSmartboardMistakes();
+  } else if (view === 'split') {
+    if (splitBtn) { splitBtn.style.background = 'var(--purple)'; splitBtn.style.color = '#fff'; splitBtn.classList.add('active'); }
+    if (chatPane) { chatPane.style.display = 'flex'; chatPane.style.width = '50%'; }
+    if (boardPane) { boardPane.style.display = 'flex'; boardPane.style.width = '50%'; }
+    if (mainCanvas) { mainCanvas.style.flexDirection = 'row'; }
+    if (!window.studioWorkspaceState.currentConceptId) {
+      window.loadDefaultSmartboardTopic();
+    }
+    window.loadSmartboardMistakes();
+  }
+};
+
+window.setSmartboardTab = function(tab) {
+  window.studioWorkspaceState.activeTab = tab;
+  const topicBtn = document.getElementById('sbTabTopicBtn');
+  const mistakesBtn = document.getElementById('sbTabMistakesBtn');
+  const derivBtn = document.getElementById('sbTabDerivationBtn');
+
+  [topicBtn, mistakesBtn, derivBtn].forEach(b => {
+    if (b) {
+      b.style.background = 'transparent';
+      b.style.color = 'var(--ink-soft)';
+      b.classList.remove('active');
+    }
+  });
+
+  const vTopic = document.getElementById('sbViewTopic');
+  const vMistakes = document.getElementById('sbViewMistakes');
+  const vDeriv = document.getElementById('sbViewDerivation');
+
+  if (vTopic) vTopic.style.display = tab === 'topic' ? 'flex' : 'none';
+  if (vMistakes) vMistakes.style.display = tab === 'mistakes' ? 'flex' : 'none';
+  if (vDeriv) vDeriv.style.display = tab === 'derivation' ? 'flex' : 'none';
+
+  if (tab === 'topic' && topicBtn) { topicBtn.style.background = 'var(--purple)'; topicBtn.style.color = '#fff'; }
+  if (tab === 'mistakes') {
+    if (mistakesBtn) { mistakesBtn.style.background = 'var(--purple)'; mistakesBtn.style.color = '#fff'; }
+    window.loadSmartboardMistakes();
+  }
+  if (tab === 'derivation') {
+    if (derivBtn) { derivBtn.style.background = 'var(--purple)'; derivBtn.style.color = '#fff'; }
+    if (window.studioWorkspaceState.currentConceptId) {
+      window.renderDerivationCanvas(window.studioWorkspaceState.cachedTopic);
+    }
+  }
+};
+
+window.loadDefaultSmartboardTopic = function() {
+  const hud = coachState.telemetry;
+  if (hud && hud.weak_concepts && hud.weak_concepts.length > 0) {
+    window.loadSmartboardTopic(hud.weak_concepts[0].concept_id);
+  }
+};
+
+window.loadSmartboardTopic = async function(conceptId) {
+  if (!conceptId) return;
+  window.studioWorkspaceState.currentConceptId = conceptId;
+  const targetEl = document.getElementById('sbTopicContent');
+  if (!targetEl) return;
+
+  targetEl.innerHTML = `
+    <div style="text-align:center;padding:24px;color:var(--ink-soft);">
+      <div style="display:inline-block;width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px;"></div>
+      <div style="font-size:12.5px;">Projecting ${escapeHtml(conceptId)} to Smart Board...</div>
+    </div>
+  `;
+
+  try {
+    let data;
+    if (window.ApiClient && typeof window.ApiClient.get === 'function') {
+      data = await window.ApiClient.get(`/api/ai/smartboard/topic/${conceptId}`);
+    } else {
+      const res = await fetch(`/api/ai/smartboard/topic/${conceptId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+    }
+    window.studioWorkspaceState.cachedTopic = data;
+
+    const reading = data.fineweb_reading || {};
+    const formulaBox = reading.formula_box || {};
+    const latexFormula = formulaBox.latex || '';
+
+    let prereqsHtml = '';
+    if (data.upstream_prerequisites && data.upstream_prerequisites.length > 0) {
+      prereqsHtml = data.upstream_prerequisites.map(p => `
+        <button type="button" class="btn-subtle" onclick="window.loadSmartboardTopic('${p.concept_id}')" style="padding:3px 8px;font-size:11px;border-radius:6px;background:var(--track-bg);border:1px solid var(--border);color:var(--ink);cursor:pointer;">
+          ⬅ ${escapeHtml(p.name)}
+        </button>
+      `).join('');
+    } else {
+      prereqsHtml = '<span style="font-size:11.5px;color:var(--ink-faint);">Foundational baseline (No prerequisites required)</span>';
+    }
+
+    let unlockedHtml = '';
+    if (data.downstream_unlocked && data.downstream_unlocked.length > 0) {
+      unlockedHtml = data.downstream_unlocked.map(p => `
+        <button type="button" class="btn-subtle" onclick="window.loadSmartboardTopic('${p.concept_id}')" style="padding:3px 8px;font-size:11px;border-radius:6px;background:var(--track-bg);border:1px solid var(--border);color:var(--ink);cursor:pointer;">
+          ➡ ${escapeHtml(p.name)}
+        </button>
+      `).join('');
+    } else {
+      unlockedHtml = '<span style="font-size:11.5px;color:var(--ink-faint);">Terminal topic</span>';
+    }
+
+    targetEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <!-- Header badge row -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.05em;">
+              ${escapeHtml(data.subject_name || 'General')} &bull; ${escapeHtml(data.chapter_name || 'Core')}
+            </div>
+            <h3 style="margin:2px 0 4px 0;font-size:17px;font-weight:800;color:var(--ink);">${escapeHtml(data.name)}</h3>
+            <div style="font-size:12px;color:var(--ink-soft);">${escapeHtml(data.description || reading.summary || '')}</div>
+          </div>
+          <span class="chip chip-purple" style="font-size:10.5px;font-weight:700;flex-shrink:0;">
+            Difficulty: ${(data.difficulty_weight !== undefined ? (data.difficulty_weight * 10).toFixed(1) : '5.0')}/10
+          </span>
+        </div>
+
+        <!-- Formula Callout Box -->
+        <div style="background:var(--track-bg);border:1.5px solid var(--purple-border);border-radius:10px;padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:11px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.05em;">Governing Analytical Formula</span>
+            <span style="font-size:10px;color:var(--ink-faint);">${escapeHtml(formulaBox.name || 'Canonical Equation')}</span>
+          </div>
+          <div style="text-align:center;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:14px;color:var(--ink);font-weight:700;overflow-x:auto;">
+            ${latexFormula ? `$${escapeHtml(latexFormula)}$` : 'Formula grounded in physical boundary conditions.'}
+          </div>
+          ${formulaBox.description ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.4;">${escapeHtml(formulaBox.description)}</div>` : ''}
+        </div>
+
+        <!-- FineWeb Academic Passages & Key Takeaways -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:800;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">
+            📖 FineWeb-Edu Textbook Reference: ${escapeHtml(reading.title || data.name)}
+          </div>
+          <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin:0 0 8px 0;">
+            ${escapeHtml(reading.summary || 'Rigorous theoretical foundations grounded in high-yield competition standards.')}
+          </p>
+          ${reading.key_takeaways && reading.key_takeaways.length > 0 ? `
+            <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--ink);line-height:1.6;">
+              ${reading.key_takeaways.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+            </ul>
+          ` : ''}
+        </div>
+
+        <!-- Prerequisite Graph Connections -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:var(--track-bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
+            <div style="font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;margin-bottom:6px;">Foundational Prerequisites</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">${prereqsHtml}</div>
+          </div>
+          <div style="background:var(--track-bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
+            <div style="font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;margin-bottom:6px;">Unlocked Downstream Concepts</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">${unlockedHtml}</div>
+          </div>
+        </div>
+
+        <!-- Quick Interaction Buttons -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;">
+          <button type="button" class="btn-primary" onclick="window.sendStudioPrompt('Explain the step-by-step physical derivation of ${escapeHtml(data.name)} with key formula traps.')" style="font-size:11.5px;padding:6px 12px;border-radius:8px;display:flex;align-items:center;gap:6px;">
+            <span>💬 Discuss in Chat</span>
+          </button>
+          <button type="button" class="btn-subtle" onclick="window.setSmartboardTab('derivation')" style="font-size:11.5px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);color:var(--purple);font-weight:700;cursor:pointer;">
+            <span>📐 Open Derivation Board</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    renderCoachMath(targetEl);
+    window.renderDerivationCanvas(data);
+
+    if (window.studioWorkspaceState.view === 'chat') {
+      window.setStudioWorkspaceView('split');
+    }
+  } catch (err) {
+    targetEl.innerHTML = `<div style="color:var(--status-critical);padding:16px;font-size:12px;">Failed to load topic details (${err.message}).</div>`;
+  }
+};
+
+window.renderDerivationCanvas = function(topicData) {
+  const stepsEl = document.getElementById('sbDerivationSteps');
+  const titleEl = document.getElementById('sbDerivationTitle');
+  if (!stepsEl) return;
+  if (!topicData) {
+    stepsEl.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;">Select a topic first to inspect its derivation steps.</div>';
+    return;
+  }
+
+  if (titleEl) titleEl.textContent = `Derivation Canvas: ${topicData.name}`;
+
+  const reading = topicData.fineweb_reading || {};
+  const formulaBox = reading.formula_box || {};
+  const latex = formulaBox.latex || 'E = mc^2';
+
+  stepsEl.innerHTML = `
+    <!-- Step 1 -->
+    <div style="background:var(--card);border-left:3px solid var(--purple);border-radius:6px;padding:10px 12px;">
+      <div style="font-size:11px;font-weight:800;color:var(--purple);margin-bottom:3px;">STEP 1: Physical Principles & Assumptions</div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.45;">
+        Identify boundary conditions and symmetries. For <b>${escapeHtml(topicData.name)}</b>, isolate the governing vector or scalar field in standard inertial coordinates.
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div style="background:var(--card);border-left:3px solid #3B82F6;border-radius:6px;padding:10px 12px;">
+      <div style="font-size:11px;font-weight:800;color:#3B82F6;margin-bottom:3px;">STEP 2: Governing Differential Equation</div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.45;">
+        Set up the conservation laws (Energy, Momentum, or Flux conservation). Substitute constitutive relations into first-order differential form.
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div style="background:var(--card);border-left:3px solid #F59E0B;border-radius:6px;padding:10px 12px;">
+      <div style="font-size:11px;font-weight:800;color:#F59E0B;margin-bottom:3px;">STEP 3: Analytical Integration & Limits</div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.45;">
+        Integrate over finite boundary limits. Apply dimensional analysis to verify that both sides possess matching SI units.
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div style="background:var(--card);border-left:3px solid var(--status-ok);border-radius:6px;padding:10px 12px;">
+      <div style="font-size:11px;font-weight:800;color:var(--status-ok);margin-bottom:3px;">STEP 4: Golden Exam Formulation</div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--ink);font-family:var(--font-mono);margin:4px 0;">
+        $${escapeHtml(latex)}$
+      </div>
+      <div style="font-size:11px;color:var(--ink-faint);">
+        Watch out for factor of 2 or negative sign errors in exam multiple-choice options!
+      </div>
+    </div>
+  `;
+  renderCoachMath(stepsEl);
+};
+
+window.loadSmartboardMistakes = async function() {
+  const sid = AppState.studentId || 'general';
+  try {
+    let diag;
+    if (window.ApiClient && typeof window.ApiClient.get === 'function') {
+      diag = await window.ApiClient.get(`/api/ai/diagnostics/history/${sid}`);
+    } else {
+      const res = await fetch(`/api/ai/diagnostics/history/${sid}`);
+      diag = await res.json();
+    }
+    window.studioWorkspaceState.cachedDiagnostics = diag;
+
+    const tTests = document.getElementById('sbStatTotalTests');
+    const tQs = document.getElementById('sbStatTotalQs');
+    const tAcc = document.getElementById('sbStatAccuracy');
+    const tTrap = document.getElementById('sbStatDominantTrap');
+
+    if (tTests) tTests.textContent = diag.total_assessments || 0;
+    if (tQs) tQs.textContent = diag.total_questions_attempted || 0;
+    if (tAcc) tAcc.textContent = `${(diag.overall_accuracy_pct || 0).toFixed(1)}%`;
+    if (tTrap) {
+      if (diag.top_error_types && diag.top_error_types.length > 0) {
+        tTrap.textContent = diag.top_error_types[0].error_type.replace('_ERROR', '').replace('_', ' ');
+      } else {
+        tTrap.textContent = 'None';
+      }
+    }
+
+    let mData;
+    if (window.ApiClient && typeof window.ApiClient.get === 'function') {
+      mData = await window.ApiClient.get(`/api/ai/smartboard/mistakes/${sid}`);
+    } else {
+      const res = await fetch(`/api/ai/smartboard/mistakes/${sid}`);
+      mData = await res.json();
+    }
+    window.studioWorkspaceState.cachedMistakes = mData;
+
+    const badge = document.getElementById('sbMistakesCountBadge');
+    if (badge) badge.textContent = mData.total_mistakes || 0;
+
+    const listEl = document.getElementById('sbMistakesList');
+    if (!listEl) return;
+
+    const mistakes = mData.mistakes || [];
+    if (mistakes.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align:center;padding:24px;color:var(--ink-soft);background:var(--track-bg);border-radius:10px;">
+          <div style="font-size:24px;margin-bottom:4px;">🎉</div>
+          <div style="font-weight:700;font-size:13.5px;color:var(--ink);">Clean Error Logbook!</div>
+          <div style="font-size:12px;margin-top:2px;">No unaddressed failed items found across your past tests.</div>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = mistakes.map((m, idx) => `
+      <div class="hud-item" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:10.5px;font-weight:700;color:var(--ink-faint);font-family:var(--font-mono);">${escapeHtml(m.question_id)}</span>
+            <span class="chip chip-red" style="font-size:9.5px;padding:1px 6px;">${escapeHtml(m.error_type)}</span>
+          </div>
+          <span style="font-size:10.5px;color:var(--ink-faint);">${escapeHtml(m.date || '')}</span>
+        </div>
+
+        <div style="font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.45;">
+          ${escapeHtml(m.content)}
+        </div>
+
+        <div style="display:flex;gap:12px;font-size:11.5px;padding:6px 8px;background:var(--track-bg);border-radius:6px;align-items:center;">
+          <div>Your Choice: <b style="color:var(--status-warn);">${escapeHtml(m.student_answer || 'Skipped')}</b></div>
+          <div>&bull;</div>
+          <div>Correct Key: <b style="color:var(--status-ok);">${escapeHtml(m.correct_answer)}</b></div>
+        </div>
+
+        ${m.distractor_note ? `
+          <div style="font-size:11.5px;color:var(--status-warn);background:rgba(245,158,11,0.08);border-left:3px solid var(--status-warn);padding:6px 10px;border-radius:4px;line-height:1.4;">
+            💡 <b>Distractor Trap:</b> ${escapeHtml(m.distractor_note)}
+          </div>
+        ` : ''}
+
+        <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.45;">
+          ${escapeHtml(m.explanation)}
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+          <button type="button" class="btn-subtle" onclick="window.loadSmartboardTopic('${m.concept_id}')" style="font-size:11px;color:var(--purple);font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <span>Project ${escapeHtml(m.concept_name || 'Concept')} &rarr;</span>
+          </button>
+          <button type="button" class="btn-subtle" onclick="window.sendStudioPrompt('Explain where my derivation went wrong on question ${m.question_id} where I chose ${m.student_answer} instead of ${m.correct_answer}.')" style="font-size:11px;color:var(--ink-soft);cursor:pointer;">
+            <span>💬 Ask Mentor to Deconstruct</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    console.warn('Could not load Smart Board mistakes:', err);
+  }
+};
 
 /* =============================================================
    MOBILE NAVIGATION & TABS CONTROLLER

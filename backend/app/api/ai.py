@@ -514,3 +514,188 @@ async def get_brain_briefing(
         "engine_source": cloud_res.get("source", "LOCAL_LLM")
     }
 
+
+@router.get("/diagnostics/history/{student_id}")
+async def get_lifetime_diagnostics(
+    student_id: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Returns full lifetime diagnostics, historical scores, error distributions,
+    and recurring distractor traps across all assessments taken by the student.
+    """
+    data = OmniContextHarvester.harvest_lifetime_diagnostics(student_id, db)
+    return data
+
+
+@router.get("/smartboard/topic/{concept_id}")
+async def get_smartboard_topic(
+    concept_id: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Fetches full Smart Board topic details:
+    - Concept metadata, difficulty, estimated time
+    - Upstream & downstream prerequisites
+    - FineWeb-Edu textbook excerpt, summary, and LaTeX formula box
+    - Sample practice questions for live derivation/drilling
+    """
+    concept = db.query(Concept).filter(Concept.concept_id == concept_id).first()
+    if not concept:
+        raise HTTPException(status_code=404, detail=f"Concept '{concept_id}' not found.")
+
+    from backend.app.models.schema import Prerequisite
+    upstream_prereqs = (
+        db.query(Prerequisite, Concept)
+        .join(Concept, Prerequisite.from_concept_id == Concept.concept_id)
+        .filter(Prerequisite.to_concept_id == concept_id)
+        .all()
+    )
+    upstream_list = [
+        {"concept_id": c.concept_id, "name": c.name, "strength": p.strength, "relationship": p.relationship_type}
+        for p, c in upstream_prereqs
+    ]
+
+    downstream_prereqs = (
+        db.query(Prerequisite, Concept)
+        .join(Concept, Prerequisite.to_concept_id == Concept.concept_id)
+        .filter(Prerequisite.from_concept_id == concept_id)
+        .all()
+    )
+    downstream_list = [
+        {"concept_id": c.concept_id, "name": c.name, "strength": p.strength}
+        for p, c in downstream_prereqs
+    ]
+
+    topic_name = concept.topic.name if concept.topic else None
+    chapter_name = concept.topic.chapter.name if (concept.topic and concept.topic.chapter) else None
+    subject_name = (
+        concept.topic.chapter.subject.name
+        if (concept.topic and concept.topic.chapter and concept.topic.chapter.subject)
+        else None
+    )
+
+    from backend.app.knowledge_graph.fineweb_vault import FINEWEB_READINGS
+    matched_reading = None
+    cname_lower = concept.name.lower()
+    for r in FINEWEB_READINGS:
+        title_lower = (r.get("title") or "").lower()
+        chap_lower = (r.get("chapter") or "").lower()
+        if cname_lower in title_lower or cname_lower in chap_lower:
+            matched_reading = r
+            break
+    if not matched_reading and FINEWEB_READINGS:
+        for r in FINEWEB_READINGS:
+            if subject_name and subject_name.lower() in (r.get("subject") or "").lower():
+                matched_reading = r
+                break
+        if not matched_reading:
+            matched_reading = FINEWEB_READINGS[0]
+
+    sample_qs = (
+        db.query(Question)
+        .filter(Question.concept_id == concept_id)
+        .limit(3)
+        .all()
+    )
+    questions_list = []
+    for q in sample_qs:
+        questions_list.append({
+            "question_id": q.question_id,
+            "content": q.content,
+            "options": q.options,
+            "correct_answer": q.correct_answer,
+            "explanation": q.explanation,
+            "difficulty": q.difficulty,
+            "skill": q.skill
+        })
+
+    return {
+        "concept_id": concept.concept_id,
+        "name": concept.name,
+        "description": concept.description,
+        "difficulty_weight": concept.difficulty_weight,
+        "exam_relevance": concept.exam_relevance,
+        "estimated_minutes": concept.estimated_minutes,
+        "topic_name": topic_name,
+        "chapter_name": chapter_name,
+        "subject_name": subject_name,
+        "upstream_prerequisites": upstream_list,
+        "downstream_unlocked": downstream_list,
+        "fineweb_reading": {
+            "title": matched_reading.get("title") if matched_reading else concept.name,
+            "chapter": matched_reading.get("chapter") if matched_reading else chapter_name,
+            "subject": matched_reading.get("subject") if matched_reading else subject_name,
+            "summary": matched_reading.get("summary") if matched_reading else "Core concept foundational principles.",
+            "formula_box": matched_reading.get("formula_box", {}) if matched_reading else {},
+            "key_takeaways": matched_reading.get("key_takeaways", []) if matched_reading else []
+        } if matched_reading else None,
+        "sample_questions": questions_list
+    }
+
+
+@router.get("/smartboard/mistakes/{student_id}")
+async def get_smartboard_mistakes(
+    student_id: str,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    """
+    Returns student's complete historical failed questions across all tests
+    with question details, options, student choice vs correct answer,
+    distractor notes, and mathematical explanations for the Smart Board inspector.
+    """
+    attempts = (
+        db.query(AssessmentAttempt)
+        .filter(AssessmentAttempt.student_id == student_id, AssessmentAttempt.is_completed == True)
+        .all()
+    )
+    if not attempts:
+        return {"total_mistakes": 0, "mistakes": []}
+
+    attempt_map = {a.attempt_id: a for a in attempts}
+    attempt_ids = list(attempt_map.keys())
+
+    items = (
+        db.query(StudentAttemptItem, Question)
+        .join(Question, StudentAttemptItem.question_id == Question.question_id)
+        .filter(StudentAttemptItem.attempt_id.in_(attempt_ids), StudentAttemptItem.is_correct == False)
+        .order_by(StudentAttemptItem.timestamp.desc())
+        .limit(limit)
+        .all()
+    )
+
+    mistakes_list = []
+    for item, q in items:
+        att = attempt_map.get(item.attempt_id)
+        distractor_note = None
+        if q.distractor_explanations and item.student_answer:
+            distractor_note = q.distractor_explanations.get(item.student_answer)
+
+        mistakes_list.append({
+            "attempt_id": item.attempt_id,
+            "test_title": (att.assessment.title if att and att.assessment else "Practice Assessment"),
+            "date": item.timestamp.strftime("%b %d, %Y %H:%M") if item.timestamp else "Recent",
+            "question_id": q.question_id,
+            "subject": q.subject,
+            "chapter": q.chapter,
+            "concept_id": q.concept_id,
+            "concept_name": q.concept.name if q.concept else q.concept_id,
+            "content": q.content,
+            "options": q.options,
+            "student_answer": item.student_answer,
+            "correct_answer": q.correct_answer,
+            "error_type": item.error_type or "CONCEPTUAL_ERROR",
+            "distractor_note": distractor_note,
+            "explanation": q.explanation,
+            "time_taken_seconds": item.time_taken_seconds,
+            "difficulty": q.difficulty
+        })
+
+    return {
+        "student_id": student_id,
+        "total_mistakes": len(mistakes_list),
+        "mistakes": mistakes_list
+    }
+
+
