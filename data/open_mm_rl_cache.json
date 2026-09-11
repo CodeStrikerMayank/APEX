@@ -1,0 +1,347 @@
+{
+  "rows": [
+    {
+      "row_idx": 0,
+      "row": {
+        "conversation_id": "306510",
+        "domain": "Math",
+        "subDomain": "Field theory and polynomials",
+        "author_id": "168",
+        "question": "Determine the number of monic primitive irreducible polynomials of degree\n\\[\nd=11ci^{+e}_{2r}(G_4)+ci^{+e}_{2r}(G_1)+ci^{v}_{2r}(G_3)+ci^{+e}_{2r}(G_2)+ci^{-e}_{2r}(G_3)\n\\]\nover the finite field \\(\\mathbb{F}_q\\), where\n\\[\nq=2^{ci^{+e}_{2r}(G_1)+ci^{v}_{2r}(G_3)-ci^{+e}_{2r}(G_2)-ci^{-e}_{2r}(G_3)}\n\\]\nand \\(G_1,G_2,G_3,G_4\\) are the graphs shown in Figures 1, 2, 3, and 4 of the attached diagram.\n\nRecall that a \\(2\\)-rainbow dominating function of a simple graph \\(G=(V(G), E(G))\\) is a function \\(f:V(G)\\to \\mathcal{P}(\\{1,2\\})\\) such that for every vertex \\(v\\in V(G)\\) with \\(f(v)=\\emptyset\\), \\(\\bigcup_{u\\in N(v)} f(u) = \\{1,2\\}\\).",
+        "answer": "\\[120\\]",
+        "format": "multimodal",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/0/images/image-1d100e9.jpg",
+            "width": 1254,
+            "height": 1254
+          }
+        ]
+      }
+    },
+    {
+      "row_idx": 1,
+      "row": {
+        "conversation_id": "306511",
+        "domain": "Math",
+        "subDomain": "Geometry & Coordinate Integration",
+        "author_id": "169",
+        "question": "Consider the geometric figure shown in the diagram. Let $a$ denote the area of the shaded region bounded by the parabolic curve $y^2 = 4ax$ and the chord $x - y = 3$. Define two vectors in $\\mathbb{R}^3$ by:\n\\[\n\\vec{u} = \\begin{pmatrix} a \\\\ 2a \\\\ -1 \\end{pmatrix}, \\quad \\vec{v} = \\begin{pmatrix} 3 \\\\ -1 \\\\ a \\end{pmatrix}\n\\]\nEvaluate the scalar triple product $[\\vec{u} \\times \\vec{v}] \\cdot \\vec{w}$ where $\\vec{w} = \\hat{i} + 2\\hat{j} - \\hat{k}$.",
+        "answer": "\\[-\\frac{71}{4}\\]",
+        "format": "multimodal",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/1/images/image-1d100ea.jpg",
+            "width": 1024,
+            "height": 768
+          }
+        ]
+      }
+    },
+    {
+      "row_idx": 2,
+      "row": {
+        "conversation_id": "306512",
+        "domain": "Physics",
+        "subDomain": "Electromagnetism & Lorentz Dynamics",
+        "author_id": "170",
+        "question": "A charged particle with charge $q = +2\\,\\mu\\text{C}$ and mass $m = 1.0\\times 10^{-14}\\,\\text{kg}$ enters a region of uniform magnetic field $\\vec{B} = 0.50\\,\\hat{k}\\,\\text{T}$ with initial velocity $\\vec{v}_0 = (3.0\\hat{i} + 4.0\\hat{k})\\times 10^5\\,\\text{m/s}$.\n\nCalculate the pitch $p$ of the resulting helical trajectory and the radius $R$ of the circular projection in the $xy$-plane.\n\\[\np = v_z \\cdot T = v_z \\cdot \\frac{2\\pi m}{qB}\n\\]",
+        "answer": "\\[R = 3.0\\,\\text{mm}, \\quad p = 25.1\\,\\text{mm}\\]",
+        "format": "multimodal",
+        "images": [
+          {
+            "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Lorentz_force_helical.svg/640px-Lorentz_force_helical.svg.png",
+            "width": 640,
+            "height": 480
+          }
+        ]
+      }
+    },
+    {
+      "row_idx": 3,
+      "row": {
+        "conversation_id": "306513",
+        "domain": "Physics",
+        "subDomain": "Oscillations & Simple Harmonic Motion",
+        "author_id": "171",
+        "question": "A block of mass $M$ attached to a horizontal ideal spring of stiffness constant $k$ undergoes simple harmonic oscillation on a frictionless surface. At time $t = 0$, the block is at displacement $x = +A$ with velocity $v = 0$. A small clay ball of mass $m$ falling vertically hits and sticks to the block as it passes through the equilibrium position $x = 0$.\n\nDetermine the ratio of the new oscillation amplitude $A'$ to the original amplitude $A$:\n\\[\n\\frac{A'}{A} = \\sqrt{\\frac{M}{M + m}}\n\\]",
+        "answer": "\\[A' = A\\sqrt{\\frac{M}{M+m}}\\]",
+        "format": "text",
+        "images": []
+      }
+    },
+    {
+      "row_idx": 4,
+      "row": {
+        "conversation_id": "306514",
+        "domain": "Chemistry",
+        "subDomain": "Thermodynamics & Chemical Equilibrium",
+        "author_id": "172",
+        "question": "For the gas-phase dissociation reaction:\n\\[\n\\text{N}_2\\text{O}_4(g) \\rightleftharpoons 2\\text{NO}_2(g)\n\\]\nthe standard enthalpy of reaction is $\\Delta H^\\circ = +57.2\\,\\text{kJ/mol}$ and the standard entropy change is $\\Delta S^\\circ = +176.0\\,\\text{J/(mol}\\cdot\\text{K)}$.\n\nDetermine the equilibrium constant $K_p$ at temperature $T = 298.15\\,\\text{K}$ using the fundamental thermodynamic relation:\n\\[\n\\Delta G^\\circ = \\Delta H^\\circ - T\\Delta S^\\circ = -RT \\ln K_p\n\\]",
+        "answer": "\\[K_p \\approx 0.141\\,\\text{atm}\\]",
+        "format": "text",
+        "images": []
+      }
+    },
+    {
+      "row_idx": 5,
+      "row": {
+        "conversation_id": "306515",
+        "domain": "Chemistry",
+        "subDomain": "Electrochemistry & Nernst Potential",
+        "author_id": "173",
+        "question": "Consider the electrochemical galvanic cell at $298\\,\\text{K}$:\n\\[\n\\text{Zn}(s) \\mid \\text{Zn}^{2+}(aq, 0.010\\,\\text{M}) \\parallel \\text{Cu}^{2+}(aq, 1.0\\,\\text{M}) \\mid \\text{Cu}(s)\n\\]\nGiven the standard reduction potentials $E^\\circ(\\text{Zn}^{2+}/\\text{Zn}) = -0.763\\,\\text{V}$ and $E^\\circ(\\text{Cu}^{2+}/\\text{Cu}) = +0.337\\,\\text{V}$, calculate the cell electromotive force $\\mathcal{E}_{\\text{cell}}$ using the Nernst equation:\n\\[\n\\mathcal{E}_{\\text{cell}} = E^\\circ_{\\text{cell}} - \\frac{0.0592}{n} \\log_{10} Q\n\\]",
+        "answer": "\\[\\mathcal{E}_{\\text{cell}} = 1.159\\,\\text{V}\\]",
+        "format": "text",
+        "images": []
+      }
+    },
+    {
+      "row_idx": 6,
+      "row": {
+        "conversation_id": "306516",
+        "domain": "Biology",
+        "subDomain": "Cell Biology & Organelle Energetics",
+        "author_id": "174",
+        "question": "In eukaryotic plant cells, the chemiosmotic coupling hypothesis of Peter Mitchell explains ATP synthesis across both mitochondrial inner membranes and chloroplast thylakoid membranes.\n\nContrast the direction of proton pumping: In mitochondria, protons are pumped from the matrix into the intermembrane space; where are protons accumulated in chloroplasts during light-dependent photosynthetic electron transport?\n\\[\n\\text{Proton Gradient: } \\Delta \\text{pH} = \\text{pH}_{\\text{stroma}} - \\text{pH}_{\\text{lumen}} \\approx 3.5\n\\]",
+        "answer": "\\[\\text{Thylakoid Lumen (creating an acidic interior with high } [\\text{H}^+]\\]",
+        "format": "text",
+        "images": []
+      }
+    },
+    {
+      "row_idx": 7,
+      "row": {
+        "conversation_id": "306517",
+        "domain": "Biology",
+        "subDomain": "Mendelian Genetics & Dihybrid Linkage",
+        "author_id": "175",
+        "question": "In a test cross of a dihybrid pea plant heterozygous for round yellow seeds ($RrYy$) with a homozygous recessive wrinkled green plant ($rryy$), the observed progeny counts across 1,000 offspring are:\n- Round Yellow: 440\n- Wrinkled Green: 436\n- Round Green: 64\n- Wrinkled Yellow: 60\n\nCalculate the recombination frequency $\\theta$ and the genetic map distance between the two loci in centimorgans (cM):\n\\[\n\\theta = \\frac{\\text{Recombinant Progeny}}{\\text{Total Progeny}} \\times 100\\%\n\\]",
+        "answer": "\\[\\theta = 12.4\\,\\text{cM}\\]",
+        "format": "text",
+        "images": []
+      }
+    },
+    {
+      "row_idx": 8,
+      "row": {
+        "conversation_id": "306518",
+        "domain": "Math",
+        "subDomain": "Calculus & King's Rule Integration",
+        "author_id": "176",
+        "question": "Evaluate the definite integral using the reflection property (King's Rule):\n\\[\nI = \\int_{0}^{\\pi} \\frac{x \\sin x}{1 + \\cos^2 x} \\, dx\n\\]\nBy substituting $x = \\pi - u$, express $2I$ as a standard integral and find its exact value.",
+        "answer": "\\[I = \\frac{\\pi^2}{4}\\]",
+        "format": "text",
+        "images": []
+      }
+    },
+    {
+      "row_idx": 9,
+      "row": {
+        "conversation_id": "306519",
+        "domain": "Physics",
+        "subDomain": "Electrostatics & Capacitance Dielectrics",
+        "author_id": "177",
+        "question": "A parallel plate capacitor with plate area $A$ and initial separation $d$ is connected to a battery of constant voltage $V_0$. A dielectric slab of dielectric constant $K = 4.0$ and thickness $t = \\frac{d}{2}$ is inserted between the plates while the battery remains connected.\n\nFind the ratio of the new stored electrostatic energy $U'$ to the initial energy $U_0$:\n\\[\nC' = \\frac{\\varepsilon_0 A}{d - t + \\frac{t}{K}}\n\\]",
+        "answer": "\\[\\frac{U'}{U_0} = \\frac{8}{5} = 1.60\\]",
+        "format": "text",
+        "images": []
+      }
+    },
+    {
+      "row_idx": 1,
+      "row": {
+        "conversation_id": "306490",
+        "domain": "Math",
+        "subDomain": "Geometry",
+        "author_id": "168",
+        "question": " Consider the figure shown. Let $a$ denote the area of the shaded region. Define two vectors in $\\mathbb{R}^3$ by \\[ \\mathbf{A} = [1,\\ a,\\ 2],  \\qquad  \\mathbf{B} = [c,\\ 3,\\ 1]. \\] Determine the value of the constant $c$ such that the vectors $\\mathbf{A}$ and $\\mathbf{B}$ are orthogonal.",
+        "answer": "\\[-\\frac{71}{4} \\]",
+        "format": "single_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/1/images/image-1d100e9.png?Expires=1789057613&Signature=Iqv1q04LLdnnR3fHEJkG63jVh3Y4y0bo0K9L6AIr-vArkwLu5Q9TkHxF7rB8nLsPa-4GptISwhOjiLoOY9SeUhamRv9YN5HAG4cfbRC99KGZoQEezWQb1CBbJ22o6~wraNcbA38bjbbxzQf6mQkkbd-aGiKxEkD3LdJfxweLHz1o98kMHptlJoy1udeeig-ararSUHrfVzlceud7Aw0aUvwq94DYFuTuHQEt560Ld-YNTe2G~Jf8rJbP0ydAtUav-GVXG3rEQ0eIUs7dpN3D2LQnkwkczIoVKNS4PRDyAi~4U4k5iM-UfNi6pi0Yih5I0dcceBVgVfWAS4eilaCLXg__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 157,
+            "width": 317
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 2,
+      "row": {
+        "conversation_id": "306449",
+        "domain": "Math",
+        "subDomain": "Number theory",
+        "author_id": "1718",
+        "question": "Determine the order of the ideal class group\n\\[\n\\mathrm{Cl}\\!\\left(\\mathbb{Q}(\\sqrt{-N})\\right),\n\\]\nwhere\n\\[\nN=\n\\lambda_{3,2,1}(G_1\\times G_3)^2+\n\\lambda_{3,2,1}(G_1\\times G_2)\\,\n\\lambda_{3,2,1}(G_1\\times G_3)-\n\\lambda_{3,2,1}(G_1\\times G_2)^2,\n\\]\nand \\(G_1,G_2,G_3\\) denote the graphs shown in Figure 1, Figure 2, and Figure 3 of the attached image, respectively.\n\nIn the attached image, the points denote the vertices of the graphs and the line segments joining pairs of points denote the edges.\n\nGiven a graph \\(G\\), an \\(L(3,2,1)\\)-labeling of \\(G\\) is a function\n\\[\nf : V(G) \\to \\mathbb{Z}_{\\ge 0}\n\\]\nsuch that\n\\[\n|f(u) - f(v)| \\ge 1 \\quad \\text{if } d(u,v) = 3,\n\\]\n\\[\n|f(u) - f(v)| \\ge 2 \\quad \\text{if } d(u,v) = 2,\n\\]\nand\n\\[\n|f(u) - f(v)| \\ge 3 \\quad \\text{if } d(u,v) = 1,\n\\]\nwhere \\(d(u,v)\\) denotes the distance between the vertices \\(u\\) and \\(v\\) in \\(G\\).\n\nFor a nonnegative integer \\(k\\), a \\(k\\)-\\(L(3,2,1)\\)-labeling is an\n\\(L(3,2,1)\\)-labeling such that no label exceeds \\(k\\).\n\nThe \\(L(3,2,1)\\)-labeling number of \\(G\\), denoted by\n\\[\n\\lambda_{3,2,1}(G),\n\\]\nis the smallest integer \\(k\\) such that \\(G\\) admits a \\(k\\)-\\(L(3,2,1)\\)-labeling.\n\nLet \\(\\times\\) denote the Cartesian product of graphs and \\(P_n\\) denote the path on \\(n\\) vertices.",
+        "answer": "\\[12\\]",
+        "format": "multi_panel",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/2/images/image-1d100e9.png?Expires=1789057613&Signature=F7vGsJFSVeTlVc4EfJIcLPDvEZT8Ev1x2iuC4IJqsPAMmlNYcvBFduweOzprzOqC-78l~W8Knt6C1eWOsRNes~r~BkRdDAAEkpFxQIHpBQPrucy1BAaqTv9vA69NSBabt0QVFP4BRmAYZHHvCAE8XQSpug~qil-cPutKTZOFbMkv96SCFuywnBDHpOigZ0LgH0~Ry3OYLmhOj2tHYre7FDkJ99z91e8AI0kuqzU1ByJ73qHCw5NJTrsk9V83cZi2ynUh-GlaLmT-2lYtzDDTXhrmywC-1r633siG6ioJIJytS5vkJ4gSm0h~Fcr1xFihyZK2BB3jyrV7F25EJmYdAQ__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 629,
+            "width": 465
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 3,
+      "row": {
+        "conversation_id": "306427",
+        "domain": "Math",
+        "subDomain": "Linear and multilinear algebra",
+        "author_id": "1718",
+        "question": "Let $G = (V,E)$ be a simple connected graph. For an ordered set of vertices \n$S = \\{u_1, u_2, \\dots, u_t\\} \\subseteq V(G)$, the metric representation \nof a vertex $v \\in V(G)$ with respect to $S$ is defined by\n\\[\nr(v \\mid S) = \\big(d(v,u_1), d(v,u_2), \\dots, d(v,u_t)\\big),\n\\]\nwhere $d(u,v)$ denotes the length of a shortest path between $u$ and $v$.\n\nLet $k$ be a positive integer. A set $S \\subseteq V(G)$ is called a \n$k$-antiresolving set if $k$ is the largest integer such that for every \nvertex $v \\in V(G)\\setminus S$, there exist at least $k-1$ distinct vertices \n$v_1, \\dots, v_{k-1} \\in V(G)\\setminus S$ satisfying\n\\[\nr(v \\mid S) = r(v_1 \\mid S) = \\cdots = r(v_{k-1} \\mid S).\n\\]\n\nThe minimum cardinality among all $k$-antiresolving sets of $G$ is called the \n$k$-metric antidimension of $G$, denoted by $\\operatorname{adim}_k(G)$.\n\nLet $G_1$ and $G_2$ be the graphs shown in Figure 1 and Figure 2, respectively.\n\nDefine\n\\[\n\\alpha = \\sum_{k=1}^{3} \\operatorname{adim}_k(G_1), \\qquad\n\\beta = \\sum_{k=1}^{3} \\operatorname{adim}_k(G_2).\n\\]\n\nLet $n = \\alpha + \\beta$.\n\nConsider the vector space $V = \\mathbb{R}^n$ and define a linear operator $T : V \\to V$ whose matrix representation with respect to the standard basis is the block matrix\n\\[\nT =\n\\begin{pmatrix}\n\\alpha I_{\\alpha} & J_{\\alpha \\times \\beta} \\\\\n0 & \\beta I_{\\beta}\n\\end{pmatrix},\n\\]\nwhere $I_m$ denotes the $m \\times m$ identity matrix and $J_{\\alpha \\times \\beta}$ denotes the $\\alpha \\times \\beta$ matrix with all entries equal to $1$.\n\nDetermine the dimension of the eigenspace corresponding to the eigenvalue $\\beta$.\n\n",
+        "answer": "\\[5\\]",
+        "format": "multi_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/3/images/image-1d100e9.jpg?Expires=1789058908&Signature=EznCDmRB1le--fyUpSgxg22-a7F7tzSLtK-lnMmUnNURtpaxJxN1KKdxXR4XwsTXUIWoHGdK9EAaBwSFxmOyj0to9C3W0BHnSVVEl7k1EuGT5iL-z80nlY84uKCHK2fkevBj~d0qLHWWOLHIXSdEKTCuKuzPtpV4JtGtFyfwfa1FCJbb0-skN-RhUkCq5~Uc8dPMgvbblybyzx7e~C7catAZ-GDDrzpJOqu-e6BGp3lebHquk9u~ZN4I4S1KNvdlRSZzZ2U5f~HSPZKcNJJy-Wq6ECbim4M1Oi1PcaIr0o6akAWULl5i5DFqD3gT~OLqzITnuxjPYBBAIVWvWGTfsg__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 1213,
+            "width": 1296
+          },
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/3/images/image-1d300ea.jpg?Expires=1789058908&Signature=CKj5m0jcLmaeqbezakM80Dh2EuXG0vSa-nLIvvQwtGxw00tvnYoS2156ScOz8~dDPDTQT2OW-zLI4qaxysEcw1Pggvg1VPQMd-ig7O6WvMc0qP8NSO9c813QvRYUXFTnZM~3WsSsh6uHO8O4yUlFQ~yhXwaIju-MYg8LojVhr51QeTP04OjyfZMVl5p28PUHKVqibabxrcEwjkErBwfV9i0i0aPGdpEwFy~2d17qJVs4XovXKN2lG1YRgQU4HoicP9Bz3QEyuvPuAyO4Cev95TT2At8yKmMREi4jmAv6crXh7oh0w4e7cUXNaoAiavPoBpxL0gjhYtb94WDMxv1O1g__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 1288,
+            "width": 1221
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 4,
+      "row": {
+        "conversation_id": "306425",
+        "domain": "Math",
+        "subDomain": "Differential geometry",
+        "author_id": "1718",
+        "question": "Determine the value of the surface integral\n\\[\n\\iint_{S}\\left(x^2+y^2+z^2\\right)\\,dA,\n\\]\nwhere\n\\[\nS:\\quad x^2+y^2+z^2=N,\n\\]\nand\n\\[\nN=C_4(G)\\cdot C_5(G)+1,\n\\]\nwith \\(G\\) denoting the graph shown in the attached image.\n\nConsider a simple and undirected graph \\(G\\) with vertex set \\(V=V(G)\\). For an integer \\(k\\ge1\\), a \\(k\\)-dominating set of \\(G\\) is a set \\(S\\subseteq V(G)\\) such that each vertex in \\(V(G)\\setminus S\\) is adjacent to at least \\(k\\) vertices in \\(S\\).\n\nA \\(k\\)-coalition refers to a pair of disjoint vertex sets that jointly constitute a \\(k\\)-dominating set of the graph, meaning that every vertex not in the set has at least \\(k\\) neighbors in the set.\n\nA \\(k\\)-coalition partition of a graph is a partition of the vertex set in which each set is either a \\(k\\)-dominating set with exactly \\(k\\) vertices or forms a \\(k\\)-coalition with another set in the partition.\n\nThe maximum number of sets in a \\(k\\)-coalition partition is called the \\(k\\)-coalition number of the graph and is denoted by\n\\[\nC_k(G).\n\\]",
+        "answer": "\\[7396\\pi\\]",
+        "format": "single_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/4/images/image-1d100e9.png?Expires=1789058908&Signature=XIAS3zIPSsp8-CZEn0DRmOABEONz3F8Rc3zQDvsb6DOgvoIbrAU4FNS9HK2rwdcHHTBAGsZybEQCBGnArOpdxvJQAYU7M4ntWnklbYMrjYhldg49Nbf2zATEGGbD7t5GvJJQwrpfLFwGU5JZ9QM8FvxqV41LUPWiobjwv7s-ReRSdcPhASNZ5uwRYuUN2IyT~I~h60exlHmZgsfQUvMitba~EPRMXycG51eJfxYHcckgwOFyi0Sj6PuNhwHSvcKteV94HsTpztSnZW9xrtu7W5FzINjG2ie~9Ywpqx7aoOKpU3PnytFAQO9tkqRS-3M6niISLMOb1SLIzIEgm2TbDg__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 555,
+            "width": 558
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 5,
+      "row": {
+        "conversation_id": "306423",
+        "domain": "Math",
+        "subDomain": "Group theory",
+        "author_id": "1718",
+        "question": "Let $G=(V(G),E(G))$ be a finite, simple, connected graph. A function \n$f:V(G)\\to \\{0,1,2,3\\}$ is called a modern Roman dominating function if every vertex labeled $0$ is adjacent to two vertices, one labeled $2$ and one labeled $3$, and every vertex labeled $1$ is adjacent to at least one vertex labeled $2$ or $3$. The minimum possible value of $\\sum_{v\\in V(G)} f(v)$ is called the modern Roman domination number and is denoted by $\\gamma_{mR}(G)$.\n\nLet $\\odot$ denote the corona product of graphs. Let the graph in Figure 1 be denoted by $H_1$, the graph in Figure 2 by $H_2$, and the graph in Figure 3 by $K$.\n\nLet $|V(H_1)|=n_1$ and $|V(H_2)|=n_2$. Define\n\\[\n\\mathcal{R} =\n\\mathbb{Z}_{\\gamma_{mR}(H_1\\odot K)} \\times\n\\mathbb{Z}_{\\gamma_{mR}(H_2\\odot K)} \\times\n\\mathbb{Z}_{\\gamma_{mR}(C_{n_1+2}\\odot K)} \\times\n\\mathbb{Z}_{\\gamma_{mR}(C_{n_2+2}\\odot K)}.\n\\]\n\nDetermine the exact value of $|\\mathcal{R}|$.\n",
+        "answer": "\\[4423680\\]",
+        "format": "multi_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/5/images/image-1d100e9.jpg?Expires=1789058908&Signature=IyfEXhEk4Ho8uYFK0Z6KAaxqmPvPoBMqgIICCSpfmfDkFFBRh6VpzFA-un4thv3Zi2K8oxnYa~IcUMRAHBV8T6UvCvWsf~8NJS5Ckfvgh0Lhlkfd6QF~h2JAGtP9vGM4oKawIaw3tygyq8jo8YzrXFAitpMKt08H3zxe7iUIkL43mo7oyvBvlHA-qMSOLE-P0P49Ef-XU28rnAzst1Vpz4Adi9a6qepBPytoHr-f~-LuDqX~P-QVEgg7XHF7wtry2-AWyBpsLACfm~fO2dC4ys1FoG0XJ9rzHyghTk6vWDtWFdMNI3ryOzBMHWQoanOP5wCu1In~EUC4NYkCUgHQ2w__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 1254,
+            "width": 1254
+          },
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/5/images/image-1d300ea.jpg?Expires=1789058908&Signature=E~ViLgIq8eVdlD-4hRu5v5jxoM6K39OwwbbERrXfn6VxadhXWhfk-qKrytNHSem7UL4cq5uvUqSug3Amr4DYZrdWodPoaC1VdYCh1XGkzyvWFb4Oi0DnBZncr4ffqT39m-DyYlXVhXIe1uXeZmNDnBWyWp7Gemc-COLe02CPsKFgGSp3OsERlKc~Gg0OnXdOmuc~kHuRxPLB8MN4E8C-xBckFJUfiO3q9fftRd6LhBf-6YO5IuUNb4BxsbbFnnI~51VgOCiuCTmOuWPdGNjVSdtJifY4UN4sX0HuGG6weMDHt5zf8-TWZzqNEhQ-qmt56TA6LXXd4OCmTXlxPfhe5Q__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 1254,
+            "width": 1254
+          },
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/5/images/image-1d500eb.jpg?Expires=1789058908&Signature=sRNxygfejRwZOW8jZQd~Ffzfuqolzh6APBKKXHkO6osHLZKuGw51YM7a0K2OQeuFlVPyaLpCntQfo1grmXgGp0kp4v3fF-uG~9~Bt0bPgBH2CiIYkUP-LT4L1AXOnHOweXOf5uu9-Yq7jAr1qRuuYfnr5krAz550CPeHhe-zRXRVrlYgKzYLmIPBFFC2SqwqW-itTo17G7lapoBWy2t3VDVn7mRimI7rM25pSUNxl7Sa~QAsMsYlN6RuZsB1yhhYejVDuuhRPrpR9HU8M15kjvjsqMXAlvHBA~BO5bD8CbFxMMTxXY0vUInPMveTfJCnNeMi9r29Z8~7~OPgLixKcQ__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 1254,
+            "width": 1254
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 6,
+      "row": {
+        "conversation_id": "306419",
+        "domain": "Math",
+        "subDomain": "Combinatorics ",
+        "author_id": "1428",
+        "question": "\nLet \\(\\lambda\\) be the Young diagram shown on the left in the figure, and let \\(\\mu\\) be the Young diagram shown on the right in the figure. For a Young diagram \\(\\nu\\), let \\(\\nu^\\vee_j\\) denote the length of its \\(j\\)-th column, with \\(\\nu^\\vee_j=0\\) for all sufficiently large \\(j\\). Define\n\\[\n[z]:=z^{-1/2}-z^{1/2}.\n\\]\n\nDefine\n\\[\nN^{(0\\mid 2)}_{\\lambda,\\mu}(u\\mid q,\\kappa)\n:=\n\\prod_{\\substack{1\\le i\\le j\\\\0\\le \\ell<\\lambda^\\vee_j-\\lambda^\\vee_{j+1}\\\\\\lambda^\\vee_{j+1}-\\mu^\\vee_i+\\ell\\equiv 0\\pmod 2}}\n\\left[u\\,q^{\\,j-i}\\kappa^{\\,\\lambda^\\vee_{j+1}-\\mu^\\vee_i+\\ell}\\right]\n\\;\n\\prod_{\\substack{1\\le i\\le j\\\\0\\le \\ell<\\mu^\\vee_j-\\mu^\\vee_{j+1}\\\\\\lambda^\\vee_i-\\mu^\\vee_j+\\ell\\equiv 0\\pmod 2}}\n\\left[u\\,q^{\\,i-j-1}\\kappa^{\\,\\lambda^\\vee_i-\\mu^\\vee_j+\\ell}\\right].\n\\]\n\nDetermine the exact fully factorized expression for \\(N^{(0\\mid 2)}_{\\lambda,\\mu}(u\\mid q,\\kappa)\\).\n\n",
+        "answer": "\r\n\\[\r\n[u]^2\\,[u q^{-1}]\\,[u q]\\,[u q\\,\\kappa^{-2}]\\,[u q^{2}\\kappa^{-2}]\\,[u q^{-2}\\kappa^{2}]\r\n\\]",
+        "format": "multi_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/6/images/image-1d100e9.png?Expires=1789058908&Signature=i9ali4a2~oEn3sJf3M130Iig8Afbf4u6iVHnaiFUGZvJb63xXM~mq5l2-HfPuoL9AGMW1pCYVbyp5IzrAskapF-E-rRgHNyFcUhKHBTDPx1UpC9q7Y3gsvG8m8m0YlJKqwH~5bg4ZckoFZKEchPvYsSZU4gjC20f3ZcXaXiIYxNdPo5oHnnbQk93MY5o2xlLxm3N8WSw1SH9Yqzgw~j0qqI-NsLHprqKwGmgp81IusS3OmEho3IPMb9BWmgZJfPIPH3GA-fjao9afNFfdVX0N4RFplBy5P2KeLML-1jDveRr-TXoN3J5RjZd0vZRGwAZHyqn9mnTmpb5eCvsDgNNPw__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 559,
+            "width": 945
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 7,
+      "row": {
+        "conversation_id": "306415",
+        "domain": "Math",
+        "subDomain": "Number theory",
+        "author_id": "1718",
+        "question": "Determine the number of primitive Dirichlet characters modulo\n\\[\nN=\\chi'_{NK}(G)^{\\,3}+2,\n\\]\nwhere \\(G\\) denotes the graph shown in the attached image.\n\nIn the attached image, the colored points denote the vertices of the graph and the line segments joining pairs of points denote the edges of the graph.\n\nLet \\(G=(V(G),E(G))\\) be a simple graph, and let\n\\[\nc_E:E(G)\\to\\mathbb{N}\n\\]\nbe a proper edge coloring of \\(G\\), that is, no two adjacent edges receive the same color.\n\nFor a positive integer \\(n\\), define a mapping\n\\[\nc_V':V(G)\\to\\mathbb{Z}_n\n\\]\nby\n\\[\nc_V'(v)\\equiv \\sum_{e\\in E_v} c_E(e)\\pmod n,\n\\]\nwhere \\(E_v\\) denotes the set of edges incident with the vertex \\(v\\in V(G)\\).\n\nIf the induced vertex labeling \\(c_V'\\) is a proper vertex coloring of \\(G\\), that is,\n\\[\nc_V'(u)\\neq c_V'(v)\n\\]\nfor every edge \\(uv\\in E(G)\\), then the edge coloring \\(c_E\\) is called an NK-labeling of \\(G\\).\n\nThe smallest positive integer \\(n\\) for which \\(G\\) admits an NK-labeling is called the NK-chromatic index of \\(G\\), denoted by\n\\[\n\\chi'_{NK}(G).\n\\]",
+        "answer": "\\[125\\]",
+        "format": "single_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/7/images/image-1d100e9.png?Expires=1789058908&Signature=kVHAcFSZrsz6rTwwfZ8Pi1yExgH3cGD0ToiYi-VOG3v3Du3gbOu-PieGcvPvAG871biwOx1NnFxAsEtvFW6wqQYv4w2dOVXA0IXTpIOYFri28VhmRW43i0mrzA9DXEl5to0GN~dTPYXY~p~LK030SqrviAmQPOCTn3oeoIVJFLHbok~JNEZ4f4ETVOtc4-k13k5HCztMnU5oUM4USTHbPFLrohL9E8hLSqRSEBtoAFgp1jxe2QY2JbBMIXdAXQJNqmHKDb2nCDy6ihblYDNbX0apwQ-DviLpGBE-y4PULhToN3ozGDvgbEvcpnD16mC1~h88iLIX1t45ITNNkBx7Eg__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 550,
+            "width": 556
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 8,
+      "row": {
+        "conversation_id": "306407",
+        "domain": "Math",
+        "subDomain": " Differential geometry",
+        "author_id": "1428",
+        "question": "Use the right-hand panel of the given figure.\n\nLet $({\\rm CP}^{2},\\omega)$ be complex projective $2$-space with the Fubini--Study form normalized by\n$$\n\\int_{{\\rm CP}^{1}}\\omega=1.\n$$\nDefine\n$$\n\\mu([z_{1}:z_{2}:z_{3}])\n=\n\\frac{1}{2\\sum_{j=1}^{3}|z_{j}|^{2}}\n\\bigl(|z_{1}|^{2},|z_{2}|^{2}\\bigr),\n$$\nlet\n$$\n\\Delta=\\mu({\\rm CP}^{2}),\n\\qquad\n\\ell=\\Delta\\cap\\{(x,x)\\mid x\\in {\\bf R}\\}.\n$$\nThe hypersurface $\\mu^{-1}(\\ell)$ is preserved by the circle action\n$$\ne^{i\\theta}\\cdot[z_{1}:z_{2}:z_{3}]\n=\n[e^{i\\theta}z_{1}:e^{-i\\theta}z_{2}:z_{3}],\n$$\nand the corresponding symplectic reduction is a singular $2$-sphere $S$ with singular points\n$$\np,q\\in S\n$$\nlying over the two endpoints of $\\ell$.\n\nLet $\\gamma_{B}\\subset S\\setminus\\{p,q\\}$ be the solid, non-dotted, simple closed curve shown in the right-hand panel of the figure. Let $P$ be the connected component of $S\\setminus\\gamma_{B}$ containing $p$, and assume that\n$$\n{\\rm area}(P)=\\frac13\\,{\\rm area}(S).\n$$\nLet $Y\\subset{\\rm CP}^{2}$ be the full circle-orbit preimage of $\\gamma_{B}$.\n\nFor each $t\\in {\\bf R}/{\\bf Z}$, define\n$$\nL_{t}\n=\n\\left\\{\n\\bigl[\n(a_{1}+ia_{2})e^{i\\pi t/3}:\n(a_{1}-ia_{2})e^{i\\pi t/3}:\na_{3}e^{-2\\pi i t/3}\n\\bigr]\n\\ \\Big|\\\n[a_{1}:a_{2}:a_{3}]\\in{\\rm RP}^{2}\n\\right\\}\n\\subset{\\rm CP}^{2}.\n$$\nLet $\\mathrm{Ham}({\\rm CP}^{2},\\omega)$ denote the Hamiltonian diffeomorphism group. For each\n$$\n\\phi\\in\\mathrm{Ham}({\\rm CP}^{2},\\omega),\n$$\nset\n$$\nK_{\\phi}:=\\phi(Y),\n\\qquad\n\\Sigma_{\\phi}\n=\n\\{\\,t\\in {\\bf R}/{\\bf Z}\\mid K_{\\phi}\\cap L_{t}\\neq\\emptyset\\,\\}.\n$$\nLet $\\lambda$ be Lebesgue measure on ${\\bf R}/{\\bf Z}$ normalized by\n$$\n\\lambda({\\bf R}/{\\bf Z})=1.\n$$\n\nDetermine the ordered pair $(m,N)$, where\n$$\nm\n=\n\\inf_{\\phi\\in\\mathrm{Ham}({\\rm CP}^{2},\\omega)}\n\\lambda(\\Sigma_{\\phi}),\n$$\nand $N$ is the largest positive integer such that the following statement holds:\n\nfor every\n$$\n\\phi\\in\\mathrm{Ham}({\\rm CP}^{2},\\omega)\n\\qquad\\hbox{and}\\qquad\nt\\in {\\bf R}/{\\bf Z},\n$$\nif\n$$\nK_{\\phi}\\cap L_{t}\\quad\\hbox{and}\\quad K_{\\phi}\\cap L_{t+1/3}\n$$\nare both transverse, and\n$$\nK_{\\phi}\\cap(L_{t}\\cap L_{t+1/3})=\\emptyset,\n$$\nthen\n$$\n\\#\\bigl(K_{\\phi}\\cap(L_{t}\\cup L_{t+1/3})\\bigr)\\ge N.\n$$\n\nGive the exact ordered pair $(m,N)$.\n\n",
+        "answer": "\n\\[\n\\left(\\frac{2}{3},\\,4\\right)\n\\]",
+        "format": "multi_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/8/images/image-1d100e9.png?Expires=1789058908&Signature=b4RYRIETeH13oxfI4bha1TPdygw1sKrhz8dBjGFxRHQmg-GOoR1nK3hueD7~X3P75r-nniayl9t5bYZsyk03djGXLT2LNVqcIbgAH8nnPCEzUajvTyaGqahJoIXTObMC1Wp5D-JnMGg0X2sNGsfbgrMWuxUI8CB7LxHQfX5pzNDUAhH1-lK~JSo2HUNW7uQGEsF8MKcOhCG9jgEebgc--304cc2XPGVABwRESrgiMCqyqAGJ5uUXwdVeEyQ6XLLCjmPIQuV4pSSElVnkwt2wJyfZgaaMDdip84n94DxvAiuTOCpYZg0nwpY1suEwZKllJtKBmkOSDm88cI~dX6~jrg__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 471,
+            "width": 954
+          }
+        ]
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 9,
+      "row": {
+        "conversation_id": "306296",
+        "domain": "Biology",
+        "subDomain": "Neurobiology",
+        "author_id": "899",
+        "question": "In this multi-compartment model of leech T-cells, different spike initiation zone (SIZ) distributions are tested on reconstructed morphologies while holding ion channel parameters fixed. \n\nUsing the Figure $1$, identify which SIZ placement produces the second lowest height across the reconstructed morphologies?",
+        "answer": "Anterior",
+        "format": "single_image",
+        "images": [
+          {
+            "src": "https://datasets-server.huggingface.co/cached-assets/TuringEnterprises/Open-MM-RL/--/eceb05ae7ffe378f3a02884d93ab95a405f6db19/--/default/train/9/images/image-1d100e9.png?Expires=1789058908&Signature=A2vCGN5CRcxVii4jQUdlrITnLHL4Qvp6C-skQykffaLedk7pIAaDVO3IiGwwN8IBc06yNfOvYf7h50NYWEsYoDupYIlGgdSFL7i9wBwUHX9GcG~N2F3isOAtuTo-I7zpOkAUhaIUjaxyTftpeNecUAVlzdX~uLWtHgRld2wkPXGtdI1S0VuEF2OJgOhPJwqSqbASeXtCPVsIApRM9wNBzKuRCcFQWs~ZS5MFwnpOHugaBCnDDZ8sRc37RxbdzxDQOV6W2oDdxaJr8uN296-xpYNo1oYLRF6kTVaUx7p9rg5wqoX-8Qk8rJUwieph9JCVIUy5F4718wTR6CrtZd~X5w__&Key-Pair-Id=K3C0L9WB6U5DUC",
+            "height": 720,
+            "width": 724
+          }
+        ]
+      },
+      "truncated_cells": []
+    }
+  ]
+}

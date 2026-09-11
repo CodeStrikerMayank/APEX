@@ -88,3 +88,21 @@ def get_knowledge_graph(
         mastery_dict = {m.concept_id: m.mastery for m in masteries}
 
     return graph.export_graph_json(student_masteries=mastery_dict)
+
+
+from backend.app.services.open_mm_rl_service import OpenMMRLService
+_open_mm_rl_service = OpenMMRLService()
+
+
+@router.get("/open-mm-rl/sample")
+def get_open_mm_rl_sample(
+    offset: int = Query(0, ge=0, description="Offset index for dataset pagination"),
+    length: int = Query(10, ge=1, le=100, description="Number of problem rows to fetch")
+):
+    """
+    Fetches live/cached structured problem items from Hugging Face Open-MM-RL dataset.
+    Features 2-tier resilience (HF API with 15s timeout + local cache fallback),
+    LaTeX mathematical typesetting data, multimodal diagram references, and concept mappings.
+    """
+    return _open_mm_rl_service.fetch_live_rows(offset=offset, length=length)
+

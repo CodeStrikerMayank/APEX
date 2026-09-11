@@ -68,9 +68,14 @@ if DATABASE_URL.startswith("sqlite"):
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# Attach Foreign Key Guardian (Strict Rule 2)
+from backend.app.database.guardian import attach_guardian_to_session
+attach_guardian_to_session(SessionLocal)
+
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+

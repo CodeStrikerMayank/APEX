@@ -196,6 +196,8 @@ class StudentAttemptItem(Base):
     timestamp = Column(DateTime, default=utc_now, index=True)
 
     attempt = relationship("AssessmentAttempt", back_populates="item_responses")
+    question = relationship("Question")
+    concept = relationship("Concept")
 
 
 class StudentConceptMastery(Base):
@@ -244,6 +246,8 @@ class StudentErrorLog(Base):
     timestamp = Column(DateTime, default=utc_now, index=True)
 
     student = relationship("Student", back_populates="errors")
+    question = relationship("Question")
+    concept = relationship("Concept")
 
 
 class LearningEvent(Base):

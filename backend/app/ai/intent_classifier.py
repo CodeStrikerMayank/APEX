@@ -108,11 +108,17 @@ class IntentClassifier:
     def _extract_topic_hint(cls, text: str) -> Optional[str]:
         """Extracts potential concept or subject name from query text."""
         topics = [
-            "mechanics", "kinematics", "shm", "oscillations", "optics", "buffer",
+            "mechanics", "kinematics", "shm", "oscillations", "harmonic", "optics", "buffer",
             "ionic", "organic", "goc", "calculus", "limits", "integrals",
-            "genetics", "cardiac", "heart", "cell", "newton"
+            "genetics", "cardiac", "heart", "cell", "meiosis", "mitosis",
+            "basic structure", "constitution", "polity", "economy", "newton"
         ]
         for t in topics:
             if t in text:
                 return t
+        for prefix in ["explain", "what is", "tell me about", "concept of", "teach me"]:
+            if prefix in text:
+                candidate = text.split(prefix, 1)[-1].strip(" ?:.,")
+                if candidate:
+                    return candidate
         return None

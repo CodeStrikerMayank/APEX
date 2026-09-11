@@ -40,8 +40,19 @@ app.include_router(upsc.router, prefix="/api")
 app.include_router(supporting.router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 
+# Register V1 API Routers
+from backend.app.api.v1 import curriculum as v1_curriculum
+app.include_router(v1_curriculum.router, prefix="/api/v1")
+
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
+
+@app.get("/app.js")
+def get_app_js():
+    app_js_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "app.js"))
+    if os.path.exists(app_js_path):
+        return FileResponse(app_js_path, media_type="application/javascript")
+    return JSONResponse(status_code=404, content={"detail": "app.js not found"})
 
 @app.get("/")
 def root(request: Request):
