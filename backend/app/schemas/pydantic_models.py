@@ -258,6 +258,8 @@ class AIChatRequest(BaseModel):
     concept_id: Optional[str] = None
     mode: Optional[str] = "pedagogical"
     include_student_state: bool = True
+    history: Optional[List[Dict[str, Any]]] = None
+    quiz_intent: Optional[bool] = False
 
     def get_prompt(self) -> str:
         return self.prompt or self.message or "Help with exam preparation"
@@ -265,6 +267,8 @@ class AIChatRequest(BaseModel):
 class AIChatResponse(BaseModel):
     response: str
     source: str = "OFFLINE_LLM_OR_RULE_FALLBACK"
+    structured_card: Optional[Dict[str, Any]] = None
+    suggested_chips: Optional[List[str]] = None
 
 class AIQuestionGenRequest(BaseModel):
     exam: str

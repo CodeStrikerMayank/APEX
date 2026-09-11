@@ -155,6 +155,140 @@ async def chat_with_assistant(
     mode = (req.mode or "pedagogical").lower()
     student_context["mode"] = mode
 
+    prompt_raw = req.get_prompt()
+    prompt_lower = prompt_raw.lower()
+
+    # --- Pillar 3: In-Chat Interactive Quiz Agent ---
+    is_quiz_req = bool(req.quiz_intent) or any(k in prompt_lower for k in [
+        "quiz me", "test me", "micro-check", "micro check",
+        "practice question", "give me a question", "targeted recovery drill",
+        "quick drill", "practice problem", "interactive quiz"
+    ])
+
+    if is_quiz_req:
+        exam_filter = student.target_exam if student and student.target_exam else "JEE"
+        target_cid = req.concept_id
+
+        if not target_cid:
+            # Check if student prompt mentions any concept directly
+            all_c = db.query(Concept).all()
+            for c in all_c:
+                if c.name and (c.name.lower() in prompt_lower or c.concept_id.lower() in prompt_lower):
+                    target_cid = c.concept_id
+                    break
+
+        if not target_cid:
+            # Check if any weak concepts match or use the first weak concept
+            weak_list = student_context.get("weak_concepts") or []
+            if weak_list and len(weak_list) > 0:
+                target_cid = weak_list[0].get("concept_id")
+
+        q_target = None
+        q_query = db.query(Question).filter(Question.exam == exam_filter)
+        if target_cid:
+            q_target = q_query.filter(Question.concept_id == target_cid).first()
+        if not q_target:
+            # Try matching chapter or subject from prompt
+            all_q = q_query.all()
+            for q_cand in all_q:
+                if (q_cand.chapter and q_cand.chapter.lower() in prompt_lower) or (q_cand.subject and q_cand.subject.lower() in prompt_lower):
+                    q_target = q_cand
+                    break
+        if not q_target:
+            q_target = q_query.first()
+
+        if q_target:
+            raw_opts = q_target.options or []
+            formatted_opts = []
+            if isinstance(raw_opts, list):
+                for o in raw_opts:
+                    if isinstance(o, dict):
+                        formatted_opts.append(o)
+                    elif isinstance(o, str):
+                        opt_id = o[:1].upper() if o[:1].isalpha() else str(len(formatted_opts) + 1)
+                        formatted_opts.append({"id": opt_id, "text": o})
+            if not formatted_opts:
+                formatted_opts = [
+                    {"id": "A", "text": "Option A"},
+                    {"id": "B", "text": "Option B"},
+                    {"id": "C", "text": "Option C"},
+                    {"id": "D", "text": "Option D"}
+                ]
+
+            c_name = q_target.concept_id
+            c_obj = db.query(Concept).filter(Concept.concept_id == q_target.concept_id).first()
+            if c_obj:
+                c_name = c_obj.name
+
+            structured_card = {
+                "type": "quiz",
+                "question_id": q_target.question_id,
+                "subject": q_target.subject,
+                "chapter": q_target.chapter,
+                "concept_id": q_target.concept_id,
+                "concept_name": c_name,
+                "content": q_target.content,
+                "options": formatted_opts,
+                "correct_answer": q_target.correct_answer,
+                "explanation": q_target.explanation,
+                "distractor_explanations": q_target.distractor_explanations or {}
+            }
+
+            theta_val = student_context.get("latent_ability_theta", 0.0)
+            resp_msg = (
+                f"🎯 **Interactive Micro-Challenge: {c_name}**\n\n"
+                f"I've generated a high-yield question calibrated to your latent ability "
+                f"($\\theta = {theta_val:+.2f}$). Test your conceptual understanding directly below:"
+            )
+
+            return AIChatResponse(
+                response=resp_msg,
+                source="INTERACTIVE_QUIZ_AGENT",
+                structured_card=structured_card,
+                suggested_chips=[
+                    "📐 Unpack Derivation",
+                    "⚠️ Common Traps",
+                    "💡 Numerical Example",
+                    "🔄 Another Question"
+                ]
+            )
+
+    # --- Multi-Turn Rolling History Ingestion ---
+    history_str = ""
+    if req.history and isinstance(req.history, list):
+        recent_turns = req.history[-6:]
+        turn_lines = []
+        for turn in recent_turns:
+            role_name = turn.get("role", "user").upper()
+            msg_txt = turn.get("text", "")
+            if msg_txt and role_name in ["USER", "COACH", "ASSISTANT"]:
+                clean_txt = msg_txt[:200].replace("\n", " ")
+                turn_lines.append(f"{role_name}: {clean_txt}")
+        if turn_lines:
+            history_str = "\n[RECENT CONVERSATION HISTORY]\n" + "\n".join(turn_lines) + "\n"
+
+    # --- IRT Theta-Adaptive Tone Modulation ---
+    theta_val = student_context.get("latent_ability_theta", 0.0)
+    if theta_val < -0.5:
+        theta_tier_instruction = (
+            "STUDENT ABILITY TIER: Foundational Baseline (θ < -0.5).\n"
+            "- Use encouraging, supportive language; validate their effort.\n"
+            "- Break down mathematical derivations into granular, step-by-step algebraic steps.\n"
+            "- Emphasize physical intuition and relatable real-world analogies before compact formula summaries."
+        )
+    elif theta_val > 0.7:
+        theta_tier_instruction = (
+            "STUDENT ABILITY TIER: Advanced Mastery (θ > 0.7).\n"
+            "- Maintain high competitive rigor; avoid over-explaining trivial steps.\n"
+            "- Emphasize dimensional analysis shortcuts, symmetry arguments, extreme boundary limits, and Olympiad/Advanced challenge problem variants."
+        )
+    else:
+        theta_tier_instruction = (
+            "STUDENT ABILITY TIER: Intermediate Core (-0.5 <= θ <= 0.7).\n"
+            "- Balance conceptual clarity with competitive speed and exam pacing.\n"
+            "- Focus on identifying recurring calculation traps and negative-marking prevention strategies."
+        )
+
     # Build omni-context grounding block
     grounding_str = OmniContextHarvester.format_grounding_block(student_context, mode=mode)
 
@@ -181,7 +315,15 @@ async def chat_with_assistant(
     system_prompt = (
         f"You are an offline pedagogical AI study mentor for {exam_label}.\n"
         f"{mode_guidance}\n\n"
-        f"Real-Time Student Cognitive Grounding:\n{grounding_str}\n\n"
+        f"{theta_tier_instruction}\n\n"
+        "PEDAGOGICAL STRUCTURE (Strictly follow this 5-part scaffold for conceptual explanations):\n"
+        "1. 💡 Intuitive Mental Model: Relatable physical analogy (Feynman technique).\n"
+        "2. 📐 Canonical Analytical Formulation: High-contrast LaTeX ($$...$$) defining all variables and SI units.\n"
+        "3. 🔬 Step-by-Step Derivation & Symmetries: Clean mathematical progression.\n"
+        "4. ⚠️ Exam Trap Radar: Exact distractor traps and common mistakes in competitive exams.\n"
+        "5. 🎯 Quick Micro-Check: A 1-line self-check problem testing the core formula.\n\n"
+        f"Real-Time Student Cognitive Grounding:\n{grounding_str}\n"
+        f"{history_str}\n"
         "Your role is to guide the student, explain concepts and error patterns, "
         "explain why their dynamic roadmap was sequenced the way it was, and give direct, rigorous guidance. "
         "All adaptive diagnostic engines are active on standby with zero compulsory barriers."
@@ -238,7 +380,19 @@ async def chat_with_assistant(
         if break_prompt:
             final_text += break_prompt
 
-    return AIChatResponse(response=final_text, source=source)
+    default_chips = [
+        "🎯 Test Me on This",
+        "📐 Unpack Derivation",
+        "💡 Numerical Example",
+        "⚠️ Common Traps",
+        "📋 Copy Formula"
+    ]
+
+    return AIChatResponse(
+        response=final_text,
+        source=source,
+        suggested_chips=default_chips
+    )
 
 @router.post("/generate-question")
 async def generate_practice_question(
@@ -542,13 +696,26 @@ async def get_smartboard_topic(
     """
     concept = db.query(Concept).filter(Concept.concept_id == concept_id).first()
     if not concept:
+        # Fallback 1: match by substring or alias (e.g. phy_shm_01 -> shm)
+        clean_key = concept_id.lower().replace("_01", "").replace("_02", "").replace("_basic", "").strip()
+        concept = db.query(Concept).filter(
+            (Concept.concept_id.ilike(f"%{clean_key}%")) | 
+            (Concept.name.ilike(f"%{clean_key}%"))
+        ).first()
+    if not concept and "shm" in concept_id.lower():
+        concept = db.query(Concept).filter(Concept.concept_id.ilike("%shm%")).first()
+    if not concept:
+        concept = db.query(Concept).first()
+    if not concept:
         raise HTTPException(status_code=404, detail=f"Concept '{concept_id}' not found.")
+
+    resolved_cid = concept.concept_id
 
     from backend.app.models.schema import Prerequisite
     upstream_prereqs = (
         db.query(Prerequisite, Concept)
         .join(Concept, Prerequisite.from_concept_id == Concept.concept_id)
-        .filter(Prerequisite.to_concept_id == concept_id)
+        .filter(Prerequisite.to_concept_id == resolved_cid)
         .all()
     )
     upstream_list = [
@@ -559,7 +726,7 @@ async def get_smartboard_topic(
     downstream_prereqs = (
         db.query(Prerequisite, Concept)
         .join(Concept, Prerequisite.to_concept_id == Concept.concept_id)
-        .filter(Prerequisite.from_concept_id == concept_id)
+        .filter(Prerequisite.from_concept_id == resolved_cid)
         .all()
     )
     downstream_list = [
@@ -594,7 +761,7 @@ async def get_smartboard_topic(
 
     sample_qs = (
         db.query(Question)
-        .filter(Question.concept_id == concept_id)
+        .filter(Question.concept_id == resolved_cid)
         .limit(3)
         .all()
     )

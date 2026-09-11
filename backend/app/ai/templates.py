@@ -179,69 +179,156 @@ def format_concept_explanation(topic_hint: Optional[str], exam: str) -> str:
 
     th = topic_hint.lower()
     
-    # UPSC Concepts
-    if "basic structure" in th or "kesavananda" in th or "constitution" in th:
+    # Physics & JEE: Simple Harmonic Motion
+    if "shm" in th or "oscillation" in th or "harmonic" in th:
         return (
-            "### ⚖️ Concept: The Basic Structure Doctrine (Indian Polity)\n\n"
-            "Hello! Let's understand this foundational constitutional principle:\n\n"
-            "- **Origin:** Propounded by a 13-judge bench of the Supreme Court in *Kesavananda Bharati v. State of Kerala (1973)*.\n"
-            "- **Core Principle:** Parliament's amending power under **Article 368** is plenary but NOT unlimited; it cannot alter the fundamental identity or 'basic structure' of the Constitution.\n"
-            "- **Core Elements:** Supremacy of the Constitution, Rule of Law, Separation of Powers, Judicial Review, Secularism, and Federalism.\n"
-            "- **Exam Tip:** The term 'Basic Structure' is NOT explicitly mentioned anywhere in the text of the Constitution—it is an indigenous judicial safeguard!"
+            "### 🔬 Concept Masterclass: Simple Harmonic Motion (SHM)\n\n"
+            "#### 💡 1. Intuitive Mental Model (Feynman Analogy)\n"
+            "Imagine a ball rolling inside a frictionless curved bowl. The farther it climbs up the rim, the harder gravity pulls it back toward the bottom. "
+            "In SHM, the **restoring force** acts like an elastic leash that gets strictly stronger in direct linear proportion to displacement.\n\n"
+            "#### 📐 2. Canonical Analytical Formulation\n"
+            "$$\\frac{d^2x}{dt^2} + \\omega^2 x = 0 \\quad \\text{where } \\omega = \\sqrt{\\frac{k}{m}} = \\frac{2\\pi}{T}$$\n"
+            "- $x(t) = A \\sin(\\omega t + \\phi)$: Instantaneous displacement (meters)\n"
+            "- $v(t) = \\omega \\sqrt{A^2 - x^2}$: Velocity at displacement $x$ (m/s)\n"
+            "- $a(t) = -\\omega^2 x$: Acceleration (strictly opposes displacement)\n\n"
+            "#### 🔬 3. Step-by-Step Derivation & Energy Invariants\n"
+            "By integrating $F = m\\frac{dv}{dt} = -kx$ over displacement:\n"
+            "$$\\int m v \\, dv = -\\int k x \\, dx \\implies \\frac{1}{2}m v^2 + \\frac{1}{2}k x^2 = E_{\\text{total}} = \\frac{1}{2}k A^2$$\n"
+            "The system continuously trades kinetic energy ($K$) and elastic potential energy ($U$), but their sum remains constant at all times.\n\n"
+            "#### ⚠️ 4. Exam Trap Radar (JEE / NEET Traps)\n"
+            "- **The Equilibrium Zero Trap:** At mean position ($x=0$), velocity and kinetic energy are maximal, but acceleration is **precisely ZERO**.\n"
+            "- **The Frequency Doubling Trap:** While displacement oscillates with frequency $f = \\frac{\\omega}{2\\pi}$, kinetic energy and potential energy oscillate with **double frequency ($2f$)**!\n\n"
+            "#### 🎯 5. Quick Micro-Check\n"
+            "*At what displacement from the mean position does the kinetic energy of an undamped particle equal its potential energy?* (Hint: $x = \\pm \\frac{A}{\\sqrt{2}}$)"
         )
-    elif "fiscal" in th or "deficit" in th or "frbm" in th or "monetary" in th:
-        return (
-            "### 📈 Concept: Fiscal Deficit & Monetary Framework (Indian Economy)\n\n"
-            "Hello! Here is the clear economic breakdown:\n\n"
-            "- **Fiscal Deficit:** $\\text{Total Expenditure} - \\text{Total Receipts (excluding borrowings)}$. Represents the total borrowing requirement of the government.\n"
-            "- **Primary Deficit:** $\\text{Fiscal Deficit} - \\text{Interest Payments}$. Indicates current fiscal stance minus past debt burdens.\n"
-            "- **FRBM Act Framework:** Targets fiscal deficit around 3% of GDP and debt-to-GDP ratio around 60% (combined Centre + States).\n"
-            "- **Exam Trap:** Fiscal deficit is financed by internal borrowing (g-sec issuance), external borrowing, and drawdown of cash balances—NOT by direct currency printing since 1997."
-        )
-    # Physics & JEE
-    elif "shm" in th or "oscillation" in th:
-        return (
-            "### 🔬 Concept: Simple Harmonic Motion (SHM)\n\n"
-            "Hello! Let's break down SHM cleanly:\n\n"
-            "- **Governing Equation:** $F = -kx \\implies \\frac{d^2x}{dt^2} + \\omega^2 x = 0$\n"
-            "- **Angular Frequency:** $\\omega = \\sqrt{\\frac{k}{m}} = \\frac{2\\pi}{T}$\n"
-            "- **Energy Conservation:** $E_{\\text{total}} = \\frac{1}{2}kA^2 = K(t) + U(t)$\n"
-            "- **High-Yield Trap:** At equilibrium ($x=0$), velocity and kinetic energy are maximal, but acceleration is precisely ZERO!"
-        )
+    # Chemistry: Buffers
     elif "buffer" in th or "ionic" in th:
         return (
-            "### 🧪 Concept: Acidic & Basic Buffers (Chemistry)\n\n"
-            "Hello! Here is the essential buffer summary:\n\n"
-            "- **Acidic Buffer:** Weak Acid (HA) + Conjugate Base Salt (NaA)\n"
-            "- **Henderson-Hasselbalch Equation:** $\\text{pH} = \\text{pK}_a + \\log\\frac{[\\text{Conjugate Base}]}{[\\text{Weak Acid}]}$\n"
-            "- **Buffer Capacity:** Maximized when $[\text{Salt}] = [\text{Acid}] \\implies \\text{pH} = \\text{pK}_a$.\n"
-            "- **Exam Trap:** Moderate dilution changes concentrations but DOES NOT change the ratio $\\frac{[\\text{Salt}]}{[\\text{Acid}]}$, so pH remains constant!"
+            "### 🧪 Concept Masterclass: Acidic & Basic Buffers\n\n"
+            "#### 💡 1. Intuitive Mental Model\n"
+            "Think of a buffer as a chemical shock absorber. When hydronium ions ($H^+$) enter, the conjugate base sponge absorbs them; when hydroxide ($OH^-$) enters, the weak acid donates a proton. The system neutralizes disturbances without shifting pH dramatically.\n\n"
+            "#### 📐 2. Canonical Analytical Formulation (Henderson-Hasselbalch)\n"
+            "$$\\text{pH} = \\text{pK}_a + \\log_{10} \\left( \\frac{[\\text{Conjugate Base}]}{[\\text{Weak Acid}]} \\right)$$\n"
+            "- Maximum Buffer Capacity occurs when $[\\text{Salt}] = [\\text{Acid}]$, meaning $\\text{pH} = \\text{pK}_a$.\n\n"
+            "#### 🔬 3. Step-by-Step Derivation\n"
+            "For weak acid $HA \\rightleftharpoons H^+ + A^-$ with acid dissociation constant $K_a = \\frac{[H^+][A^-]}{[HA]}$:\n"
+            "1. Take negative logarithm of both sides: $-\\log K_a = -\\log [H^+] - \\log \\frac{[A^-]}{[HA]}$\n"
+            "2. Rearranging gives: $\\text{pH} = \\text{pK}_a + \\log \\frac{[A^-]}{[HA]}$\n\n"
+            "#### ⚠️ 4. Exam Trap Radar\n"
+            "- **The Dilution Invariance Trap:** Moderate dilution with pure water reduces both $[A^-]$ and $[HA]$ by identical factors, so the ratio $\\frac{[A^-]}{[HA]}$ does not change—**pH remains unchanged** upon moderate dilution!\n\n"
+            "#### 🎯 5. Quick Micro-Check\n"
+            "*If a buffer contains $0.1\\text{ M } \\text{CH}_3\\text{COOH}$ and $0.01\\text{ M } \\text{CH}_3\\text{COONa}$ (with $\\text{pK}_a = 4.74$), is the pH greater than or less than 4.74?* (Answer: Less, specifically $\\text{pH} = 3.74$)."
         )
+    # Mathematics: Calculus Limits & L'Hôpital
     elif "limit" in th or "calculus" in th:
         return (
-            "### 📐 Concept: Calculus Limits & L'Hôpital's Rule\n\n"
-            "Hello! Let's master limit evaluations:\n\n"
-            "- **Applicability:** Applies strictly to indeterminate forms $\\frac{0}{0}$ or $\\frac{\\infty}{\\infty}$.\n"
-            "- **Method:** $\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\lim_{x \\to a} \\frac{f'(x)}{g'(x)}$\n"
-            "- **Core Standard Limits:** $\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$, $\\lim_{x \\to 0} \\frac{e^x - 1}{x} = 1$, $\\lim_{x \\to 0} \\frac{\\ln(1+x)}{x} = 1$.\n"
-            "- **Crucial Reminder:** Differentiate the numerator and denominator separately—never use the quotient rule $(\\frac{u}{v})'$ for L'Hôpital!"
+            "### 📐 Concept Masterclass: Indeterminate Limits & L'Hôpital's Rule\n\n"
+            "#### 💡 1. Intuitive Mental Model\n"
+            "When evaluating $\\frac{f(x)}{g(x)}$ as both tend to 0, you aren't dividing zero by zero—you are comparing the *relative rates of descent* of both functions toward zero.\n\n"
+            "#### 📐 2. Canonical Analytical Formulation\n"
+            "$$\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\lim_{x \\to a} \\frac{f'(x)}{g'(x)} \\quad \\text{iff form is } \\left[\\frac{0}{0}\\right] \\text{ or } \\left[\\frac{\\pm\\infty}{\\pm\\infty}\\right]$$\n\n"
+            "#### 🔬 3. Step-by-Step Execution Protocol\n"
+            "1. Verify indeterminate form before differentiating; never apply if the denominator has a non-zero finite limit.\n"
+            "2. Differentiate numerator $f'(x)$ and denominator $g'(x)$ independently.\n"
+            "3. Substitute $x \\to a$. If indeterminate persists, apply second derivative $\\frac{f''(x)}{g''(x)}$.\n\n"
+            "#### ⚠️ 4. Exam Trap Radar\n"
+            "- **The Quotient Rule Trap:** Never use the quotient formula $\\frac{f'g - fg'}{g^2}$! L'Hôpital requires differentiating the numerator and denominator separately.\n"
+            "- **Standard Limit Supremacy:** In competitive exams, standard expansions (Taylor series) like $\\sin x = x - \\frac{x^3}{6} + \\dots$ are 3x faster than multiple L'Hôpital differentiations.\n\n"
+            "#### 🎯 5. Quick Micro-Check\n"
+            "*Evaluate $\\lim_{x \\to 0} \\frac{\\tan x - x}{x^3}$.* (Answer: $1/3$ via Taylor expansion or L'Hôpital)."
         )
-    elif "cell" in th or "genetic" in th:
+    # Biology / NEET: Meiosis
+    elif "cell" in th or "genetic" in th or "meiosis" in th:
         return (
-            "### 🧬 Concept: Cell Biology & Chromosomal Division (Biology)\n\n"
-            "Hello! Let's review this core NEET chapter:\n\n"
-            "- **Meiosis I vs II:** Homologous chromosomes segregate during Anaphase I (reductional division). Sister chromatids segregate during Anaphase II (equational division).\n"
-            "- **Crossing Over:** Occurs during the **Pachytene** stage of Prophase I, mediated by enzyme recombinase.\n"
-            "- **Synaptonemal Complex:** Formed during **Zygotene** and dissolves during **Diplotene**.\n"
-            "- **NEET Trap:** In Anaphase I, centromeres DO NOT split; splitting occurs strictly in Anaphase II."
+            "### 🧬 Concept Masterclass: Meiosis & Chromosomal Recombination\n\n"
+            "#### 💡 1. Intuitive Mental Model\n"
+            "Meiosis is nature's genetic shuffling deck. Unlike mitosis (which creates identical photocopies), Meiosis deliberately cuts chromosome count in half while exchanging pieces of maternal and paternal DNA to create infinite variety.\n\n"
+            "#### 📐 2. Key Stages & Cytogenetic Landmarks\n"
+            "- **Leptotene:** Chromatin condensation begins.\n"
+            "- **Zygotene:** Synapsis and Synaptonemal Complex formation between homologous pairs.\n"
+            "- **Pachytene:** Recombination nodules appear; crossing over mediated by enzyme **Recombinase**.\n"
+            "- **Diplotene:** Dissolution of synaptonemal complex; **Chiasmata** (X-shaped structures) visible.\n"
+            "- **Diakinesis:** Terminalization of chiasmata.\n\n"
+            "#### 🔬 3. Division Mechanism Comparison\n"
+            "- **Meiosis I (Reductional):** Homologous chromosomes separate ($2n \\to n$). Centromeres DO NOT split.\n"
+            "- **Meiosis II (Equational):** Sister chromatids separate. Centromeres split during Anaphase II.\n\n"
+            "#### ⚠️ 4. Exam Trap Radar (NEET)\n"
+            "- **Centromere Splitting Trap:** NEET examiners love asking in which stage centromeres divide. Remember: Anaphase I separates homologous chromosomes; centromeres divide strictly in **Anaphase II**!\n\n"
+            "#### 🎯 5. Quick Micro-Check\n"
+            "*In which specific sub-stage of Prophase I do chiasmata first become visible due to synaptonemal complex dissolution?* (Answer: Diplotene)."
+        )
+    # UPSC: Basic Structure Doctrine
+    elif "basic structure" in th or "kesavananda" in th or "constitution" in th:
+        return (
+            "### ⚖️ Concept Masterclass: The Basic Structure Doctrine\n\n"
+            "#### 💡 1. Intuitive Mental Model\n"
+            "Think of the Constitution as a foundational building. Parliament can repaint the walls, add rooms, or update the plumbing under Article 368, but it cannot demolish the load-bearing pillars that hold up the edifice.\n\n"
+            "#### 📐 2. Canonical Constitutional Jurisprudence\n"
+            "- **Propounded in:** *Kesavananda Bharati v. State of Kerala (1973)* by a historic 13-judge constitutional bench (7:6 majority).\n"
+            "- **Core Principle:** Parliament's constituent power under **Article 368** is broad but bounded; it does not extend to altering or destroying the essential framework of the Constitution.\n\n"
+            "#### 🔬 3. Core Structural Pillars Recognized by Supreme Court\n"
+            "1. Supremacy of the Constitution\n"
+            "2. Republican and Democratic form of Government\n"
+            "3. Secular character of the Constitution\n"
+            "4. Separation of Powers between Legislature, Executive, and Judiciary\n"
+            "5. Federal Character\n"
+            "6. Power of Judicial Review (*Minerva Mills*, 1980)\n\n"
+            "#### ⚠️ 4. Exam Trap Radar (UPSC Prelims)\n"
+            "- **Textual Absence:** The term 'Basic Structure' is **NOT defined or mentioned anywhere** in the written text of the Constitution of India—it is an indigenous judicial safeguard developed via case law.\n\n"
+            "#### 🎯 5. Quick Micro-Check\n"
+            "*Which landmark case held that Judicial Review is an inviolable part of the Basic Structure?* (Answer: *Minerva Mills v. Union of India*, 1980)."
+        )
+    # Physics: Rotational Dynamics & Moment of Inertia
+    elif "rotat" in th or "inertia" in th or "torque" in th or "angular" in th:
+        return (
+            "### 🔄 Concept Masterclass: Rotational Dynamics & Moment of Inertia\n\n"
+            "#### 💡 1. Intuitive Mental Model\n"
+            "Moment of inertia is the rotational clone of linear mass. Just as linear inertia resists changes in straight-line speed ($F = ma$), rotational inertia ($I$) resists being spun up or slowed down ($\\tau = I\\alpha$). Crucially, mass distributed farther from the axis of rotation counts quadratically ($mr^2$)!\n\n"
+            "#### 📐 2. Canonical Analytical Formulation\n"
+            "$$\\tau_{\\text{net}} = I \\alpha = \\frac{dL}{dt}, \\quad K_{\\text{rot}} = \\frac{1}{2} I \\omega^2$$\n"
+            "- Parallel Axis Theorem: $I = I_{\\text{cm}} + M d^2$ (Valid for any rigid body)\n"
+            "- Perpendicular Axis Theorem: $I_z = I_x + I_y$ (Valid strictly for planar 2D laminae)\n\n"
+            "#### 🔬 3. Step-by-Step Rolling Derivation\n"
+            "For a body of radius $R$ rolling down an incline of angle $\\theta$ without slipping ($a = \\alpha R$):\n"
+            "$$a = \\frac{g \\sin \\theta}{1 + \\frac{I_{\\text{cm}}}{M R^2}}$$\n"
+            "Notice how the acceleration depends solely on the shape factor $\\beta = \\frac{I_{\\text{cm}}}{M R^2}$! A solid sphere ($\\beta = 2/5$) always beats a ring ($\\beta = 1$) down the incline.\n\n"
+            "#### ⚠️ 4. Exam Trap Radar\n"
+            "- **The Incline Shape Trap:** In pure rolling down an incline, the velocity at the bottom does NOT depend on mass or radius—it depends strictly on the geometric distribution parameter $\\frac{I}{MR^2}$!\n"
+            "- **Perpendicular Axis Trap:** Never apply $I_z = I_x + I_y$ to solid 3D spheres or cylinders; it holds strictly for planar laminae.\n\n"
+            "#### 🎯 5. Quick Micro-Check\n"
+            "*Which reaches the bottom first in pure rolling down an incline: a hollow cylinder or a solid cylinder?* (Answer: Solid cylinder, because smaller $I/MR^2 = 1/2 < 1$ produces higher linear acceleration)."
+        )
+    # Physics: Optics & Lens Maker's Formula
+    elif "optic" in th or "lens" in th or "refract" in th:
+        return (
+            "### 🔍 Concept Masterclass: Refraction & Lens Maker's Formula\n\n"
+            "#### 💡 1. Intuitive Mental Model\n"
+            "A lens alters light wavefronts because light travels slower in glass than in air. Curving the surfaces changes the optical path delay across the aperture, bending parallel rays to converge at a sharp focal point.\n\n"
+            "#### 📐 2. Canonical Analytical Formulation\n"
+            "$$\\frac{1}{f} = \\left( \\frac{\\mu_2}{\\mu_1} - 1 \\right) \\left( \\frac{1}{R_1} - \\frac{1}{R_2} \\right)$$\n"
+            "- $\\mu_2$: Refractive index of lens material\n"
+            "- $\\mu_1$: Refractive index of surrounding medium\n"
+            "- $R_1, R_2$: Radii of curvature with strict Cartesian sign convention\n\n"
+            "#### 🔬 3. Step-by-Step Derivation from Spherical Refraction\n"
+            "Applying single-surface refraction $\\frac{\\mu_2}{v} - \\frac{\\mu_1}{u} = \\frac{\\mu_2 - \\mu_1}{R}$ across both front and rear curved interfaces and summing the equations yields the thin-lens focal equation.\n\n"
+            "#### ⚠️ 4. Exam Trap Radar\n"
+            "- **The Immersion Inversion Trap:** When a glass convex lens ($\\mu = 1.5$) is placed in a medium with higher refractive index (e.g. carbon disulfide $\\mu = 1.63$), the term $(\\frac{\\mu_2}{\\mu_1} - 1)$ becomes negative—the converging convex lens behaves as a **diverging concave lens**!\n\n"
+            "#### 🎯 5. Quick Micro-Check\n"
+            "*What happens to the focal length of a biconvex glass lens if immersed in water ($\\mu_w = 4/3$)?* (Answer: Focal length increases by approximately $4\\times$)."
         )
     else:
         return (
-            f"### 🔬 Concept: {topic_hint.title()}\n\n"
-            f"Hello! For {exam}, here is the key takeaway for **{topic_hint.title()}**:\n\n"
-            f"- Focus on the core foundational definition and governing formula/statute.\n"
-            "- Check how this concept connects to prerequisite topics in your curriculum DAG.\n"
-            "- Practice 3 to 5 targeted questions to test edge cases and distractor options!"
+            f"### 🔬 Concept Masterclass: {topic_hint.title()}\n\n"
+            f"#### 💡 1. Intuitive Mental Model\n"
+            f"To master **{topic_hint.title()}** in {exam}, ground the concept in foundational physical and conceptual symmetries before diving into complex problems.\n\n"
+            f"#### 📐 2. Governing Analytical Formulation\n"
+            f"Isolate the canonical governing relations and dimensional units for **{topic_hint.title()}**.\n\n"
+            f"#### 🔬 3. Step-by-Step Logical Derivation\n"
+            f"Trace the derivation from first principles (conservation laws or fundamental definitions) to competitive exam shortcuts.\n\n"
+            f"#### ⚠️ 4. Exam Trap Radar\n"
+            f"- Verify boundary conditions and sign conventions to eliminate common distractor traps.\n\n"
+            f"#### 🎯 5. Quick Micro-Check\n"
+            f"*Ready to test your mastery of {topic_hint.title()}? Click '🎯 Test Me on This' below for an instant micro-drill!*"
         )
 
 
