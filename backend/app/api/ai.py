@@ -37,6 +37,7 @@ async def chat_with_assistant(
     context_str = ""
 
     student = db.query(Student).filter(Student.student_id == student_id).first()
+    latest_attempt = None
     if student:
         student_context["student_name"] = student.name
         student_context["target_exam"] = student.target_exam
@@ -186,13 +187,58 @@ async def chat_with_assistant(
         "All adaptive diagnostic engines are active on standby with zero compulsory barriers."
     )
 
-    res = await llm.generate_text(
-        prompt=req.get_prompt(),
-        system_prompt=system_prompt,
-        student_context=student_context
-    )
+    from backend.app.ai.socratic_agents import SocraticCoordinator, SocraticProberAgent, PsychologistAgent
 
-    return AIChatResponse(response=res["text"], source=res["source"])
+    # Determine active session duration for Agent 3 (Psychologist)
+    active_minutes = 0.0
+    from backend.app.models.schema import utc_now
+    if student and student.last_active:
+        diff_secs = (utc_now() - student.last_active).total_seconds()
+        if 0 <= diff_secs <= 86400:
+            active_minutes = diff_secs / 60.0
+    if latest_attempt and latest_attempt.time_taken_seconds:
+        active_minutes = max(active_minutes, latest_attempt.time_taken_seconds / 60.0)
+
+    if mode == "socratic":
+        concept_name = "Core Conceptual Foundation"
+        if latest_attempt and student_context.get("latest_quiz", {}).get("mistakes"):
+            first_mistake = student_context["latest_quiz"]["mistakes"][0]
+            concept_name = first_mistake.get("concept_id", concept_name)
+            error_type = first_mistake.get("error_type")
+            explanation = first_mistake.get("explanation")
+        else:
+            error_type = "CONCEPTUAL_ERROR"
+            explanation = None
+
+        socratic_bundle = SocraticCoordinator.coordinate_response(
+            student_id=student_id,
+            db=db,
+            concept_name=concept_name,
+            error_type=error_type,
+            explanation=explanation,
+            session_duration_minutes=active_minutes,
+            student_name=student.name if student else "Aspirant"
+        )
+        final_text = socratic_bundle["text"]
+        source = socratic_bundle["source"]
+    else:
+        res = await llm.generate_text(
+            prompt=req.get_prompt(),
+            system_prompt=system_prompt,
+            student_context=student_context
+        )
+        final_text = res["text"]
+        source = res["source"]
+
+        # Agent 3 (Psychologist) fatigue check for long sessions
+        break_prompt = PsychologistAgent.check_and_inject_break_prompt(
+            active_duration_minutes=active_minutes,
+            student_name=student.name if student else "Aspirant"
+        )
+        if break_prompt:
+            final_text += break_prompt
+
+    return AIChatResponse(response=final_text, source=source)
 
 @router.post("/generate-question")
 async def generate_practice_question(
@@ -302,28 +348,92 @@ async def test_provider_key(req: KeyTestRequest):
 async def get_fineweb_readings_endpoint(
     course: Optional[str] = None,
     subject: Optional[str] = None,
-    min_score: float = 0.0
+    sub_category: Optional[str] = None,
+    min_score: float = 0.0,
+    db: Session = Depends(get_db)
 ):
-    """Returns curated FineWeb-Edu educational readings tailored by course and subject."""
-    from backend.app.knowledge_graph.fineweb_vault import get_fineweb_readings
-    readings = get_fineweb_readings(course=course, subject=subject, min_score=min_score)
+    """
+    Returns comprehensive educational readings across ALL curriculum topics extracted from the API,
+    divided into primary categories (Subjects) and granular subcategories (e.g., Mechanics, Electrodynamics, Calculus).
+    """
+    from backend.app.knowledge_graph.fineweb_vault import get_fineweb_readings, extract_all_curriculum_readings
+
+    # Fetch all readings for this course to extract available subcategories
+    all_course_readings = extract_all_curriculum_readings(course=course or "ALL", db=db)
+
+    # Compute subcategories list for dynamic frontend pills
+    subcat_counts = {}
+    for r in all_course_readings:
+        sc = r.get("sub_category", "General")
+        subcat_counts[sc] = subcat_counts.get(sc, 0) + 1
+
+    subcat_emoji_map = {
+        "Mechanics": "⚙️ Mechanics",
+        "Electrodynamics": "⚡ Electrodynamics",
+        "Optics": "🔍 Optics",
+        "Modern Physics": "⚛️ Modern Physics",
+        "Thermal Physics": "🔥 Thermal Physics",
+        "Calculus & Analysis": "📐 Calculus & Analysis",
+        "Algebra": "📊 Algebra",
+        "Vectors & 3D Geometry": "📐 Vectors & 3D Geometry",
+        "Physical Chemistry": "🧪 Physical Chemistry",
+        "Organic Chemistry": "⚗️ Organic Chemistry",
+        "Biochemistry & Biomolecules": "🧬 Biomolecules",
+        "Inorganic Chemistry": "🧱 Inorganic Chemistry",
+        "Cell Biology": "🔬 Cell Biology",
+        "Genetics & Evolution": "🧬 Genetics & Evolution",
+        "Human Physiology": "🫀 Human Physiology",
+        "Plant Physiology": "🌱 Plant Physiology",
+        "Ecology & Environment": "🌍 Ecology & Environment",
+        "Polity & Governance": "🏛️ Polity & Governance",
+        "Economy & Development": "📈 Economy & Development",
+        "Environment & Ecology": "🌿 Environment & Ecology",
+        "Ethics & Integrity": "⚖️ Ethics & Integrity",
+        "Modern History & Culture": "📜 Modern History",
+        "CSAT & Aptitude": "🧩 CSAT & Aptitude"
+    }
+
+    sub_categories_list = [
+        {"id": "all", "label": "All Subcategories", "count": len(all_course_readings)}
+    ] + [
+        {
+            "id": sc,
+            "label": f"{subcat_emoji_map.get(sc, sc)} ({count})",
+            "name": sc,
+            "count": count
+        }
+        for sc, count in sorted(subcat_counts.items())
+    ]
+
+    # Filtered readings based on query params
+    readings = get_fineweb_readings(
+        course=course,
+        subject=subject,
+        sub_category=sub_category,
+        min_score=min_score,
+        db=db
+    )
+
     return {
-        "dataset": "HuggingFaceFW/fineweb-edu",
+        "dataset": "HuggingFaceFW/fineweb-edu & APEX Curriculum Graph",
         "total_tokens_dataset": "1.3T",
         "course": course or "ALL",
         "count": len(readings),
+        "total_topics": len(all_course_readings),
+        "sub_categories": sub_categories_list,
         "readings": readings
     }
 
 
 @router.get("/fineweb/reading/{reading_id}")
-async def get_single_fineweb_reading(reading_id: str):
+async def get_single_fineweb_reading(reading_id: str, db: Session = Depends(get_db)):
     """Fetches full academic excerpt by reading ID."""
     from backend.app.knowledge_graph.fineweb_vault import get_reading_by_id
-    reading = get_reading_by_id(reading_id)
+    reading = get_reading_by_id(reading_id, db=db)
     if not reading:
         raise HTTPException(status_code=404, detail=f"Reading {reading_id} not found")
     return reading
+
 
 
 

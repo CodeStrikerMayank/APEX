@@ -2439,6 +2439,9 @@
     <a class="nav-item" data-view="view-vault"><span class="left">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1.2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12.5h4"/></svg>
       Practice Vault</span><span class="count">405k</span></a>
+    <a class="nav-item" data-view="view-open-mm-rl" id="navOpenMMRL"><span class="left">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Multimodal STEM Vault</span><span class="count" style="background:linear-gradient(135deg,#06B6D4,#3B82F6);color:#fff;font-weight:700;">RL</span></a>
     <a class="nav-item" data-view="view-knowledge-vault" id="navKnowledgeVault"><span class="left">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M12 6v6M9 9h6"/></svg>
       Knowledge Vault &amp; Readings</span><span class="count" id="vaultArticleCount">FineWeb</span></a>
@@ -2955,6 +2958,21 @@
         <h1>Practice Vault</h1>
         <p>405,000+ questions across Physics, Chemistry &amp; Mathematics. Filter by subject and jump straight into a drill.</p>
       </div>
+
+      <!-- Jump banner to Multimodal STEM Vault -->
+      <div style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(6,182,212,0.08));border:1px solid var(--purple-border);border-radius:var(--radius-md);padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="chip chip-purple" style="font-weight:700;font-size:11px;">NEW LIVE INTEGRATION</span>
+            <span style="font-weight:700;font-size:14px;color:var(--ink);">🔬 Multimodal STEM Vault (Open-MM-RL)</span>
+          </div>
+          <p style="margin:4px 0 0;font-size:12.5px;color:var(--ink-soft);">Olympiad-level multimodal reasoning problems with LaTeX formulas, scientific diagrams, and interactive drills.</p>
+        </div>
+        <button class="btn-solid-purple" onclick="switchView('view-open-mm-rl')" style="padding:8px 16px;font-size:12.5px;display:flex;align-items:center;gap:6px;">
+          <span>Explore STEM Vault &rarr;</span>
+        </button>
+      </div>
+
       <div class="filter-chips" id="vaultFilters">
         <button class="filter-chip active" data-subject="">All Subjects</button>
         <button class="filter-chip" data-subject="physics">⚡ Physics</button>
@@ -2963,6 +2981,48 @@
       </div>
       <div class="simple-list" id="vaultList"></div>
     </div>
+
+    <!-- ============ VIEW: MULTIMODAL STEM VAULT (Open-MM-RL) ============ -->
+    <div class="view" id="view-open-mm-rl">
+      <div class="view-head">
+        <div class="welcome-tags">MULTIMODAL REINFORCEMENT LEARNING <span>•</span> <span class="live"><span class="dot-live"></span>TURING ENTERPRISES OPEN-MM-RL</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h1 style="display:flex;align-items:center;gap:10px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--purple);"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              <span>🔬 Multimodal STEM Vault</span>
+            </h1>
+            <p>Live multimodal reasoning and Olympiad-level STEM problems from Hugging Face <code>TuringEnterprises/Open-MM-RL</code>. Rendered with KaTeX mathematical typesetting, high-resolution scientific diagrams, and instant adaptive quiz drills.</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span id="openMMRLSourceBadge" class="chip chip-green"><span class="dot-live"></span> Live Hugging Face API</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter & Controls Toolbar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;background:var(--track-bg);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 18px;">
+        <div class="filter-chips" id="openMMRLFilters" style="margin:0;">
+          <button class="filter-chip active" data-subject="all" onclick="window.filterStemVault('all', this)">All Disciplines</button>
+          <button class="filter-chip" data-subject="mathematics" onclick="window.filterStemVault('mathematics', this)">📐 Mathematics</button>
+          <button class="filter-chip" data-subject="physics" onclick="window.filterStemVault('physics', this)">⚡ Physics</button>
+          <button class="filter-chip" data-subject="chemistry" onclick="window.filterStemVault('chemistry', this)">🧪 Chemistry</button>
+          <button class="filter-chip" data-subject="biology" onclick="window.filterStemVault('biology', this)">🧬 Biology</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="openMMRLCountLabel" style="font-size:12px;color:var(--ink-faint);font-weight:600;">Loading batch...</span>
+          <button class="btn-subtle" onclick="window.prevStemBatch()" style="padding:6px 12px;font-size:12px;border:1px solid var(--border);border-radius:8px;">&larr; Prev</button>
+          <button class="btn-subtle" onclick="window.nextStemBatch()" style="padding:6px 12px;font-size:12px;border:1px solid var(--border);border-radius:8px;">Next &rarr;</button>
+          <button class="btn-subtle" onclick="window.refreshStemVault()" title="Refresh live from Hugging Face" style="padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:8px;">🔄</button>
+        </div>
+      </div>
+
+      <!-- Problem Cards Grid -->
+      <div id="openMMRLGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(360px, 1fr));gap:18px;">
+        <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-faint);">Loading Multimodal STEM Vault...</div>
+      </div>
+    </div>
+
 
     <!-- ============ VIEW: KNOWLEDGE VAULT & READINGS (FineWeb-Edu) ============ -->
     <div class="view" id="view-knowledge-vault">
@@ -2978,6 +3038,7 @@
           <span style="font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink-faint);">COURSE SYLLABUS:</span>
           <span class="chip chip-purple" id="vaultActiveCourseChip" style="font-weight:700;font-size:12px;">🎯 JEE Main &amp; Advanced</span>
           <span class="chip chip-green" style="font-size:11px;">⭐ Score &ge; 4.7/5.0 Edu Quality</span>
+          <span class="chip chip-blue" id="vaultCurriculumPill" style="font-size:11px;font-weight:600;background:rgba(59,130,246,0.12);color:var(--blue, #3b82f6);border:1px solid rgba(59,130,246,0.25);">📚 100% Curriculum Extracted</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <button class="btn-subtle" id="installAllReadingsBtn" onclick="installEntireCoursePack()" style="padding:7px 13px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:9px;">
@@ -2986,15 +3047,43 @@
         </div>
       </div>
 
-      <!-- Filter Chips -->
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
-        <div class="filter-chips" id="knowledgeSubjectFilters">
-          <button class="filter-chip active" data-subject="all" onclick="filterKnowledgeBySubject('all', this)">All Topics</button>
+      <!-- Live Search & Concept Filter -->
+      <div style="display:flex;gap:12px;margin-bottom:14px;align-items:center;">
+        <div style="flex:1;position:relative;">
+          <input type="text" id="knowledgeSearchInput" placeholder="🔍 Search all syllabus topics, subcategories, formulas, or concepts (e.g. Mechanics, Bernoulli, Calculus, Thermodynamics)..." style="width:100%;box-sizing:border-box;padding:10px 14px 10px 38px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--ink);font-size:13px;outline:none;" oninput="onKnowledgeSearch(this.value)">
+          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.6;pointer-events:none;">🔍</span>
         </div>
+        <button class="btn-subtle" onclick="clearKnowledgeSearch()" style="padding:10px 14px;font-size:12px;border-radius:10px;border:1px solid var(--border);white-space:nowrap;">Clear Search</button>
+      </div>
+
+      <!-- Main Category / Subject Filter Chips -->
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Category / Subject:</div>
+        <div class="filter-chips" id="knowledgeSubjectFilters">
+          <button class="filter-chip active" data-subject="all" onclick="filterKnowledgeBySubject('all', this)">All Subjects</button>
+        </div>
+      </div>
+
+      <!-- Granular Subcategory Filter Chips (Mechanics, Electrodynamics, Calculus, etc.) -->
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em;">Domain Subcategories (e.g. Mechanics, Optics, Calculus):</span>
+          <span id="knowledgeSubcatCountBadge" style="font-size:11px;color:var(--ink-soft);font-weight:600;"></span>
+        </div>
+        <div class="filter-chips" id="knowledgeSubcategoryFilters" style="display:flex;flex-wrap:wrap;gap:6px;">
+          <button class="filter-chip active" data-sub="all" onclick="filterKnowledgeBySubcategory('all', this)">All Subcategories</button>
+        </div>
+      </div>
+
+      <!-- Filter Chips & Status Summary Bar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);">
         <div class="filter-chips" id="knowledgeOfflineFilters">
-          <button class="filter-chip active" data-mode="all" onclick="filterReadingsByMode('all', this)">All Readings</button>
+          <button class="filter-chip active" data-mode="all" onclick="filterReadingsByMode('all', this)">All Topics</button>
           <button class="filter-chip" data-mode="elite" onclick="filterReadingsByMode('elite', this)">⭐ Elite (&ge; 4.85)</button>
           <button class="filter-chip" data-mode="installed" onclick="filterReadingsByMode('installed', this)">📥 Installed Offline (<span id="installedCountBadge">0</span>)</button>
+        </div>
+        <div id="knowledgeVaultStatusSummary" style="font-size:12px;color:var(--ink-soft);font-weight:600;">
+          Loading topics...
         </div>
       </div>
 
@@ -3763,6 +3852,7 @@ const ApiClient = {
     });
   }
 };
+window.ApiClient = ApiClient;
 
 const TRACK_LABELS = {
   jee: 'JEE Main',
@@ -5581,7 +5671,50 @@ function renderView(viewId){
   if (viewId === 'view-upsc-mains') initUpscMainsLab();
   if (viewId === 'view-knowledge-vault') renderKnowledgeVault();
   if (viewId === 'view-ai-studio') renderAiStudio();
+  if (viewId === 'view-open-mm-rl') renderOpenMMRLVault();
 }
+
+let _stemVaultOffset = 0;
+let _stemVaultFilter = 'all';
+
+function renderOpenMMRLVault() {
+  if (window.loadOpenMMRLVault) {
+    window.loadOpenMMRLVault(_stemVaultOffset, 10, _stemVaultFilter);
+  }
+}
+
+window.filterStemVault = function(sub, btn) {
+  _stemVaultFilter = sub;
+  _stemVaultOffset = 0;
+  if (btn) {
+    document.querySelectorAll('#openMMRLFilters .filter-chip').forEach(function(c){ c.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+  if (window.loadOpenMMRLVault) {
+    window.loadOpenMMRLVault(_stemVaultOffset, 10, _stemVaultFilter);
+  }
+};
+
+window.nextStemBatch = function() {
+  _stemVaultOffset += 10;
+  if (window.loadOpenMMRLVault) {
+    window.loadOpenMMRLVault(_stemVaultOffset, 10, _stemVaultFilter);
+  }
+};
+
+window.prevStemBatch = function() {
+  _stemVaultOffset = Math.max(0, _stemVaultOffset - 10);
+  if (window.loadOpenMMRLVault) {
+    window.loadOpenMMRLVault(_stemVaultOffset, 10, _stemVaultFilter);
+  }
+};
+
+window.refreshStemVault = function() {
+  if (window.loadOpenMMRLVault) {
+    window.loadOpenMMRLVault(_stemVaultOffset, 10, _stemVaultFilter);
+  }
+};
+
 
 
 /* =============================================================
@@ -5699,24 +5832,27 @@ document.querySelectorAll('#vaultFilters .filter-chip').forEach(function(chip){
    ============================================================= */
 let _activeKnowledgeCourse = null;
 let _activeKnowledgeSubject = 'all';
+let _activeKnowledgeSubcategory = 'all';
 let _activeKnowledgeMode = 'all';
+let _knowledgeSearchQuery = '';
 let _currentReadingsCache = [];
+let _availableSubcategories = [];
 
 const KNOWLEDGE_SUBJECT_MAP = {
   JEE: [
-    { id: 'all', label: 'All Topics' },
+    { id: 'all', label: 'All Subjects' },
     { id: 'physics', label: '⚡ Physics' },
     { id: 'mathematics', label: '📐 Mathematics' },
     { id: 'chemistry', label: '🧪 Chemistry' }
   ],
   NEET: [
-    { id: 'all', label: 'All Topics' },
+    { id: 'all', label: 'All Subjects' },
     { id: 'biology', label: '🧬 Biology (Botany & Zoology)' },
     { id: 'chemistry', label: '🧪 Medical Chemistry' },
     { id: 'physics', label: '⚡ Medical Physics' }
   ],
   UPSC: [
-    { id: 'all', label: 'All Topics' },
+    { id: 'all', label: 'All Subjects' },
     { id: 'polity', label: '🏛️ Polity & Governance' },
     { id: 'economy', label: '📈 Economy & Dev' },
     { id: 'environment', label: '🌍 Environment & Climate' },
@@ -5741,16 +5877,20 @@ function saveInstalledReadingsSet(set) {
   } catch (_) {}
 }
 
-async function renderKnowledgeVault(subjectFilter = null, modeFilter = null) {
+async function renderKnowledgeVault(subjectFilter = null, modeFilter = null, subcatFilter = null) {
   const currentExam = (AppState.targetExam || 'JEE').toUpperCase();
   const grid = document.getElementById('knowledgeReadingsGrid');
   const chipContainer = document.getElementById('knowledgeSubjectFilters');
+  const subcatContainer = document.getElementById('knowledgeSubcategoryFilters');
+  const subcatBadge = document.getElementById('knowledgeSubcatCountBadge');
   const courseChip = document.getElementById('vaultActiveCourseChip');
   const installedBadge = document.getElementById('installedCountBadge');
   const vaultArticleCount = document.getElementById('vaultArticleCount');
+  const curriculumPill = document.getElementById('vaultCurriculumPill');
 
   if (subjectFilter !== null) _activeKnowledgeSubject = subjectFilter;
   if (modeFilter !== null) _activeKnowledgeMode = modeFilter;
+  if (subcatFilter !== null) _activeKnowledgeSubcategory = subcatFilter;
 
   const cfg = EXAM_CONFIGS[currentExam] || EXAM_CONFIGS.JEE;
   if (courseChip) courseChip.textContent = cfg.pill;
@@ -5758,6 +5898,11 @@ async function renderKnowledgeVault(subjectFilter = null, modeFilter = null) {
   // Render course-specific subject filter chips if course changed
   if (chipContainer && _activeKnowledgeCourse !== currentExam) {
     _activeKnowledgeCourse = currentExam;
+    _activeKnowledgeSubcategory = 'all';
+    _knowledgeSearchQuery = '';
+    const searchInput = document.getElementById('knowledgeSearchInput');
+    if (searchInput) searchInput.value = '';
+
     const subjects = KNOWLEDGE_SUBJECT_MAP[currentExam] || KNOWLEDGE_SUBJECT_MAP.JEE;
     chipContainer.innerHTML = subjects.map(s => `
       <button class="filter-chip ${s.id === _activeKnowledgeSubject ? 'active' : ''}" data-subject="${s.id}" onclick="filterKnowledgeBySubject('${s.id}', this)">${s.label}</button>
@@ -5768,91 +5913,34 @@ async function renderKnowledgeVault(subjectFilter = null, modeFilter = null) {
   if (installedBadge) installedBadge.textContent = String(installedSet.size);
 
   if (grid) {
-    grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--ink-faint);"><span class="dot-live" style="background:var(--purple);display:inline-block;width:10px;height:10px;margin-right:8px;"></span>Loading course readings from FineWeb-Edu repository...</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--ink-faint);"><span class="dot-live" style="background:var(--purple);display:inline-block;width:10px;height:10px;margin-right:8px;"></span>Extracting all curriculum topics &amp; academic passages from FineWeb repository...</div>';
   }
 
   try {
     const res = await ApiClient.get(`/api/ai/fineweb/readings?course=${currentExam}`);
     const readings = res.readings || [];
     _currentReadingsCache = readings;
+    _availableSubcategories = res.sub_categories || [];
 
     if (vaultArticleCount) {
-      vaultArticleCount.textContent = `${readings.length} Curated`;
+      vaultArticleCount.textContent = `${readings.length} Topics`;
     }
 
-    let filtered = readings;
-    if (_activeKnowledgeSubject !== 'all') {
-      filtered = filtered.filter(r => (r.subject || '').toLowerCase().includes(_activeKnowledgeSubject.toLowerCase()));
+    if (curriculumPill) {
+      curriculumPill.textContent = `📚 ${res.total_topics || readings.length} Syllabus Topics Extracted`;
     }
 
-    if (_activeKnowledgeMode === 'elite') {
-      filtered = filtered.filter(r => (r.score || 0) >= 4.85);
-    } else if (_activeKnowledgeMode === 'installed') {
-      filtered = filtered.filter(r => installedSet.has(r.id));
+    // Render Subcategory Chips
+    if (subcatContainer && _availableSubcategories.length > 0) {
+      if (subcatBadge) subcatBadge.textContent = `${_availableSubcategories.length - 1} Distinct Branches`;
+      subcatContainer.innerHTML = _availableSubcategories.map(sc => `
+        <button class="filter-chip ${sc.id === _activeKnowledgeSubcategory ? 'active' : ''}" data-sub="${sc.id}" onclick="filterKnowledgeBySubcategory('${sc.id}', this)">
+          ${escapeHtml(sc.label)}
+        </button>
+      `).join('');
     }
 
-    if (!grid) return;
-
-    if (filtered.length === 0) {
-      grid.innerHTML = `
-        <div style="grid-column:1/-1;padding:40px 20px;text-align:center;background:var(--card);border:1px dashed var(--border);border-radius:14px;">
-          <div style="font-size:32px;margin-bottom:8px;">📭</div>
-          <b style="font-size:15px;color:var(--ink);">No readings match your filter</b>
-          <p style="margin:4px 0 14px;font-size:13px;color:var(--ink-soft);">
-            ${_activeKnowledgeMode === 'installed' ? 'You have not installed any readings for offline study yet. Click "Install / Save Offline" on any card to save it!' : 'Try selecting "All Topics" to see all curated textbook excerpts.'}
-          </p>
-          <button class="btn-primary" onclick="filterReadingsByMode('all', document.querySelector('#knowledgeOfflineFilters button'))" style="padding:8px 16px;border-radius:10px;">Show All Readings</button>
-        </div>
-      `;
-      return;
-    }
-
-    grid.innerHTML = filtered.map(r => {
-      const isInstalled = installedSet.has(r.id);
-      return `
-        <div class="knowledge-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;transition:transform 0.2s ease, box-shadow 0.2s ease;">
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;">
-              <span class="chip chip-purple" style="font-size:10.5px;padding:2px 7px;">${escapeHtml(r.subject)}</span>
-              <span class="chip chip-green" style="font-size:10.5px;padding:2px 7px;" title="Evaluated via Llama-3-70B classifier on educational quality (0.0 to 5.0)">⭐ ${r.score.toFixed(2)} / 5.0 Edu</span>
-            </div>
-
-            <h3 style="font-size:15px;line-height:1.4;margin:0 0 6px;color:var(--ink);">${escapeHtml(r.title)}</h3>
-            <div style="font-size:11.5px;color:var(--ink-faint);margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span>📖 ${escapeHtml(r.chapter)}</span>
-              <span>•</span>
-              <span>${r.word_count} Words</span>
-              <span>•</span>
-              <span>~${r.reading_time_mins}m read</span>
-            </div>
-
-            <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
-              ${escapeHtml(r.summary || r.content.substring(0, 160) + '...')}
-            </p>
-          </div>
-
-          <div>
-            <div style="font-size:10.5px;color:var(--ink-faint);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">🏛 ${escapeHtml(r.source)}</span>
-              ${isInstalled ? '<span class="chip chip-purple" style="font-size:9.5px;padding:1px 6px;">📥 INSTALLED OFFLINE</span>' : '<span style="opacity:0.7;">Online Stream</span>'}
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-              <button class="btn-primary" onclick="openReaderModal('${r.id}')" style="padding:7px 10px;font-size:12px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;">
-                <span>📖 Read Excerpt</span>
-              </button>
-              <button class="btn-subtle" onclick="toggleInstallReading('${r.id}')" style="padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:5px;">
-                <span>${isInstalled ? '✅ Installed' : '📥 Save Offline'}</span>
-              </button>
-            </div>
-
-            <button class="btn-subtle" onclick="startPassageQuiz('${r.id}')" style="width:100%;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--purple);border:1px dashed var(--purple);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
-              <span>⚡ Practice Passage Drill</span>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
+    renderKnowledgeVaultCards();
 
   } catch (err) {
     if (grid) {
@@ -5861,16 +5949,209 @@ async function renderKnowledgeVault(subjectFilter = null, modeFilter = null) {
   }
 }
 
+function renderKnowledgeVaultCards() {
+  const grid = document.getElementById('knowledgeReadingsGrid');
+  const statusSummary = document.getElementById('knowledgeVaultStatusSummary');
+  if (!grid) return;
+
+  const installedSet = getInstalledReadingsSet();
+  let filtered = _currentReadingsCache;
+
+  // Filter 1: Main Subject / Category
+  if (_activeKnowledgeSubject !== 'all') {
+    filtered = filtered.filter(r => (r.subject || '').toLowerCase().includes(_activeKnowledgeSubject.toLowerCase()));
+  }
+
+  // Filter 2: Subcategory (e.g. Mechanics, Calculus & Analysis, Cell Biology, etc.)
+  if (_activeKnowledgeSubcategory !== 'all') {
+    filtered = filtered.filter(r => (r.sub_category || '').toLowerCase() === _activeKnowledgeSubcategory.toLowerCase());
+  }
+
+  // Filter 3: Quality / Mode
+  if (_activeKnowledgeMode === 'elite') {
+    filtered = filtered.filter(r => (r.score || 0) >= 4.85);
+  } else if (_activeKnowledgeMode === 'installed') {
+    filtered = filtered.filter(r => installedSet.has(r.id));
+  }
+
+  // Filter 4: Live Search Query
+  if (_knowledgeSearchQuery) {
+    const q = _knowledgeSearchQuery;
+    filtered = filtered.filter(r => {
+      const inTitle = (r.title || '').toLowerCase().includes(q);
+      const inTopic = (r.topic || '').toLowerCase().includes(q);
+      const inChapter = (r.chapter || '').toLowerCase().includes(q);
+      const inSubcat = (r.sub_category || '').toLowerCase().includes(q);
+      const inSubject = (r.subject || '').toLowerCase().includes(q);
+      const formulaStr = typeof r.formula_box === 'string' ? r.formula_box : (r.formula_box?.plain || r.formula_box?.latex || r.formula_box?.title || '');
+      const inFormula = formulaStr.toLowerCase().includes(q);
+      const inConcepts = Array.isArray(r.concepts) && r.concepts.some(c => {
+        const lbl = typeof c === 'string' ? c : (c?.name || c?.title || '');
+        return lbl.toLowerCase().includes(q);
+      });
+      return inTitle || inTopic || inChapter || inSubcat || inSubject || inFormula || inConcepts;
+    });
+  }
+
+  // Update Status Summary
+  if (statusSummary) {
+    const activeSubcatObj = _availableSubcategories.find(s => s.id === _activeKnowledgeSubcategory);
+    const subcatText = activeSubcatObj && activeSubcatObj.id !== 'all' ? ` in ${activeSubcatObj.label}` : '';
+    statusSummary.innerHTML = `Showing <b>${filtered.length}</b> of <b>${_currentReadingsCache.length}</b> syllabus topics${subcatText}`;
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;padding:40px 20px;text-align:center;background:var(--card);border:1px dashed var(--border);border-radius:14px;">
+        <div style="font-size:32px;margin-bottom:8px;">📭</div>
+        <b style="font-size:15px;color:var(--ink);">No topics match your current filter</b>
+        <p style="margin:4px 0 14px;font-size:13px;color:var(--ink-soft);">
+          ${_knowledgeSearchQuery ? `No matches found for "${escapeHtml(_knowledgeSearchQuery)}". Try clearing your search keyword.` :
+            _activeKnowledgeMode === 'installed' ? 'You have not installed any readings for offline study yet. Click "Save Offline" on any card to store it on this device!' :
+            'Try selecting "All Subjects" or "All Subcategories" to view all curriculum topics.'}
+        </p>
+        <button class="btn-primary" onclick="resetAllKnowledgeFilters()" style="padding:8px 16px;border-radius:10px;">Reset All Filters</button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r => {
+    const isInstalled = installedSet.has(r.id);
+    const subcatBadge = r.sub_category ? `
+      <span class="chip" style="font-size:10px;font-weight:700;background:rgba(139,92,246,0.12);color:var(--purple);border:1px solid rgba(139,92,246,0.25);" title="Curriculum Domain Subcategory">
+        ${escapeHtml(r.sub_category)}
+      </span>
+    ` : '';
+
+    const conceptsHtml = (r.concepts && r.concepts.length > 0) ? `
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">
+        ${r.concepts.slice(0, 3).map(c => {
+          const lbl = typeof c === 'string' ? c : (c?.name || c?.title || '');
+          return `
+            <span style="font-size:10px;background:var(--track-bg);border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--ink-soft);">
+              🏷️ ${escapeHtml(lbl)}
+            </span>
+          `;
+        }).join('')}
+        ${r.concepts.length > 3 ? `<span style="font-size:10px;color:var(--ink-faint);padding:2px 4px;">+${r.concepts.length - 3} more</span>` : ''}
+      </div>
+    ` : '';
+
+    const formulaStr = typeof r.formula_box === 'string' ? r.formula_box : (r.formula_box?.plain || r.formula_box?.latex || r.formula_box?.title || '');
+    const formulaHtml = formulaStr ? `
+      <div style="background:var(--track-bg);border:1px solid var(--border);border-radius:8px;padding:6px 9px;font-family:monospace;font-size:11px;color:var(--purple);margin-bottom:10px;overflow-x:auto;white-space:nowrap;" title="Syllabus Formula / Core Equation">
+        📐 <b>${escapeHtml(formulaStr)}</b>
+      </div>
+    ` : '';
+
+    return `
+      <div class="knowledge-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;transition:transform 0.2s ease, box-shadow 0.2s ease;">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="chip chip-purple" style="font-size:10.5px;padding:2px 7px;">${escapeHtml(r.subject)}</span>
+              ${subcatBadge}
+            </div>
+            <span class="chip chip-green" style="font-size:10.5px;padding:2px 7px;" title="Evaluated via Llama-3-70B classifier on educational quality (0.0 to 5.0)">⭐ ${(r.score || 4.8).toFixed(2)} / 5.0 Edu</span>
+          </div>
+
+          <h3 style="font-size:15px;line-height:1.4;margin:0 0 6px;color:var(--ink);">${escapeHtml(r.title)}</h3>
+          <div style="font-size:11.5px;color:var(--ink-faint);margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span>📖 ${escapeHtml(r.chapter)}</span>
+            <span>•</span>
+            <span style="color:var(--purple);font-weight:600;">🎯 ${escapeHtml(r.topic)}</span>
+            <span>•</span>
+            <span>~${r.reading_time_mins || 4}m read</span>
+          </div>
+
+          ${conceptsHtml}
+          ${formulaHtml}
+
+          <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+            ${escapeHtml(r.summary || (r.content ? r.content.substring(0, 160) + '...' : ''))}
+          </p>
+        </div>
+
+        <div>
+          <div style="font-size:10.5px;color:var(--ink-faint);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">🏛 ${escapeHtml(r.source || 'FineWeb-Edu Academic Corpus')}</span>
+            ${isInstalled ? '<span class="chip chip-purple" style="font-size:9.5px;padding:1px 6px;">📥 INSTALLED OFFLINE</span>' : '<span style="opacity:0.7;">Online Stream</span>'}
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <button class="btn-primary" onclick="openReaderModal('${r.id}')" style="padding:7px 10px;font-size:12px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;">
+              <span>📖 Read Excerpt</span>
+            </button>
+            <button class="btn-subtle" onclick="toggleInstallReading('${r.id}')" style="padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:5px;">
+              <span>${isInstalled ? '✅ Installed' : '📥 Save Offline'}</span>
+            </button>
+          </div>
+
+          <button class="btn-subtle" onclick="startPassageQuiz('${r.id}')" style="width:100%;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--purple);border:1px dashed var(--purple);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span>⚡ Practice Passage Drill</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function filterKnowledgeBySubject(subject, btn) {
+  _activeKnowledgeSubject = subject;
   document.querySelectorAll('#knowledgeSubjectFilters .filter-chip').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderKnowledgeVault(subject, null);
+  renderKnowledgeVaultCards();
+}
+
+function filterKnowledgeBySubcategory(subcat, btn) {
+  _activeKnowledgeSubcategory = subcat;
+  document.querySelectorAll('#knowledgeSubcategoryFilters .filter-chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderKnowledgeVaultCards();
 }
 
 function filterReadingsByMode(mode, btn) {
+  _activeKnowledgeMode = mode;
   document.querySelectorAll('#knowledgeOfflineFilters .filter-chip').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderKnowledgeVault(null, mode);
+  renderKnowledgeVaultCards();
+}
+
+function onKnowledgeSearch(val) {
+  _knowledgeSearchQuery = (val || '').trim().toLowerCase();
+  renderKnowledgeVaultCards();
+}
+
+function clearKnowledgeSearch() {
+  _knowledgeSearchQuery = '';
+  const input = document.getElementById('knowledgeSearchInput');
+  if (input) input.value = '';
+  renderKnowledgeVaultCards();
+}
+
+function resetAllKnowledgeFilters() {
+  _activeKnowledgeSubject = 'all';
+  _activeKnowledgeSubcategory = 'all';
+  _activeKnowledgeMode = 'all';
+  _knowledgeSearchQuery = '';
+  const input = document.getElementById('knowledgeSearchInput');
+  if (input) input.value = '';
+
+  document.querySelectorAll('#knowledgeSubjectFilters .filter-chip').forEach((b, i) => {
+    if (i === 0) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  document.querySelectorAll('#knowledgeSubcategoryFilters .filter-chip').forEach((b, i) => {
+    if (i === 0) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  document.querySelectorAll('#knowledgeOfflineFilters .filter-chip').forEach((b, i) => {
+    if (i === 0) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+
+  renderKnowledgeVaultCards();
 }
 
 function toggleInstallReading(readingId) {
@@ -5886,7 +6167,9 @@ function toggleInstallReading(readingId) {
     toast(`📥 Installed "${title}" for offline study! Saved on this device.`, 'success');
   }
   saveInstalledReadingsSet(set);
-  renderKnowledgeVault();
+  renderKnowledgeVaultCards();
+  const installedBadge = document.getElementById('installedCountBadge');
+  if (installedBadge) installedBadge.textContent = String(set.size);
 }
 
 function installEntireCoursePack() {
@@ -5895,7 +6178,9 @@ function installEntireCoursePack() {
   _currentReadingsCache.forEach(r => set.add(r.id));
   saveInstalledReadingsSet(set);
   toast(`🎉 All ${currentExam} FineWeb-Edu readings installed for offline study!`, 'success');
-  renderKnowledgeVault();
+  renderKnowledgeVaultCards();
+  const installedBadge = document.getElementById('installedCountBadge');
+  if (installedBadge) installedBadge.textContent = String(set.size);
 }
 
 let _activeBookReading = null;
@@ -7519,5 +7804,6 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 </script>
+<script src="app.js"></script>
 </body>
 </html>

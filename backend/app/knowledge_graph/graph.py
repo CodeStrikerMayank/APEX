@@ -136,3 +136,8 @@ class CurriculumGraph:
             "nodes": nodes,
             "edges": edges
         }
+
+    def to_gcn_adjacency(self):
+        """Converts NetworkX graph into GCN adjacency matrices and node indexing."""
+        from backend.app.knowledge_graph.propagation import GCNPropagator
+        return GCNPropagator(self.graph)

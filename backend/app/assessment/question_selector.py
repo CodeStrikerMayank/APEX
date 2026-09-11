@@ -1,8 +1,22 @@
 import random
+import hashlib
 from typing import List, Optional, Set
 from sqlalchemy.orm import Session
 from backend.app.models.schema import Question, StudentAttemptItem
 from backend.app.student_model.irt import ItemResponseTheory
+
+def deterministic_shuffle(items: List[Question], salt: str = "apex_default") -> List[Question]:
+    """
+    Deterministic pseudo-random permutation seeded strictly by question IDs (Strict Rule 4).
+    Ensures that identical candidate pools consistently yield identical selections across reloads.
+    """
+    if not items:
+        return []
+    def item_key(q: Question) -> int:
+        qid = getattr(q, "question_id", str(q))
+        h = hashlib.sha256(f"{qid}_{salt}".encode("utf-8")).hexdigest()
+        return int(h[:12], 16)
+    return sorted(items, key=item_key)
 
 STREAM_SUBJECTS = {
     "JEE": ["Physics", "Chemistry", "Mathematics"],
@@ -162,9 +176,9 @@ class QuestionSelector:
                 Question.exam == exam
             ).all()
 
-        # Shuffle and pick up to count
-        random.shuffle(candidates)
-        return candidates[:count]
+        # Deterministic shuffle and pick up to count (Strict Rule 4)
+        shuffled = deterministic_shuffle(candidates, salt=f"{exam}_{norm_sub}")
+        return shuffled[:count]
 
     def select_full_scan_questions(
         self,
@@ -183,15 +197,15 @@ class QuestionSelector:
         selected = []
         for sub in subjects:
             sub_qs = [q for q in all_q if q.subject == sub]
-            random.shuffle(sub_qs)
-            selected.extend(sub_qs[:per_sub])
+            shuffled_sub = deterministic_shuffle(sub_qs, salt=f"{exam}_{sub}_{student_id or ''}")
+            selected.extend(shuffled_sub[:per_sub])
 
         # Fill any remainder
         if len(selected) < count:
             chosen_ids = {q.question_id for q in selected}
             remaining = [q for q in all_q if q.question_id not in chosen_ids]
-            random.shuffle(remaining)
-            selected.extend(remaining[:(count - len(selected))])
+            shuffled_rem = deterministic_shuffle(remaining, salt=f"{exam}_remainder_{student_id or ''}")
+            selected.extend(shuffled_rem[:(count - len(selected))])
 
         return selected[:count]
 
@@ -228,7 +242,7 @@ class QuestionSelector:
         unexposed = [q for q in candidates if q.question_id not in exposed_ids]
         pool = unexposed if len(unexposed) >= count else candidates
 
-        shuffled_pool = list(pool)
-        random.shuffle(shuffled_pool)
+        shuffled_pool = deterministic_shuffle(list(pool), salt=f"{exam}_adv_{student_id or ''}")
         return shuffled_pool[:count]
+
 
