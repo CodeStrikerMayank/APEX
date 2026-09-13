@@ -200,10 +200,94 @@ class PsychologistAgent:
         )
 
 
+class PedagogicalPolicyRouter:
+    """
+    Multi-Tier Pedagogical Routing Pipeline:
+    Automatically switches between Diagnostic, Scaffolding, and Challenge modes
+    based on live student entropy scores, error frequencies, and mastery indices.
+    """
+
+    MODE_DIAGNOSTIC = "DIAGNOSTIC"
+    MODE_SCAFFOLDING = "SCAFFOLDING"
+    MODE_CHALLENGE = "CHALLENGE"
+
+    @classmethod
+    def determine_route(
+        cls,
+        entropy_score: float = 0.0,
+        mastery: float = 50.0,
+        theta: float = 0.0,
+        is_thrashing: bool = False,
+        has_broken_prereq: bool = False,
+        recent_error_count: int = 1
+    ) -> Dict[str, Any]:
+        """
+        Determines the optimal pedagogical route based on psychometric signals:
+          - DIAGNOSTIC: High entropy (> 1.3), erratic guessing, or unclassified gap.
+          - SCAFFOLDING: Thrashing detected, developing mastery (< 70%), or broken prerequisite.
+          - CHALLENGE: Solid mastery (>= 75%), high ability (theta >= 0.7), and low entropy.
+        """
+        if entropy_score > 1.35 or (is_thrashing and recent_error_count >= 3):
+            mode = cls.MODE_DIAGNOSTIC
+            reason = "High cognitive entropy / thrashing trajectory indicates fundamental ambiguity in student mental model."
+            directive = (
+                "MODE: DIAGNOSTIC PROBING. Do NOT deliver lengthy derivations or reveal formulas. "
+                "Ask a single discriminatory diagnostic question to isolate whether the confusion is dimensional, "
+                "algebraic, or a misconception of boundary conditions."
+            )
+        elif mastery >= 75.0 and theta >= 0.70 and not is_thrashing and entropy_score <= 1.0:
+            mode = cls.MODE_CHALLENGE
+            reason = "Student has demonstrated solid conceptual mastery and stable latent ability theta."
+            directive = (
+                "MODE: COGNITIVE CHALLENGE & STRESS-TEST. Avoid basic textbook definitions. "
+                "Pose an extreme boundary case, a counterfactual limit (e.g., m -> infinity or t -> 0), "
+                "or an Olympiad-level multi-concept synthesis linking this concept to another chapter."
+            )
+        else:
+            mode = cls.MODE_SCAFFOLDING
+            reason = "Student is in the Zone of Proximal Development (ZPD) requiring stepped guidance."
+            directive = (
+                "MODE: FADED SCAFFOLDING. Break the derivation or solution into 3 sequential micro-steps. "
+                "Explicitly lay out Step 1, then prompt the student with a guided hint to deduce Step 2. "
+                "Never reveal final numerical answers or multiple-choice letters."
+            )
+
+        return {
+            "mode": mode,
+            "reason": reason,
+            "system_directive": directive,
+            "temperature_recommendation": 0.15 if mode != cls.MODE_CHALLENGE else 0.35
+        }
+
+    @classmethod
+    def generate_pedagogical_prompt_prefix(
+        cls,
+        route: Dict[str, Any],
+        concept_name: str,
+        broken_prereq_name: Optional[str] = None
+    ) -> str:
+        """
+        Generates mode-specific pedagogical framing for the LLM mentor.
+        """
+        mode = route["mode"]
+        if mode == cls.MODE_DIAGNOSTIC:
+            prefix = f"🔍 **Diagnostic Probe Mode — {concept_name}**\n"
+            prefix += "Before jumping into calculations, let's pinpoint where the conceptual disconnect lies.\n"
+            if broken_prereq_name:
+                prefix += f"💡 *Prerequisite Alert*: Root foundation '{broken_prereq_name}' needs clarification.\n"
+        elif mode == cls.MODE_CHALLENGE:
+            prefix = f"⚡ **Advanced Master Challenge — {concept_name}**\n"
+            prefix += "Your conceptual foundation is solid! Let's stress-test your mastery with an advanced boundary problem:\n"
+        else:
+            prefix = f"🧗 **Stepped Scaffolding — {concept_name}**\n"
+            prefix += "Let's deconstruct this challenge step-by-step so you discover the solution yourself:\n"
+        return prefix
+
+
 class SocraticCoordinator:
     """
     Runtime Orchestrator coordinating Agent 1, Agent 2, and Agent 3
-    into a unified, isolated Socratic dialogue response.
+    into a unified, isolated Socratic dialogue response, augmented with PedagogicalPolicyRouter.
     """
 
     @classmethod
@@ -215,18 +299,42 @@ class SocraticCoordinator:
         error_type: Optional[str] = None,
         explanation: Optional[str] = None,
         session_duration_minutes: float = 0.0,
-        student_name: str = "Aspirant"
+        student_name: str = "Aspirant",
+        cognitive_state: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
-        Runs the isolated multi-agent pipeline:
-          1. Diagnostician reads telemetry
-          2. Socratic Prober generates guided question (zero answer-letter leakage)
-          3. Psychologist checks active fatigue
+        Runs the multi-agent pedagogical pipeline:
+          1. Diagnostician reads telemetry & error distribution
+          2. PedagogicalPolicyRouter determines mode (Diagnostic vs Scaffolding vs Challenge)
+          3. Socratic Prober generates guided question (zero answer-letter leakage)
+          4. Psychologist monitors session duration and injects fatigue breaks
         """
         # 1. Diagnostician (Read-only)
         diagnosis = DiagnosticianAgent.diagnose_student(student_id, db)
 
-        # 2. Socratic Prober (Answer letter masked)
+        # Extract cognitive state if provided
+        entropy = 0.0
+        is_thrashing = False
+        broken_prereq_name = None
+
+        if cognitive_state:
+            entropy = cognitive_state.get("entropy_score", 0.0)
+            is_thrashing = cognitive_state.get("is_thrashing", False)
+            subtrees = cognitive_state.get("prerequisite_subtrees")
+            if subtrees and subtrees.get("root_broken_ancestor"):
+                broken_prereq_name = subtrees["root_broken_ancestor"].get("name")
+
+        # 2. Pedagogical Route Selection
+        route = PedagogicalPolicyRouter.determine_route(
+            entropy_score=entropy,
+            mastery=50.0,
+            theta=0.0,
+            is_thrashing=is_thrashing,
+            has_broken_prereq=broken_prereq_name is not None,
+            recent_error_count=diagnosis.get("error_count", 1)
+        )
+
+        # 3. Socratic Prober (Answer letter masked)
         actual_error = error_type or diagnosis.get("primary_vulnerability")
         socratic_probe = SocraticProberAgent.generate_scaffolding_probe(
             concept_name=concept_name,
@@ -234,20 +342,28 @@ class SocraticCoordinator:
             explanation=explanation
         )
 
-        # 3. Psychologist (Fatigue check)
+        prefix = PedagogicalPolicyRouter.generate_pedagogical_prompt_prefix(
+            route=route,
+            concept_name=concept_name,
+            broken_prereq_name=broken_prereq_name
+        )
+
+        # 4. Psychologist (Fatigue check)
         psych_break = PsychologistAgent.check_and_inject_break_prompt(
             active_duration_minutes=session_duration_minutes,
             student_name=student_name
         )
 
-        combined_text = socratic_probe
+        combined_text = prefix + socratic_probe
         if psych_break:
             combined_text += psych_break
 
         return {
             "text": combined_text,
             "diagnosis": diagnosis,
+            "pedagogical_route": route,
             "fatigue_break_triggered": psych_break is not None,
             "source": "SOCRATIC_MULTI_AGENT",
             "tier": "NEURAL_SYMBOLIC_PHASE5"
         }
+
