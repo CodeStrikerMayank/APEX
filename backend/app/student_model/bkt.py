@@ -85,3 +85,54 @@ class BayesianKnowledgeTracing:
                 normalized.append((f"q_seq_{idx}", bool(item)))
 
         return self.akt_engine.forward_sequence(normalized)
+
+    def evaluate_slip_vs_guess(
+        self,
+        p_known: float,
+        is_correct: bool
+    ) -> Dict[str, Any]:
+        """
+        Deconstructs observation into Slip vs Guess posterior probabilities:
+          - If incorrect: was it a Careless Slip (known concept) or a True Gap (unlearned)?
+          - If correct: was it Genuine Mastery or a Lucky Guess?
+        """
+        pk = safe_clamp_prob(p_known)
+        if not is_correct:
+            # P(Slip | Incorrect) = P(Known)*P(Slip) / [P(Known)*P(Slip) + (1 - P(Known))*(1 - P(Guess))]
+            num = pk * self.p_slip
+            denom = num + (1.0 - pk) * (1.0 - self.p_guess)
+            p_slip_post = safe_div(num, max(denom, 1e-7))
+
+            if p_slip_post >= 0.35 or (pk >= 0.75 and p_slip_post >= 0.25):
+                diagnosis = "CARELESS_SLIP"
+                action = "Acknowledge conceptual grasp, prompt quick arithmetic/sign re-check."
+            else:
+                diagnosis = "TRUE_CONCEPTUAL_GAP"
+                action = "Deconstruct fundamental principle before attempting formulas."
+
+            return {
+                "diagnosis": diagnosis,
+                "slip_probability": round(p_slip_post, 3),
+                "guess_probability": 0.0,
+                "mentor_signal": action
+            }
+        else:
+            # P(Guess | Correct) = (1 - P(Known))*P(Guess) / [P(Known)*(1 - P(Slip)) + (1 - P(Known))*P(Guess)]
+            num = (1.0 - pk) * self.p_guess
+            denom = pk * (1.0 - self.p_slip) + num
+            p_guess_post = safe_div(num, max(denom, 1e-7))
+
+            if p_guess_post >= 0.45:
+                diagnosis = "LUCKY_GUESS"
+                action = "Ask student to explain the reasoning step to verify understanding."
+            else:
+                diagnosis = "GENUINE_MASTERY"
+                action = "Reinforce execution and advance to next challenge tier."
+
+            return {
+                "diagnosis": diagnosis,
+                "slip_probability": 0.0,
+                "guess_probability": round(p_guess_post, 3),
+                "mentor_signal": action
+            }
+
