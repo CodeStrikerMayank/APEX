@@ -4205,6 +4205,45 @@ window.apexCopyCode = function(btn, code) {
       btn.textContent = '✓ Copied';
       setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
     }).catch(function() { btn.textContent = 'Copy'; });
+
+/* Typewriter animation — streams rendered HTML char-by-char into a container */
+function apexTypewriter(container, html, onDone) {
+  // We animate over the plain text extraction, but render final HTML at end
+  // For smooth effect: first set innerHTML = "", then animate text
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  const plainText = tempDiv.textContent || '';
+  const CHUNK = 4;   // chars per tick
+  const DELAY = 12;  // ms per tick
+  let pos = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'apex-typewriter-cursor';
+  const textNode = document.createTextNode('');
+  container.innerHTML = '';
+  container.appendChild(textNode);
+  container.appendChild(cursor);
+
+  function tick() {
+    pos = Math.min(pos + CHUNK, plainText.length);
+    textNode.textContent = plainText.slice(0, pos);
+    // Keep scroll at bottom
+    const scroller = container.closest('.coach-w-body, .studio-messages-body');
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
+    if (pos < plainText.length) {
+      requestAnimationFrame(function() { setTimeout(tick, DELAY); });
+    } else {
+      // Done — swap in the real rendered HTML
+      cursor.remove();
+      container.innerHTML = html;
+      renderCoachMath(container);
+      if (typeof onDone === 'function') onDone();
+    }
+  }
+  tick();
+}
+
+
+
   } else {
     btn.textContent = '✓ Copied';
     setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
