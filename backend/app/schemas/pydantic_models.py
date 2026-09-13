@@ -269,6 +269,8 @@ class AIChatResponse(BaseModel):
     source: str = "OFFLINE_LLM_OR_RULE_FALLBACK"
     structured_card: Optional[Dict[str, Any]] = None
     suggested_chips: Optional[List[str]] = None
+    vault_readings: Optional[List[Dict[str, Any]]] = None
+    domain_protocol: Optional[str] = None
 
 class AIQuestionGenRequest(BaseModel):
     exam: str
