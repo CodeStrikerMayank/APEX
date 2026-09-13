@@ -13,6 +13,16 @@ from backend.app.ai.local_llm import LocalLLMClient
 from backend.app.ai.explanation import ExplanationGenerator
 from backend.app.ai.question_generator import AIQuestionGenerator
 from backend.app.ai.omni_context import OmniContextHarvester
+from backend.app.ai.intent_classifier import (
+    IntentClassifier,
+    INTENT_GREETING,
+    INTENT_OFF_TOPIC,
+    INTENT_ANALYZE_MISTAKES,
+    INTENT_EXPLAIN_ROADMAP,
+    INTENT_STRATEGY_TIPS,
+    INTENT_EXPLAIN_CONCEPT
+)
+from backend.app.ai.templates import format_greeting, format_off_topic_response
 
 router = APIRouter(prefix="/ai", tags=["Offline AI Assistant & Tools"])
 
@@ -152,11 +162,109 @@ async def chat_with_assistant(
     except Exception as e:
         pass
 
-    mode = (req.mode or "pedagogical").lower()
+    from backend.app.ai.socratic_agents import PedagogicalPolicyRouter, SocraticCoordinator, SocraticProberAgent, PsychologistAgent
+    from backend.app.student_model.error_classifier import CodeTraceDissector
+    from backend.app.student_model.numerical_guards import OutputNumericalGuard
+
+    raw_mode = (req.mode or "auto").lower()
+    cog_state = student_context.get("cognitive_state") or {}
+
+    if raw_mode in ["auto", "adaptive", ""]:
+        route = PedagogicalPolicyRouter.determine_route(
+            entropy_score=cog_state.get("entropy_score", 0.0),
+            mastery=student_context.get("overall_mastery", 50.0),
+            theta=student_context.get("latent_ability_theta", 0.0),
+            is_thrashing=cog_state.get("is_thrashing", False),
+            has_broken_prereq=bool(cog_state.get("prerequisite_subtrees", {}).get("has_broken_ancestors") if isinstance(cog_state.get("prerequisite_subtrees"), dict) else False),
+            recent_error_count=len(student_context.get("recent_mistakes", []))
+        )
+        mode = route["mode"].lower()
+        student_context["pedagogical_route"] = route
+    else:
+        mode = raw_mode
     student_context["mode"] = mode
 
     prompt_raw = req.get_prompt()
     prompt_lower = prompt_raw.lower()
+
+    # --- Intent Classification Pre-Check & Domain Protocol Engine ---
+    from backend.app.ai.domain_protocols import DomainProtocolEngine
+    from backend.app.ai.cloud_llm import build_unified_system_prompt
+
+    user_intent, intent_confidence, topic_hint = IntentClassifier.classify(prompt_raw)
+    exam_label = student.target_exam if student and student.target_exam else "JEE"
+    student_name = student.name if student else "Aspirant"
+
+    domain_diag = DomainProtocolEngine.classify_query_domain(prompt_raw, target_exam=exam_label)
+    is_solve = domain_diag["is_solve"] or raw_mode == "solve" or "solve" in prompt_lower.split()
+
+    # 1. Pure Greeting Handler (Warm, Intellectually Grounded, Cold-Start Aware)
+    if user_intent == INTENT_GREETING:
+        greeting_text = format_greeting(student_context)
+        is_cold_start = (student_context.get("total_assessments", 0) == 0 and not latest_attempt)
+        greeting_chips = [
+            "⚡ Take 3-Min Diagnostic",
+            "🗺️ Explore My Roadmap",
+            "🔬 Explain SHM & Oscillations",
+            "📊 Speed & Pacing Tips"
+        ] if is_cold_start else [
+            "📊 What mistakes am I making?",
+            "🗺️ Why is my roadmap ordered this way?",
+            "⚡ Speed & Pacing Tips",
+            "🎯 Give Me a Challenge Question"
+        ]
+        return AIChatResponse(
+            response=greeting_text,
+            source="ACADEMIC_MENTOR_GREETING",
+            suggested_chips=greeting_chips,
+            domain_protocol=domain_diag["domain"]
+        )
+
+    # 2. Purely Non-Academic Casual Chat (Movies, pop culture, trivia)
+    # If the user asks ANY STEM, Science, Math, Biology, Tech, UPSC or GK query, let the Cloud LLM answer it directly!
+    if user_intent == INTENT_OFF_TOPIC and domain_diag["category"] == "CASUAL_OFF_TOPIC":
+        off_topic_text = format_off_topic_response(topic_hint, exam_label, student_name)
+        return AIChatResponse(
+            response=off_topic_text,
+            source="SYLLABUS_GUARD_ROUTER",
+            suggested_chips=[
+                "🔬 Explain High-Yield Concepts",
+                "⚡ Pacing & Strategy Tips",
+                "🎯 Take Practice Drill",
+                "🗺️ View Exam Roadmap"
+            ],
+            domain_protocol="OFF_TOPIC"
+        )
+
+    # --- Structured AST & Error Trace Preprocessing ---
+    troubleshoot_diag = CodeTraceDissector.preprocess_troubleshooting_input(prompt_raw)
+    troubleshoot_str = ""
+    if troubleshoot_diag["type"] == "TRACEBACK":
+        tb = troubleshoot_diag["dissection"]
+        troubleshoot_str = (
+            f"\n[TECHNICAL TRACEBACK DISSECTION]\n"
+            f"Exception Type: {tb.get('exception_type')}\n"
+            f"Failing Frame: {tb.get('failing_frame')}\n"
+            f"Root Cause Message: {tb.get('exception_message')}\n"
+            "INSTRUCTION: Target this exact exception and frame. Explain why this error occurred in the execution flow.\n"
+        )
+    elif troubleshoot_diag["type"] == "CODE_SNIPPET":
+        cd = troubleshoot_diag["dissection"]
+        if not cd.get("valid_syntax"):
+            troubleshoot_str = (
+                f"\n[TECHNICAL CODE AST DISSECTION]\n"
+                f"Syntax Fault: {cd.get('fault_category')} at line {cd.get('fault_line')}, offset {cd.get('fault_offset')}\n"
+                f"Offending text: '{cd.get('fault_line_text')}'\n"
+                f"Message: {cd.get('fault_message')}\n"
+                "INSTRUCTION: Guide the student to identify this exact syntax issue without rewriting their entire program.\n"
+            )
+        else:
+            metrics = cd.get("ast_metrics") or {}
+            troubleshoot_str = (
+                f"\n[TECHNICAL CODE AST METRICS]\n"
+                f"Valid Syntax: True | Nodes: {metrics.get('total_nodes')} | Loops: {metrics.get('has_loops')} | Recursion: {metrics.get('has_recursion')}\n"
+            )
+
 
     # --- Pillar 3: In-Chat Interactive Quiz Agent ---
     is_quiz_req = bool(req.quiz_intent) or any(k in prompt_lower for k in [
@@ -267,69 +375,15 @@ async def chat_with_assistant(
         if turn_lines:
             history_str = "\n[RECENT CONVERSATION HISTORY]\n" + "\n".join(turn_lines) + "\n"
 
-    # --- IRT Theta-Adaptive Tone Modulation ---
-    theta_val = student_context.get("latent_ability_theta", 0.0)
-    if theta_val < -0.5:
-        theta_tier_instruction = (
-            "STUDENT ABILITY TIER: Foundational Baseline (θ < -0.5).\n"
-            "- Use encouraging, supportive language; validate their effort.\n"
-            "- Break down mathematical derivations into granular, step-by-step algebraic steps.\n"
-            "- Emphasize physical intuition and relatable real-world analogies before compact formula summaries."
-        )
-    elif theta_val > 0.7:
-        theta_tier_instruction = (
-            "STUDENT ABILITY TIER: Advanced Mastery (θ > 0.7).\n"
-            "- Maintain high competitive rigor; avoid over-explaining trivial steps.\n"
-            "- Emphasize dimensional analysis shortcuts, symmetry arguments, extreme boundary limits, and Olympiad/Advanced challenge problem variants."
-        )
-    else:
-        theta_tier_instruction = (
-            "STUDENT ABILITY TIER: Intermediate Core (-0.5 <= θ <= 0.7).\n"
-            "- Balance conceptual clarity with competitive speed and exam pacing.\n"
-            "- Focus on identifying recurring calculation traps and negative-marking prevention strategies."
-        )
-
-    # Build omni-context grounding block
-    grounding_str = OmniContextHarvester.format_grounding_block(student_context, mode=mode)
-
-    mode_instructions = {
-        "socratic": (
-            "Mode: SOCRATIC COACH. Do NOT provide direct full solutions immediately. "
-            "Ask probing conceptual questions, guide the student step-by-step to deduce formulas or identify errors, "
-            "and encourage active problem solving."
-        ),
-        "forensics": (
-            "Mode: MISTAKE FORENSICS & STRATEGIST. Focus specifically on analyzing error patterns, "
-            "explaining why particular distractor traps were fallen for, contrasting student answers with correct keys, "
-            "and giving pacing and negative marking defense guidelines."
-        ),
-        "pedagogical": (
-            "Mode: PEDAGOGICAL MENTOR. Deliver clear, academically rigorous derivations, "
-            "explain theoretical foundations step-by-step, format all formulas with standard LaTeX ($...$ and $$...$$), "
-            "and provide structured concept summaries."
-        )
-    }
-    mode_guidance = mode_instructions.get(mode, mode_instructions["pedagogical"])
-
-    exam_label = student.target_exam if student and student.target_exam else "JEE"
-    system_prompt = (
-        f"You are an offline pedagogical AI study mentor for {exam_label}.\n"
-        f"{mode_guidance}\n\n"
-        f"{theta_tier_instruction}\n\n"
-        "PEDAGOGICAL STRUCTURE (Strictly follow this 5-part scaffold for conceptual explanations):\n"
-        "1. 💡 Intuitive Mental Model: Relatable physical analogy (Feynman technique).\n"
-        "2. 📐 Canonical Analytical Formulation: High-contrast LaTeX ($$...$$) defining all variables and SI units.\n"
-        "3. 🔬 Step-by-Step Derivation & Symmetries: Clean mathematical progression.\n"
-        "4. ⚠️ Exam Trap Radar: Exact distractor traps and common mistakes in competitive exams.\n"
-        "5. 🎯 Quick Micro-Check: A 1-line self-check problem testing the core formula.\n\n"
-        f"Real-Time Student Cognitive Grounding:\n{grounding_str}\n"
-        f"{history_str}\n"
-        "Your role is to guide the student, explain concepts and error patterns, "
-        "explain why their dynamic roadmap was sequenced the way it was, and give direct, rigorous guidance. "
-        "All adaptive diagnostic engines are active on standby with zero compulsory barriers."
+    # Build unified single-statement multi-tier system prompt with domain protocol
+    system_prompt = build_unified_system_prompt(
+        student_context=student_context,
+        exam=domain_diag["domain"],
+        mode=mode,
+        is_solve=is_solve,
+        troubleshoot_str=troubleshoot_str,
+        history_str=history_str
     )
-
-    from backend.app.ai.socratic_agents import SocraticCoordinator, SocraticProberAgent, PsychologistAgent
 
     # Determine active session duration for Agent 3 (Psychologist)
     active_minutes = 0.0
@@ -341,7 +395,13 @@ async def chat_with_assistant(
     if latest_attempt and latest_attempt.time_taken_seconds:
         active_minutes = max(active_minutes, latest_attempt.time_taken_seconds / 60.0)
 
-    if mode == "socratic":
+    is_explicit_socratic = raw_mode in ["socratic", "scaffolding", "diagnostic"]
+    is_troubleshoot_or_mistake_review = (
+        troubleshoot_diag.get("type") in ["TRACEBACK", "CODE_SNIPPET"] or
+        (user_intent == INTENT_ANALYZE_MISTAKES and bool(latest_attempt and student_context.get("latest_quiz", {}).get("mistakes")))
+    )
+    
+    if (is_explicit_socratic or (mode in ["socratic", "scaffolding", "diagnostic"] and is_troubleshoot_or_mistake_review and user_intent != INTENT_EXPLAIN_CONCEPT)):
         concept_name = "Core Conceptual Foundation"
         if latest_attempt and student_context.get("latest_quiz", {}).get("mistakes"):
             first_mistake = student_context["latest_quiz"]["mistakes"][0]
@@ -359,7 +419,8 @@ async def chat_with_assistant(
             error_type=error_type,
             explanation=explanation,
             session_duration_minutes=active_minutes,
-            student_name=student.name if student else "Aspirant"
+            student_name=student.name if student else "Aspirant",
+            cognitive_state=cog_state
         )
         final_text = socratic_bundle["text"]
         source = socratic_bundle["source"]
@@ -372,27 +433,95 @@ async def chat_with_assistant(
         final_text = res["text"]
         source = res["source"]
 
-        # Agent 3 (Psychologist) fatigue check for long sessions
-        break_prompt = PsychologistAgent.check_and_inject_break_prompt(
-            active_duration_minutes=active_minutes,
-            student_name=student.name if student else "Aspirant"
-        )
-        if break_prompt:
-            final_text += break_prompt
+    # Prepend advisory note for cross-disciplinary or advanced STEM exploration
+    if domain_diag.get("advisory_note") and not final_text.startswith("> 💡"):
+        final_text = f"> 💡 **{domain_diag['advisory_note']}**\n\n" + final_text
 
-    default_chips = [
-        "🎯 Test Me on This",
-        "📐 Unpack Derivation",
-        "💡 Numerical Example",
-        "⚠️ Common Traps",
-        "📋 Copy Formula"
-    ]
+    # Deterministic output verification & guard
+    guard_report = OutputNumericalGuard.guard_llm_output(final_text, mode=mode)
+    if not guard_report["passed"] and not guard_report["leakage_free"]:
+        final_text = SocraticProberAgent.sanitize_scaffolding(final_text)
+
+    # Attach Knowledge Vault preview badge links if articles exist and not already present
+    vault_readings = student_context.get("vault_readings", [])
+    if vault_readings and "vault:" not in final_text.lower() and not is_explicit_socratic:
+        vault_links = []
+        for v in vault_readings[:2]:
+            v_title = v.get("title", "Academic Reading")
+            v_score = v.get("score", 4.5)
+            vault_links.append(f"- [📚 **{v_title}** (FineWeb-Edu Score: {v_score})](vault:{v['id']})")
+        if vault_links:
+            final_text += "\n\n**📚 Relevant Knowledge Vault Readings:**\n" + "\n".join(vault_links)
+
+    # Construct Dynamic Interactive Chips in Asking Form
+    suggested_chips = []
+    if is_solve:
+        suggested_chips = [
+            "⚡ Step-by-Step Hint: Guide me through Step 1",
+            "📐 Check Formula & Units: What is the exact formula?",
+            "🎯 Give me another practice problem on this"
+        ]
+    else:
+        # Extract topic keyword if available
+        topic_term = topic_hint or ""
+        if not topic_term and prompt_raw:
+            stopwords = {
+                "what", "is", "are", "define", "explain", "about", "the", "this", "that", "you", "tell",
+                "how", "does", "connect", "connecting", "next", "topic", "topics", "syllabus",
+                "would", "like", "deep", "dive", "into", "derivation", "derive", "practice", "solve",
+                "question", "exam", "drill", "challenge", "please", "show", "step", "steps"
+            }
+            cleaned_words = [
+                w for w in prompt_raw.lower().replace("?", "").replace("!", "").replace(":", "").replace(".", "").split()
+                if len(w) > 2 and w not in stopwords
+            ]
+            topic_term = cleaned_words[0] if cleaned_words else ""
+
+        # If still no topic keyword but history exists, check prior user turns
+        if not topic_term and req.history and isinstance(req.history, list):
+            for turn in reversed(req.history):
+                if turn.get("role") == "user" and turn.get("text"):
+                    prev_words = [
+                        w for w in turn.get("text", "").lower().replace("?", "").replace("!", "").split()
+                        if len(w) > 2 and w not in {
+                            "what", "is", "are", "define", "explain", "about", "the", "this", "that",
+                            "how", "does", "connect", "next", "topic", "syllabus", "would", "like"
+                        }
+                    ]
+                    if prev_words:
+                        topic_term = prev_words[0]
+                        break
+
+        if topic_term:
+            topic_cap = topic_term.capitalize()
+            suggested_chips = [
+                f"📐 Would you like to deep dive into the derivation of {topic_cap}?",
+                f"🗺️ How does {topic_cap} connect to the next topic in my syllabus?",
+                f"🎯 Would you like to solve a practice {exam_label} question on {topic_cap}?"
+            ]
+        else:
+            suggested_chips = [
+                "📐 Would you like to deep dive into the derivation?",
+                "🗺️ How does this connect to the next topic in my syllabus?",
+                f"🎯 Would you like to solve a practice {exam_label} question on this?"
+            ]
+
+    # ONLY if genuine, high-relevance Knowledge Vault files exist in the database, attach as bonus chip
+    for v in vault_readings[:2]:
+        c_title = v.get("title", "")
+        short_t = c_title[:24] + "..." if len(c_title) > 24 else c_title
+        chip_label = f"📚 Vault: {short_t}"
+        if chip_label not in suggested_chips:
+            suggested_chips.append(chip_label)
 
     return AIChatResponse(
         response=final_text,
         source=source,
-        suggested_chips=default_chips
+        suggested_chips=suggested_chips,
+        vault_readings=vault_readings[:3] if vault_readings else None,
+        domain_protocol=domain_diag["domain"]
     )
+
 
 @router.post("/generate-question")
 async def generate_practice_question(
