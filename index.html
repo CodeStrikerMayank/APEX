@@ -4266,6 +4266,103 @@ function apexGenerateFollowupChips(question, answer) {
   return ['Show me a practice problem', 'Explain with a real example', 'What should I study next?'];
 }
 
+/* Build a premium AI response bubble */
+function apexBuildCoachBubble(bubble, m, rawText, sendFn) {
+  const chips = m.chips || [];
+  const vaultReadings = m.vaultReadings || [];
+  const timeStr = m.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const source = m.source || '';
+  const tier = (m.tier || '').toLowerCase();
+
+  // Model badge
+  let modelLabel = '';
+  if (source.includes('EXPERIENTIAL') || source.includes('GPT') || source.includes('LUNA')) modelLabel = '⚡ gpt-5.6-luna';
+  else if (source.includes('GEMINI')) modelLabel = '✦ Gemini Flash';
+  else if (source.includes('GROK')) modelLabel = '🤖 Grok xAI';
+  else if (source.includes('OLLAMA')) modelLabel = '🖥 Local AI';
+  else if (source.includes('PEDAGOGICAL') || source.includes('FAILSAFE')) modelLabel = '📖 Mentor';
+  else if (source) modelLabel = source.split('_').slice(-1)[0].toLowerCase();
+
+  let tierClass = 'cloud', tierLabel = 'Cloud AI';
+  if (tier.includes('fallback')) { tierClass = 'fallback'; tierLabel = 'Fallback'; }
+  else if (tier.includes('offline') || tier.includes('mentor')) { tierClass = 'offline'; tierLabel = 'Offline'; }
+
+  // Always show 3 chips — use backend chips if provided, else generate contextual ones
+  const displayChips = (chips && chips.length > 0) ? chips : apexGenerateFollowupChips(m.question || '', rawText);
+
+  // Chips HTML
+  const chipsHtml = `
+    <div class="apex-followup-chips">
+      <span class="apex-chips-label">Continue exploring →</span>
+      ${displayChips.map(function(c) {
+        const safe = c.replace(/'/g, "&#039;").replace(/"/g, '&quot;');
+        return `<button type="button" class="apex-followup-chip" data-chip-text="${safe}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          ${safe}
+        </button>`;
+      }).join('')}
+    </div>`;
+
+  // Meta bar HTML
+  const metaHtml = `
+    <div class="apex-response-meta">
+      ${modelLabel ? `<span class="apex-model-badge">⚡ ${modelLabel}</span>` : ''}
+      <span class="apex-tier-badge ${tierClass}">${tierLabel}</span>
+      <span class="apex-response-time">${timeStr}</span>
+      <div class="apex-feedback-row">
+        <button type="button" class="apex-feedback-btn" title="Good response" onclick="apexFeedback(this,'up')">👍</button>
+        <button type="button" class="apex-feedback-btn" title="Poor response" onclick="apexFeedback(this,'down')">👎</button>
+        <button type="button" class="apex-copy-btn" onclick="window.copyCoachReply(this)">📋 Copy</button>
+      </div>
+    </div>`;
+
+  // Wrapper structure
+  bubble.innerHTML = `
+    <div class="coach-msg-content apex-ai-response" id="apex-content-${Date.now()}"></div>
+    ${chipsHtml}
+    ${metaHtml}
+  `;
+
+  // Attach chip click handlers
+  bubble.querySelectorAll('.apex-followup-chip').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const chipTxt = this.getAttribute('data-chip-text') || this.textContent.trim();
+      if (chipTxt.startsWith('📚 Vault:')) {
+        let targetId = null;
+        if (vaultReadings && vaultReadings.length > 0) {
+          const cleanC = chipTxt.replace('📚 Vault:', '').replace('...', '').trim().toLowerCase();
+          const matched = vaultReadings.find(function(v) { return (v.title || '').toLowerCase().includes(cleanC); });
+          targetId = matched ? matched.id : vaultReadings[0].id;
+        }
+        window.openVaultReadingFromCoach(targetId);
+      } else if (typeof sendFn === 'function') {
+        sendFn(chipTxt);
+      } else if (typeof handleUserQuestion === 'function') {
+        handleUserQuestion(chipTxt);
+      }
+    });
+  });
+
+  // Animate content in with typewriter only for newly arrived messages
+  const contentEl = bubble.querySelector('.coach-msg-content.apex-ai-response');
+  const renderedHtml = apex_renderMarkdown(rawText);
+  if (contentEl) {
+    if (m._isNew) {
+      apexTypewriter(contentEl, renderedHtml, function() {
+        renderCoachMath(contentEl);
+        m._isNew = false;
+      });
+    } else {
+      contentEl.innerHTML = renderedHtml;
+      renderCoachMath(contentEl);
+    }
+  }
+}
+
+
+
+
 
 
 
