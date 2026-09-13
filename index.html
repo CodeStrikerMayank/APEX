@@ -5187,29 +5187,23 @@ function renderStudioMessages() {
   coachState.messages.forEach(function(m) {
     const bubble = document.createElement('div');
     bubble.className = 'studio-msg from-' + m.role;
-    bubble.setAttribute('data-raw', m.text);
+    const rawText = (typeof m.text === 'object' && m.text !== null)
+      ? (m.text.answer || m.text.response || m.text.reply || m.text.text || '')
+      : (m.text || '');
+    bubble.setAttribute('data-raw', rawText);
 
     if (m.role === 'user') {
-      bubble.textContent = m.text;
+      bubble.textContent = rawText;
     } else if (m.role === 'smartboard' || m.isHtml) {
       bubble.className = 'studio-msg from-smartboard';
-      bubble.innerHTML = m.html || m.text;
+      bubble.innerHTML = m.html || rawText;
       renderCoachMath(bubble);
     } else if (m.role === 'coach') {
-      const formattedHtml = formatCoachMarkdown(m.text);
-      const timeStr = m.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      bubble.innerHTML = `
-        <div class="coach-msg-content">${formattedHtml}</div>
-        <div class="coach-msg-meta">
-          <span class="coach-msg-time">${timeStr}</span>
-          <div class="coach-msg-meta-actions">
-            <button type="button" class="coach-msg-action-btn" title="Copy response" onclick="window.copyCoachReply(this)">📋 Copy</button>
-          </div>
-        </div>
-      `;
-      renderCoachMath(bubble);
+      // Use premium renderer (same as coach widget)
+      const studioSendFn = typeof window.sendStudioPrompt === 'function' ? window.sendStudioPrompt : handleUserQuestion;
+      apexBuildCoachBubble(bubble, m, rawText, studioSendFn);
     } else {
-      bubble.innerHTML = formatCoachMarkdown(m.text);
+      bubble.innerHTML = formatCoachMarkdown(rawText);
       renderCoachMath(bubble);
     }
 
@@ -5390,6 +5384,7 @@ window.handleStudioSubmit = async function(e) {
   if (!question) return;
 
   if (input) input.value = '';
+  coachState._lastQuestion = question;
   appendMessage('user', question);
   if (sendBtn) sendBtn.disabled = true;
 
@@ -5404,9 +5399,10 @@ window.handleStudioSubmit = async function(e) {
   }
 
   try {
-    const answer = await sendToCoach(question, coachState.mode);
+    const coachRes = await sendToCoach(question, coachState.mode);
     typingBubble.remove();
-    appendMessage('coach', answer);
+    const meta = { source: coachRes.source || '', tier: coachRes.tier || '', question: question, isNew: true };
+    appendMessage('coach', coachRes.answer, coachRes.chips, coachRes.vaultReadings, meta);
   } catch (err) {
     typingBubble.remove();
     appendMessage('system', 'Could not reach the mentor backend (' + err.message + ').');
@@ -8177,7 +8173,8 @@ async function openApiKeysModal() {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
             <div>
               <label style="font-size:10.5px;font-weight:700;color:var(--ink-faint);display:block;margin-bottom:3px;">PROVIDER</label>
-              <select id="byokCustomProvider" style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);font-size:12px;">
+              <select id="byokCustomProvider" onchange="onCustomProviderChange(this.value)" style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);font-size:12px;">
+                <option value="ExperientialLabs" ${cfg.custom?.provider === 'ExperientialLabs' ? 'selected' : ''}>ExperientialLabs (Gemini 3.7 Flash)</option>
                 <option value="OpenRouter" ${cfg.custom?.provider === 'OpenRouter' ? 'selected' : ''}>OpenRouter (DeepSeek R1 / Claude)</option>
                 <option value="OpenAI" ${cfg.custom?.provider === 'OpenAI' ? 'selected' : ''}>OpenAI Compatible Endpoint</option>
                 <option value="Anthropic" ${cfg.custom?.provider === 'Anthropic' ? 'selected' : ''}>Anthropic Claude API</option>
@@ -8186,7 +8183,7 @@ async function openApiKeysModal() {
             </div>
             <div>
               <label style="font-size:10.5px;font-weight:700;color:var(--ink-faint);display:block;margin-bottom:3px;">MODEL ID</label>
-              <input id="byokCustomModel" value="${escapeHtml(cfg.custom?.model || 'deepseek/deepseek-r1')}" placeholder="e.g. deepseek/deepseek-r1" style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);font-size:12px;" />
+              <input id="byokCustomModel" value="${escapeHtml(cfg.custom?.model || 'gemini-3.7-flash')}" placeholder="e.g. gemini-3.7-flash" style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);font-size:12px;" />
             </div>
           </div>
 
@@ -8319,6 +8316,25 @@ function toggleInputVisibility(id, btn) {
   } else {
     inp.type = 'password';
     btn.textContent = '👁️';
+  }
+}
+
+function onCustomProviderChange(provider) {
+  const urlEl = document.getElementById('byokCustomBaseUrl');
+  const modelEl = document.getElementById('byokCustomModel');
+  if (!urlEl || !modelEl) return;
+  if (provider === 'ExperientialLabs') {
+    urlEl.value = 'https://api.experientiallabs.ai/v1';
+    modelEl.value = 'gemini-3.7-flash';
+  } else if (provider === 'OpenRouter') {
+    urlEl.value = 'https://openrouter.ai/api/v1';
+    modelEl.value = 'deepseek/deepseek-r1';
+  } else if (provider === 'OpenAI') {
+    urlEl.value = 'https://api.openai.com/v1';
+    modelEl.value = 'gpt-4o';
+  } else if (provider === 'Anthropic') {
+    urlEl.value = 'https://api.anthropic.com/v1';
+    modelEl.value = 'claude-3-5-sonnet-20241022';
   }
 }
 
