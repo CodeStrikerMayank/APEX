@@ -15,6 +15,8 @@ from backend.app.ai.intent_classifier import (
     INTENT_EXPLAIN_ROADMAP,
     INTENT_STRATEGY_TIPS,
     INTENT_EXPLAIN_CONCEPT,
+    INTENT_GREETING,
+    INTENT_OFF_TOPIC,
     INTENT_UNKNOWN
 )
 from backend.app.ai.templates import (
@@ -22,6 +24,8 @@ from backend.app.ai.templates import (
     format_roadmap_explanation,
     format_strategy_tips,
     format_concept_explanation,
+    format_greeting,
+    format_off_topic_response,
     format_unknown_fallback
 )
 
@@ -94,7 +98,12 @@ class LocalLLMClient:
             ctx["roadmap_milestones"] = ctx["roadmap_actions"]
 
         # 4. Generate deterministic grounded response as safe foundation
-        if intent == INTENT_ANALYZE_MISTAKES:
+        student_name = ctx.get("student_name", "Aspirant")
+        if intent == INTENT_GREETING:
+            grounded_text = format_greeting(ctx)
+        elif intent == INTENT_OFF_TOPIC:
+            grounded_text = format_off_topic_response(topic_hint, exam, student_name)
+        elif intent == INTENT_ANALYZE_MISTAKES:
             grounded_text = format_mistake_analysis(ctx)
         elif intent == INTENT_EXPLAIN_ROADMAP:
             grounded_text = format_roadmap_explanation(ctx)
@@ -109,23 +118,45 @@ class LocalLLMClient:
         should_cloud = (use_polish is not False) and (os.getenv("USE_GEMINI_POLISH", "true").lower() == "true")
         if should_cloud:
             try:
-                from backend.app.ai.cloud_llm import CloudLLMHub
+                from backend.app.ai.cloud_llm import CloudLLMHub, build_unified_system_prompt
+                from backend.app.ai.domain_protocols import DomainProtocolEngine
+
                 hub = CloudLLMHub()
-                mentor_sys_prompt = (
-                    f"You are a distinguished, mature, and inspiring academic mentor for an Indian {exam} student. "
-                    "Communicate with pedagogical clarity, intellectual warmth, and precision. "
-                    "Format your answers with clean markdown headings (###), concise bullet points (-), and highlight cards (💡). "
-                    "Avoid robotic jargon, unformatted walls of text, or excessive filler. "
-                    "Use standard LaTeX notation ($...$ and $$...$$) for all formulas and scientific notations. "
-                    "Address the student respectfully as an encouraging coach ('Hello Aspirant!')."
-                )
-                effective_sys_prompt = (mentor_sys_prompt + "\n\n" + system_prompt) if system_prompt else mentor_sys_prompt
-                cloud_prompt = (
-                    f"User asked: {sanitized_prompt}\n\n"
-                    f"Core curriculum facts and student state to base your response on:\n{grounded_text}\n\n"
-                    "Deliver an encouraging, highly pedagogical, and humanized mentor response. "
-                    "Preserve all LaTeX equations and technical precision."
-                )
+                is_solve = DomainProtocolEngine.detect_solve_intent(sanitized_prompt)
+
+                if system_prompt:
+                    effective_sys_prompt = system_prompt
+                else:
+                    effective_sys_prompt = build_unified_system_prompt(
+                        student_context=ctx,
+                        exam=exam,
+                        mode=ctx.get("mode", "pedagogical"),
+                        is_solve=is_solve
+                    )
+
+                if intent == INTENT_EXPLAIN_CONCEPT or any(w in sanitized_prompt.lower().split() for w in ["what", "define", "explain", "meaning", "how"]):
+                    clean_context = grounded_text if not grounded_text.startswith("### 📖 Hello! Welcome") else ""
+                    cloud_prompt = (
+                        f"STUDENT'S QUESTION: {sanitized_prompt}\n\n"
+                        f"TARGET EXAM TRACK: {exam}\n\n"
+                        + (f"CURRICULUM CONTEXT:\n{clean_context}\n\n" if clean_context else "") +
+                        "INSTRUCTIONS:\n"
+                        "- Provide a pure, direct, crystal-clear conceptual definition first, grounded in scientific principles at the student's exam level.\n"
+                        "- Keep it warm, engaging, friendly, visual, and easy for any young student to understand.\n"
+                        "- State the primary governing law or formula in LaTeX ($...$ or $$...$$).\n"
+                        "- DO NOT include bureaucratic disclaimers, exam syllabi disclaimers, or canned greetings.\n"
+                        "- Keep it focused on the definition, and invite the student to explore further with derivations or examples."
+                    )
+                else:
+                    cloud_prompt = (
+                        f"STUDENT'S QUESTION: {sanitized_prompt}\n\n"
+                        f"GROUNDED CURRICULUM CONTEXT & STUDENT PROFILE:\n{grounded_text}\n\n"
+                        "INSTRUCTIONS:\n"
+                        "- Answer the student's question directly, clearly, and engagingly.\n"
+                        "- If asking to solve a problem or calculation, strictly apply the 5-step problem-solving protocol.\n"
+                        "- If they asked an out-of-syllabus or casual question, answer it clearly, then gently connect it to core principles.\n"
+                        "- Keep it punchy, visual, easy for any young student to understand, and 100% free of confusing robotic jargon."
+                    )
                 cloud_res = await hub.generate_best(cloud_prompt, system_instruction=effective_sys_prompt)
                 if cloud_res.get("text") and len(cloud_res["text"]) > 50:
                     return {
@@ -137,6 +168,19 @@ class LocalLLMClient:
                     }
             except Exception:
                 pass  # Keys exhausted or unavailable -> Proceed to Tier 2
+
+        # Cognitive temperature modulation based on live student state
+        cog_state = ctx.get("cognitive_state") or {}
+        ctrl_signals = cog_state.get("cognitive_control_signals") or {}
+        akt_pred = ctrl_signals.get("akt") or {}
+        p_next = akt_pred.get("p_next", 0.5)
+
+        if cog_state.get("is_thrashing") or p_next < 0.40:
+            rec_temperature = 0.15
+        elif ctx.get("latent_ability_theta", 0.0) >= 0.8:
+            rec_temperature = 0.40
+        else:
+            rec_temperature = 0.25
 
         # 6. Tier 2: Local Ollama Model (if running on host machine)
         ollama_enabled = (use_polish is not False) and (os.getenv("USE_OLLAMA_POLISH", "true").lower() == "true")
@@ -153,8 +197,9 @@ class LocalLLMClient:
                     "model": self.model_name,
                     "prompt": ollama_prompt,
                     "stream": False,
-                    "options": {"temperature": 0.3}
+                    "options": {"temperature": rec_temperature}
                 }
+
                 async with httpx.AsyncClient(timeout=self.timeout) as client:
                     resp = await client.post(url, json=payload)
                     if resp.status_code == 200:
