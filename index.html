@@ -4197,6 +4197,34 @@ function apex_renderMarkdown(raw) {
 // Legacy alias so any existing calls still work
 function formatCoachMarkdown(raw) { return apex_renderMarkdown(raw); }
 
+/* Copy code block helper */
+window.apexCopyCode = function(btn, code) {
+  const decoded = code ? code.replace(/\\n/g,'\n') : '';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(decoded).then(function() {
+      btn.textContent = '✓ Copied';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    }).catch(function() { btn.textContent = 'Copy'; });
+  } else {
+    btn.textContent = '✓ Copied';
+    setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+  }
+};
+
+/* Delegated click listener for code copy buttons */
+document.addEventListener('click', function(e) {
+  const copyBtn = e.target.closest('.apex-code-copy-btn');
+  if (copyBtn) {
+    e.preventDefault();
+    const encoded = copyBtn.getAttribute('data-code');
+    const code = encoded ? decodeURIComponent(encoded) : (copyBtn.closest('pre') ? copyBtn.closest('pre').querySelector('code').innerText : '');
+    window.apexCopyCode(copyBtn, code);
+  }
+});
+
+
+
+
 
 
 
