@@ -158,3 +158,40 @@ class AttentionKnowledgeTracing:
             posteriors[b] = self.forward_sequence(tuples)
 
         return posteriors
+
+    def predict_next_interaction(
+        self,
+        interactions: Sequence[Tuple[str, Union[bool, int, float]]]
+    ) -> Dict[str, Any]:
+        """
+        Calculates live predictive cognitive parameters for the AI Mentor control loop:
+          - p_next: posterior probability of solving next question correctly in [0.01, 0.99]
+          - cognitive_momentum: trend over interaction sequence ("ACCELERATING", "STABLE", "DECLINING")
+          - scaffolding_depth: recommended pedagogical granularity ("STEP_BY_STEP", "GUIDED_HINTS", "INDEPENDENT_PROMPT")
+        """
+        p_next = self.forward_sequence(interactions)
+        seq_len = len(interactions)
+
+        momentum = "STABLE"
+        if seq_len >= 3:
+            recent_3 = [1.0 if bool(c) else 0.0 for _, c in interactions[-3:]]
+            recent_avg = sum(recent_3) / 3.0
+            if recent_avg >= 0.67:
+                momentum = "ACCELERATING"
+            elif recent_avg <= 0.33:
+                momentum = "DECLINING"
+
+        if p_next < 0.40:
+            scaffold = "STEP_BY_STEP"
+        elif p_next < 0.75:
+            scaffold = "GUIDED_HINTS"
+        else:
+            scaffold = "INDEPENDENT_PROMPT"
+
+        return {
+            "p_next": p_next,
+            "cognitive_momentum": momentum,
+            "scaffolding_depth": scaffold,
+            "sequence_length": seq_len
+        }
+
