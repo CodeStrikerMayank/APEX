@@ -8,17 +8,185 @@ Harvests full internal cognitive telemetry:
 - FineWeb-Edu Textbook Citations & Formula Grounding
 - Roadmap Status & Next-Best Action (NBA)
 """
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple, Sequence
+import math
 from sqlalchemy.orm import Session
 
 from backend.app.models.schema import (
     Student, StudentConceptMastery, Concept, Question,
     AssessmentAttempt, StudentAttemptItem, Roadmap, RoadmapAction, Prerequisite
 )
-from backend.app.knowledge_graph.fineweb_vault import FINEWEB_READINGS
+from backend.app.knowledge_graph.fineweb_vault import FINEWEB_READINGS, get_fineweb_readings
+from backend.app.student_model.akt import AttentionKnowledgeTracing
+from backend.app.student_model.irt import MultidimensionalIRT
+from backend.app.student_model.bkt import BayesianKnowledgeTracing
+from backend.app.student_model.fsrs_engine import FSRSEngine
+
+
+class CognitiveStateAccumulator:
+    """
+    Dynamic Cognitive State Accumulator:
+    Calculates student cognitive entropy scores, tracks compilation/error thrashing trajectories,
+    extracts recursive prerequisite DAG subtrees, and synthesizes live control signals.
+    """
+
+    @staticmethod
+    def compute_student_cognitive_entropy(items: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Calculates Shannon entropy H(S) over student error categories and response latency variance.
+        High entropy indicates erratic guessing or thrashing; low entropy indicates localized misconceptions.
+        """
+        if not items:
+            return {
+                "entropy_score": 0.0,
+                "normalized_entropy": 0.0,
+                "is_thrashing": False,
+                "thrashing_mode": "NOMINAL",
+                "latency_spread_seconds": 0.0,
+                "state": "BASELINE_STANDBY"
+            }
+
+        error_counts: Dict[str, int] = {}
+        latencies: List[float] = []
+        total_errors = 0
+        rapid_wrong_count = 0
+        freeze_wrong_count = 0
+
+        for it in items:
+            t = float(it.get("time_taken_seconds") or 45.0)
+            latencies.append(t)
+            is_corr = bool(it.get("is_correct", False))
+
+            if not is_corr:
+                etype = it.get("error_type") or "CONCEPTUAL_ERROR"
+                error_counts[etype] = error_counts.get(etype, 0) + 1
+                total_errors += 1
+                if t < 15.0:
+                    rapid_wrong_count += 1
+                elif t > 150.0:
+                    freeze_wrong_count += 1
+
+        if total_errors == 0:
+            std_dev = 0.0
+            if len(latencies) > 1:
+                m_lat = sum(latencies) / len(latencies)
+                var_lat = sum((l - m_lat) ** 2 for l in latencies) / len(latencies)
+                std_dev = round(math.sqrt(var_lat), 1)
+            return {
+                "entropy_score": 0.0,
+                "normalized_entropy": 0.0,
+                "is_thrashing": False,
+                "thrashing_mode": "NOMINAL",
+                "latency_spread_seconds": std_dev,
+                "state": "HIGH_STABILITY_MASTERY"
+            }
+
+        # Shannon Entropy H = - sum(p * log2(p))
+        entropy = 0.0
+        for count in error_counts.values():
+            p = count / total_errors
+            if p > 0:
+                entropy -= p * math.log2(p)
+
+        k = max(len(error_counts), 1)
+        max_possible_entropy = math.log2(k) if k > 1 else 1.0
+        normalized_entropy = round(min(entropy / max(max_possible_entropy, 1.0), 1.0), 2)
+
+        avg_lat = sum(latencies) / len(latencies)
+        variance = sum((l - avg_lat) ** 2 for l in latencies) / len(latencies)
+        lat_spread = math.sqrt(variance)
+
+        is_thrashing = False
+        thrashing_mode = "NOMINAL"
+
+        if rapid_wrong_count >= 2:
+            is_thrashing = True
+            thrashing_mode = "RAPID_GUESSING"
+        elif freeze_wrong_count >= 2:
+            is_thrashing = True
+            thrashing_mode = "COGNITIVE_FREEZE"
+        elif entropy > 1.5 and lat_spread > 40.0:
+            is_thrashing = True
+            thrashing_mode = "OSCILLATING_CONFUSION"
+
+        return {
+            "entropy_score": round(entropy, 2),
+            "normalized_entropy": normalized_entropy,
+            "is_thrashing": is_thrashing,
+            "thrashing_mode": thrashing_mode,
+            "latency_spread_seconds": round(lat_spread, 1),
+            "rapid_wrong_count": rapid_wrong_count,
+            "freeze_wrong_count": freeze_wrong_count,
+            "error_distribution": error_counts
+        }
+
+    @staticmethod
+    def extract_prerequisite_subtrees(
+        target_concept_id: str,
+        student_id: str,
+        db: Session,
+        max_depth: int = 3
+    ) -> Dict[str, Any]:
+        """
+        Recursively extracts multi-hop prerequisite ancestral subtrees from the knowledge graph
+        and pinpoints the deepest broken foundation node blocking the student.
+        """
+        visited = set()
+        subtree_nodes = []
+        root_broken_ancestor = None
+
+        def traverse_ancestors(cid: str, depth: int):
+            if depth > max_depth or cid in visited:
+                return
+            visited.add(cid)
+
+            # Query direct prerequisites (to_concept_id == cid means from_concept_id is the prerequisite parent)
+            prereqs = db.query(Prerequisite).filter(Prerequisite.to_concept_id == cid).all()
+            for p in prereqs:
+                parent_id = p.from_concept_id
+                parent_concept = db.query(Concept).filter(Concept.concept_id == parent_id).first()
+                p_name = parent_concept.name if parent_concept else parent_id
+
+                mastery_rec = (
+                    db.query(StudentConceptMastery)
+                    .filter(StudentConceptMastery.student_id == student_id,
+                            StudentConceptMastery.concept_id == parent_id)
+                    .first()
+                )
+                m_val = mastery_rec.mastery if mastery_rec else 0.25
+                retrievability = getattr(mastery_rec, "fsrs_retrievability", 1.0) or 1.0
+
+                node_entry = {
+                    "concept_id": parent_id,
+                    "name": p_name,
+                    "depth": depth,
+                    "mastery": round(m_val * 100, 1),
+                    "retrievability": round(retrievability * 100, 1),
+                    "is_broken": m_val < 0.60 or retrievability < 0.65,
+                    "blocks": cid
+                }
+                subtree_nodes.append(node_entry)
+
+                nonlocal root_broken_ancestor
+                if node_entry["is_broken"]:
+                    if not root_broken_ancestor or depth > root_broken_ancestor["depth"]:
+                        root_broken_ancestor = node_entry
+
+                traverse_ancestors(parent_id, depth + 1)
+
+        traverse_ancestors(target_concept_id, 1)
+
+        return {
+            "target_concept_id": target_concept_id,
+            "has_broken_ancestors": root_broken_ancestor is not None,
+            "root_broken_ancestor": root_broken_ancestor,
+            "total_ancestors_tracked": len(subtree_nodes),
+            "subtree_nodes": subtree_nodes
+        }
 
 
 class OmniContextHarvester:
+
     @staticmethod
     def harvest_full_context(student_id: str, db: Session, prompt: str = "") -> Dict[str, Any]:
         """
@@ -249,45 +417,212 @@ class OmniContextHarvester:
                 "next_action": act_list[0] if act_list else None
             }
 
-        # 5. FINEWEB-EDU CITATIONS & KNOWLEDGE MATCHING
-        query_terms = (prompt or "").lower().split()
-        relevant_readings = []
-        for r in FINEWEB_READINGS:
-            if r.get("course") == exam or (exam == "JEE" and r.get("course") == "JEE"):
-                score = 0
-                title_lower = (r.get("title") or "").lower()
-                chap_lower = (r.get("chapter") or "").lower()
-                summary_lower = (r.get("summary") or "").lower()
+        # 5. FINEWEB-EDU & KNOWLEDGE VAULT RETRIEVER
+        vault_matches = OmniContextHarvester.find_vault_matches(
+            prompt=prompt or "",
+            exam=exam,
+            db=db,
+            limit=3
+        )
+        # Only return vault readings if there is an authentic match for the student query.
+        # If the query does not match any file, do NOT suggest unsolicited files to the student!
+        if not prompt or not prompt.strip():
+            # Only provide baseline track readings when harvesting for the static telemetry HUD
+            if not vault_matches:
+                for r in FINEWEB_READINGS:
+                    if r.get("course") == exam or exam == "JEE":
+                        vault_matches.append({
+                            "id": r.get("id"),
+                            "title": r.get("title"),
+                            "course": r.get("course", exam),
+                            "subject": r.get("subject"),
+                            "chapter": r.get("chapter"),
+                            "summary": r.get("summary"),
+                            "formula": (r.get("formula_box") or {}).get("latex"),
+                            "formula_latex": (r.get("formula_box") or {}).get("latex"),
+                            "formula_plain": (r.get("formula_box") or {}).get("plain"),
+                            "reading_time_mins": r.get("reading_time_mins", 3),
+                            "score": r.get("score", 4.8),
+                            "preview_chip": f"📚 Vault: {r.get('title', '')[:28]}...",
+                            "preview_url": f"vault:{r.get('id')}",
+                            "didactic_notes": r.get("didactic_notes") or {},
+                            "match_score": 1.0
+                        })
+                        break
 
-                for term in query_terms:
-                    if len(term) > 3:
-                        if term in title_lower or term in chap_lower:
-                            score += 3
-                        elif term in summary_lower:
-                            score += 1
+        context["vault_readings"] = vault_matches
+        context["fineweb_citations"] = vault_matches[:2]
 
-                if score == 0 and context["weak_concepts"]:
-                    top_weak_name = context["weak_concepts"][0]["name"].lower()
-                    if top_weak_name in title_lower or top_weak_name in chap_lower:
-                        score += 2
-
-                if score > 0 or len(relevant_readings) == 0:
-                    relevant_readings.append({
-                        "id": r.get("id"),
-                        "title": r.get("title"),
-                        "chapter": r.get("chapter"),
-                        "subject": r.get("subject"),
-                        "formula": r.get("formula_box", {}).get("latex"),
-                        "summary": r.get("summary"),
-                        "reading_time_mins": r.get("reading_time_mins", 3)
-                    })
-                if len(relevant_readings) >= 2:
-                    break
-
-        context["fineweb_citations"] = relevant_readings[:2]
         # 6. LIFETIME DIAGNOSTIC MEMORY (All Quizzes & Practice History)
         context["lifetime_diagnostics"] = OmniContextHarvester.harvest_lifetime_diagnostics(student_id, db)
+
+        # 7. DYNAMIC COGNITIVE ACCUMULATION: Entropy, Thrashing & Prerequisite Subtrees
+        all_recent_items = []
+        if latest_attempt:
+            for item, _ in items:
+                all_recent_items.append({
+                    "is_correct": item.is_correct,
+                    "error_type": item.error_type or "CONCEPTUAL_ERROR",
+                    "time_taken_seconds": item.time_taken_seconds or 45
+                })
+        elif context["lifetime_diagnostics"] and context["lifetime_diagnostics"].get("lifetime_mistakes"):
+            for m in context["lifetime_diagnostics"]["lifetime_mistakes"]:
+                all_recent_items.append({
+                    "is_correct": False,
+                    "error_type": m.get("error_type", "CONCEPTUAL_ERROR"),
+                    "time_taken_seconds": m.get("time_taken_seconds", 45)
+                })
+
+        entropy_diag = CognitiveStateAccumulator.compute_student_cognitive_entropy(all_recent_items)
+
+        # Extract recursive prerequisite subtree for top weak concept
+        prereq_subtree = None
+        if context["weak_concepts"]:
+            top_weak_cid = context["weak_concepts"][0]["concept_id"]
+            prereq_subtree = CognitiveStateAccumulator.extract_prerequisite_subtrees(top_weak_cid, student_id, db)
+
+        # Expose live MIRT cognitive control vector
+        mirt_signals = MultidimensionalIRT.get_cognitive_control_vector(context.get("latent_ability_theta", 0.0))
+
+        # Expose AKT sequence predictive signals
+        akt_tuples = [(m.get("question_id", f"q_{i}"), m.get("is_correct", False)) for i, m in enumerate(all_recent_items[-10:])]
+        akt_engine = AttentionKnowledgeTracing()
+        akt_prediction = akt_engine.predict_next_interaction(akt_tuples)
+
+        # Expose BKT slip/guess signal on recent observation
+        bkt_signal = None
+        if all_recent_items:
+            last_it = all_recent_items[-1]
+            bkt = BayesianKnowledgeTracing()
+            bkt_signal = bkt.evaluate_slip_vs_guess(
+                p_known=context["overall_mastery"] / 100.0,
+                is_correct=last_it["is_correct"]
+            )
+
+        # Expose proactive FSRS decay remediation candidate
+        fsrs_candidate = FSRSEngine.find_decay_remediation_candidates(masteries)
+
+        context["cognitive_state"] = {
+            "entropy_score": entropy_diag["entropy_score"],
+            "normalized_entropy": entropy_diag["normalized_entropy"],
+            "is_thrashing": entropy_diag["is_thrashing"],
+            "thrashing_mode": entropy_diag["thrashing_mode"],
+            "latency_spread_seconds": entropy_diag["latency_spread_seconds"],
+            "prerequisite_subtrees": prereq_subtree,
+            "cognitive_control_signals": {
+                "mirt": mirt_signals,
+                "akt": akt_prediction,
+                "bkt": bkt_signal
+            },
+            "decay_remediation": fsrs_candidate
+        }
+
         return context
+
+
+    @classmethod
+    def find_vault_matches(
+        cls,
+        prompt: str,
+        exam: str = "JEE",
+        db: Optional[Session] = None,
+        limit: int = 3
+    ) -> List[Dict[str, Any]]:
+        """
+        Matches user query against local Knowledge Vault readings (curated FineWeb-Edu + dynamic curriculum).
+        Computes weighted relevance score across titles, chapters, formulas, and content.
+        Returns structured readings with preview metadata and interactive chip identifiers.
+        """
+        if not prompt or not prompt.strip():
+            return []
+
+        clean_p = prompt.lower()
+        stopwords = {
+            "what", "tell", "explain", "about", "this", "that", "these", "those",
+            "please", "could", "would", "should", "with", "from", "into", "onto",
+            "give", "show", "some", "more", "help", "need", "know", "want", "like",
+            "have", "does", "will", "cant", "dont", "isnt", "arent", "the", "and",
+            "for", "how", "why", "when", "where", "which", "can", "you", "me"
+        }
+        tokens = [t.strip("?,.:;!'\"()[]{}") for t in clean_p.split() if len(t.strip("?,.:;!'\"()[]{}")) >= 3]
+        query_terms = [t for t in tokens if t not in stopwords]
+        if not query_terms:
+            query_terms = tokens
+
+        # Fetch corpus: dynamic database readings + static readings
+        corpus: List[Dict[str, Any]] = []
+        try:
+            corpus = get_fineweb_readings(course=exam or "ALL", db=db)
+        except Exception:
+            corpus = []
+
+        if not corpus:
+            corpus = FINEWEB_READINGS
+
+        scored_candidates = []
+        seen_ids = set()
+
+        for r in corpus:
+            rid = r.get("id")
+            if not rid or rid in seen_ids:
+                continue
+
+            r_course = (r.get("course") or "").upper()
+            course_match = (r_course == (exam or "JEE").upper() or (exam == "JEE" and r_course == "JEE"))
+
+            title_l = (r.get("title") or "").lower()
+            chap_l = (r.get("chapter") or "").lower()
+            subj_l = (r.get("subject") or "").lower()
+            summ_l = (r.get("summary") or "").lower()
+            fbox = r.get("formula_box") or {}
+            f_latex = (fbox.get("latex") or "").lower()
+            f_plain = (fbox.get("plain") or "").lower()
+
+            score = 0.0
+
+            # Direct phrase match in title
+            if clean_p in title_l or (len(title_l) > 6 and title_l in clean_p):
+                score += 15.0
+
+            # Term level matching
+            for t in query_terms:
+                if t in title_l:
+                    score += 6.0
+                elif t in chap_l:
+                    score += 4.5
+                elif t in subj_l:
+                    score += 2.0
+                elif t in f_plain or t in f_latex:
+                    score += 3.5
+                elif t in summ_l:
+                    score += 1.5
+
+            if score > 0:
+                if course_match:
+                    score += 3.0  # Track affinity boost
+
+                seen_ids.add(rid)
+                scored_candidates.append({
+                    "id": rid,
+                    "title": r.get("title") or "Academic Reading",
+                    "course": r.get("course") or exam,
+                    "subject": r.get("subject") or "General",
+                    "chapter": r.get("chapter") or "Curriculum",
+                    "summary": r.get("summary") or "",
+                    "formula": fbox.get("latex"),
+                    "formula_latex": fbox.get("latex"),
+                    "formula_plain": fbox.get("plain"),
+                    "reading_time_mins": r.get("reading_time_mins", 3),
+                    "score": r.get("score", 4.5),
+                    "preview_chip": f"📚 Vault: {r.get('title')[:30]}..." if len(r.get('title', '')) > 30 else f"📚 Vault: {r.get('title')}",
+                    "preview_url": f"vault:{rid}",
+                    "didactic_notes": r.get("didactic_notes") or {},
+                    "match_score": round(score, 2)
+                })
+
+        scored_candidates.sort(key=lambda x: (x["match_score"], x["score"]), reverse=True)
+        return scored_candidates[:limit]
+
 
     @staticmethod
     def harvest_lifetime_diagnostics(student_id: str, db: Session) -> Dict[str, Any]:
@@ -474,9 +809,37 @@ class OmniContextHarvester:
             )
             lines.append(f"Recent Mistake Forensics: {m_str}")
 
-        citations = context.get("fineweb_citations", [])
-        if citations:
-            c_str = " | ".join(f"[{c['chapter']}: {c['title']}] Formula: {c.get('formula') or 'N/A'}" for c in citations)
-            lines.append(f"Academic Reference Passages: {c_str}")
+        vault = context.get("vault_readings") or context.get("fineweb_citations", [])
+        if vault:
+            v_items = []
+            for v in vault[:2]:
+                f_str = f" [Formula: {v.get('formula_latex') or v.get('formula')}]" if (v.get('formula_latex') or v.get('formula')) else ""
+                v_items.append(f"[{v.get('chapter', 'Curriculum')}: {v.get('title')}]{f_str}")
+            lines.append(f"Knowledge Vault Academic Grounding: {' | '.join(v_items)}")
+
+        # 7. LIVE COGNITIVE ACCUMULATOR & CONTROL SIGNALS
+        cog = context.get("cognitive_state")
+        if cog:
+            entropy_line = f"Cognitive Entropy H={cog.get('entropy_score', 0.0)} (Mode: {cog.get('thrashing_mode', 'NOMINAL')})"
+            if cog.get("is_thrashing"):
+                entropy_line += " ⚠️ [THRASHING TRAJECTORY DETECTED - APPLY SCAFFOLDING]"
+            lines.append(entropy_line)
+
+            subtrees = cog.get("prerequisite_subtrees")
+            if subtrees and subtrees.get("has_broken_ancestors") and subtrees.get("root_broken_ancestor"):
+                root = subtrees["root_broken_ancestor"]
+                lines.append(
+                    f"Knowledge Graph Root Cause: Deepest broken prerequisite is '{root['name']}' ({root['mastery']}%, depth {root['depth']}). Fix this node before advancing."
+                )
+
+            ctrl = cog.get("cognitive_control_signals", {})
+            mirt = ctrl.get("mirt", {})
+            if mirt.get("mentor_directive"):
+                lines.append(f"Pedagogical Control Directive ({mirt.get('pedagogical_focus')}): {mirt['mentor_directive']}")
+
+            decay = cog.get("decay_remediation")
+            if decay and decay.get("interleaving_instruction"):
+                lines.append(f"Proactive FSRS Decay Alert: {decay['interleaving_instruction']}")
 
         return "\n".join(lines)
+
