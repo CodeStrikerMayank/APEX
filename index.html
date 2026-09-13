@@ -15,6 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+
 <style>
   /* ============================================================
      THEME TOKENS — light (default) + dark (html[data-theme=dark])
@@ -1213,6 +1214,96 @@
   }
   .coach-w-suggestion:hover{border-color:var(--purple);color:var(--purple);transform:translateY(-1.5px);box-shadow:var(--shadow-sm);}
   .coach-w-suggestion:active{transform:translateY(0.5px);}
+
+  .coach-vault-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.18));
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    color: var(--purple);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 2px 4px 2px 0;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .coach-vault-chip:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(139, 92, 246, 0.32));
+    border-color: var(--purple);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.2);
+  }
+  .coach-msg-chips-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+  .coach-msg-chips-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .coach-msg-chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .coach-msg-chip-btn {
+    background: var(--card, #ffffff);
+    border: 1.5px solid var(--border);
+    color: var(--ink);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    text-align: left;
+    line-height: 1.35;
+  }
+  .coach-msg-chip-btn .coach-chip-arrow {
+    opacity: 0.45;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    font-weight: 700;
+  }
+  .coach-msg-chip-btn:hover {
+    border-color: var(--purple, #6366f1);
+    color: var(--purple, #6366f1);
+    background: rgba(99, 102, 241, 0.05);
+    transform: translateY(-1.5px);
+    box-shadow: 0 3px 10px rgba(99, 102, 241, 0.15);
+  }
+  .coach-msg-chip-btn:hover .coach-chip-arrow {
+    opacity: 1;
+    transform: translateX(2.5px);
+  }
+  .coach-msg-chip-btn:active {
+    transform: translateY(0);
+  }
+  .coach-msg-link {
+    color: var(--purple);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .coach-msg-link:hover {
+    text-decoration: underline;
+  }
 
   .coach-w-foot{
     display:flex;align-items:center;gap:8px;padding:11px 13px;border-top:1px solid var(--border);flex-shrink:0;
@@ -2434,9 +2525,283 @@
   .coach-w-msg.typing span:nth-child(2){animation-delay:.15s;} .coach-w-msg.typing span:nth-child(3){animation-delay:.3s;}
   @keyframes typingDot{ 0%,60%,100%{opacity:.3;transform:translateY(0);} 30%{opacity:1;transform:translateY(-2px);} }
 
+  /* ============================================================
+     APEX AI RESPONSE — PREMIUM MARKDOWN RENDER QUALITY UPGRADE
+     ============================================================ */
 
+  /* Entry animation for new messages */
+  @keyframes apexMsgIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .coach-w-msg.from-coach, .studio-msg.from-coach {
+    animation: apexMsgIn 0.28s cubic-bezier(0.16,1,0.3,1) both;
+    position: relative;
+    border-left: none;
+    border-radius: var(--radius-md);
+    padding-left: 16px !important;
+  }
+  .coach-w-msg.from-coach::before, .studio-msg.from-coach::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3.5px;
+    background: linear-gradient(180deg, var(--purple), rgba(var(--purple-rgb),0.25));
+    border-radius: 3px;
+  }
 
+  /* Typewriter cursor */
+  @keyframes apexCursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .apex-typewriter-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: var(--purple);
+    border-radius: 1px;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: apexCursorBlink 0.7s step-end infinite;
+  }
+
+  /* ── Rendered Markdown content wrapper ── */
+  .apex-ai-response {
+    font-size: 13.5px;
+    line-height: 1.72;
+    color: var(--ink);
+    word-break: break-word;
+  }
+  .apex-ai-response p { margin: 0 0 10px; }
+  .apex-ai-response p:last-child { margin-bottom: 0; }
+
+  /* Headings */
+  .apex-ai-response h1,.apex-ai-response h2,.apex-ai-response h3,
+  .apex-ai-response h4,.apex-ai-response h5,.apex-ai-response h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 18px 0 8px;
+    line-height: 1.3;
+  }
+  .apex-ai-response h1 { font-size: 17px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .apex-ai-response h2 { font-size: 15.5px; }
+  .apex-ai-response h3 { font-size: 14px; color: var(--purple); }
+  .apex-ai-response h4 { font-size: 13.5px; }
+
+  /* Lists */
+  .apex-ai-response ul, .apex-ai-response ol {
+    margin: 8px 0 12px;
+    padding-left: 22px;
+  }
+  .apex-ai-response li { margin: 4px 0; }
+  .apex-ai-response li::marker { color: var(--purple); font-weight: 700; }
+
+  /* Bold & italic */
+  .apex-ai-response strong { font-weight: 700; color: var(--ink); }
+  .apex-ai-response em { font-style: italic; color: var(--ink-soft); }
+
+  /* Inline code */
+  .apex-ai-response code:not(.hljs) {
+    font-family: 'JetBrains Mono','Fira Code','Cascadia Code',monospace;
+    font-size: 12px;
+    background: var(--track-bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    color: var(--purple);
+  }
+
+  /* Code blocks — syntax highlighted */
+  .apex-ai-response pre {
+    position: relative;
+    margin: 14px 0;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+  .apex-ai-response pre code.hljs {
+    font-size: 12.5px;
+    line-height: 1.6;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .apex-code-copy-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: rgba(var(--purple-rgb),0.15);
+    border: 1px solid var(--purple-border);
+    color: var(--purple);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+  }
+  .apex-code-copy-btn:hover { background: rgba(var(--purple-rgb),0.28); }
+  .apex-code-lang-label {
+    position: absolute;
+    top: 8px; left: 12px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: monospace;
+  }
+
+  /* Blockquotes */
+  .apex-ai-response blockquote {
+    margin: 10px 0;
+    padding: 10px 14px;
+    border-left: 3px solid var(--purple-border);
+    background: var(--purple-tint);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* Tables */
+  .apex-ai-response table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 12px 0;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .apex-ai-response th {
+    background: var(--purple-tint);
+    color: var(--purple);
+    font-weight: 700;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--purple-border);
+  }
+  .apex-ai-response td {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .apex-ai-response tr:last-child td { border-bottom: none; }
+  .apex-ai-response tr:hover td { background: var(--track-bg); }
+
+  /* Horizontal rule */
+  .apex-ai-response hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+
+  /* ── Response metadata bar ── */
+  .apex-response-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+  }
+  .apex-model-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--purple-tint);
+    border: 1px solid var(--purple-border);
+    color: var(--purple);
+  }
+  .apex-tier-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .apex-tier-badge.cloud { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green-fg); }
+  .apex-tier-badge.fallback { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber-fg); }
+  .apex-tier-badge.offline { background: var(--blue-bg); border: 1px solid var(--blue-border); color: var(--blue-fg); }
+  .apex-response-time { font-size: 10.5px; color: var(--ink-faint); margin-left: auto; }
+  .apex-feedback-row { display: flex; gap: 4px; align-items: center; margin-left: auto; }
+  .apex-feedback-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    color: var(--ink-faint);
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .apex-feedback-btn:hover { border-color: var(--purple-border); color: var(--purple); background: var(--purple-tint); }
+  .apex-copy-btn {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 2px 8px;
+    transition: all 0.15s;
+  }
+  .apex-copy-btn:hover { border-color: var(--purple-border); color: var(--purple); background: var(--purple-tint); }
+
+  /* ── Always-visible follow-up chips ── */
+  .apex-followup-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 13px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .apex-followup-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.18s var(--ease-out);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+  .apex-followup-chip:hover {
+    border-color: var(--purple-border);
+    color: var(--purple);
+    background: var(--purple-tint);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .apex-followup-chip svg { width: 11px; height: 11px; flex-shrink: 0; }
+  .apex-chips-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ink-faint);
+    margin-bottom: 2px;
+    width: 100%;
+  }
 </style>
+
 </head>
 <body>
 
@@ -4116,6 +4481,7 @@ const DEFAULT_SUGGESTIONS = [
   { icon: '🔬', text: 'Explain high-yield syllabus concepts' }
 ];
 
+/* Rich, Sanitized Markdown & LaTeX Formatter for Academic Mentor */
 /* ======= APEX PREMIUM MARKDOWN RENDERER (marked.js + highlight.js + DOMPurify) ======= */
 function apex_renderMarkdown(raw) {
   if (!raw) return '';
@@ -4205,6 +4571,22 @@ window.apexCopyCode = function(btn, code) {
       btn.textContent = '✓ Copied';
       setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
     }).catch(function() { btn.textContent = 'Copy'; });
+  } else {
+    btn.textContent = '✓ Copied';
+    setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+  }
+};
+
+/* Delegated click listener for code copy buttons */
+document.addEventListener('click', function(e) {
+  const copyBtn = e.target.closest('.apex-code-copy-btn');
+  if (copyBtn) {
+    e.preventDefault();
+    const encoded = copyBtn.getAttribute('data-code');
+    const code = encoded ? decodeURIComponent(encoded) : (copyBtn.closest('pre') ? copyBtn.closest('pre').querySelector('code').innerText : '');
+    window.apexCopyCode(copyBtn, code);
+  }
+});
 
 /* Typewriter animation — streams rendered HTML char-by-char into a container */
 function apexTypewriter(container, html, onDone) {
@@ -4369,187 +4751,6 @@ window.apexFeedback = function(btn, type) {
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-  } else {
-    btn.textContent = '✓ Copied';
-    setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
-  }
-};
-
-/* Delegated click listener for code copy buttons */
-document.addEventListener('click', function(e) {
-  const copyBtn = e.target.closest('.apex-code-copy-btn');
-  if (copyBtn) {
-    e.preventDefault();
-    const encoded = copyBtn.getAttribute('data-code');
-    const code = encoded ? decodeURIComponent(encoded) : (copyBtn.closest('pre') ? copyBtn.closest('pre').querySelector('code').innerText : '');
-    window.apexCopyCode(copyBtn, code);
-  }
-});
-
-
-
-
-
-
-
-/* Rich, Sanitized Markdown & LaTeX Formatter for Academic Mentor */
-function formatCoachMarkdown(raw) {
-  if (!raw) return '';
-  let str = String(raw).trim();
-
-  // 1. Math extraction: Protect LaTeX math ($$ ... $$ and $ ... $) from markdown regex
-  const mathTokens = [];
-  str = str.replace(/\$\$([\s\S]+?)\$\$/g, function(_, math) {
-    const idx = mathTokens.length;
-    mathTokens.push({ display: true, code: math.trim() });
-    return `__MATH_BLOCK_${idx}__`;
-  });
-  str = str.replace(/\$([^\$\n]+?)\$/g, function(_, math) {
-    const idx = mathTokens.length;
-    mathTokens.push({ display: false, code: math.trim() });
-    return `__MATH_INLINE_${idx}__`;
-  });
-
-  // 2. Escape HTML to prevent XSS
-  str = str.replace(/&/g, '&amp;')
-           .replace(/</g, '&lt;')
-           .replace(/>/g, '&gt;');
-
-  // 3. Code blocks (```lang ... ```)
-  const codeBlocks = [];
-  str = str.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, function(_, lang, code) {
-    const idx = codeBlocks.length;
-    codeBlocks.push({ lang: lang || '', code: code.trim() });
-    return `__CODE_BLOCK_${idx}__`;
-  });
-
-  // 4. Split into lines to parse headings, callouts, lists, paragraphs
-  const lines = str.split('\n');
-  const out = [];
-  let inUl = false;
-  let inOl = false;
-
-  function closeLists() {
-    if (inUl) { out.push('</ul>'); inUl = false; }
-    if (inOl) { out.push('</ol>'); inOl = false; }
-  }
-
-  function formatInlines(text) {
-    // Bold: **text**
-    let s = text.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
-    // Italic: *text* (avoiding double replacements)
-    s = s.replace(/(?:^|[^\*])\*([^\*]+?)\*(?!\*)/g, function(m, p1) {
-      return m.replace(`*${p1}*`, `<em>${p1}</em>`);
-    });
-    // Inline code: `code`
-    s = s.replace(/`([^`]+?)`/g, '<code class="coach-inline-code">$1</code>');
-    return s;
-  }
-
-  const calloutIcons = ['💡', '⚡', '📌', '⚠️', '🎉', '🌟', '⚖️', '🔬', '🧪', '📐', '🧬', '🤝', '🗺️', '📖'];
-
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
-    if (!line) {
-      closeLists();
-      continue;
-    }
-
-    // Headings: ### or ## or #
-    const h3Match = line.match(/^###\s+(.+)$/);
-    if (h3Match) {
-      closeLists();
-      out.push(`<div class="coach-msg-h3">${formatInlines(h3Match[1])}</div>`);
-      continue;
-    }
-    const h2Match = line.match(/^##?\s+(.+)$/);
-    if (h2Match) {
-      closeLists();
-      out.push(`<div class="coach-msg-h2">${formatInlines(h2Match[1])}</div>`);
-      continue;
-    }
-
-    // Callout boxes: lines starting with standard callout emojis or blockquote >
-    let isCallout = false;
-    let calloutIcon = '💡';
-    let calloutBody = line;
-
-    if (line.startsWith('&gt;')) {
-      isCallout = true;
-      calloutBody = line.replace(/^&gt;\s*/, '');
-    } else {
-      for (let ci = 0; ci < calloutIcons.length; ci++) {
-        if (line.startsWith(calloutIcons[ci])) {
-          isCallout = true;
-          calloutIcon = calloutIcons[ci];
-          calloutBody = line.slice(calloutIcons[ci].length).trim();
-          break;
-        }
-      }
-    }
-
-    if (isCallout) {
-      closeLists();
-      out.push(`<div class="coach-callout"><span class="coach-callout-icon">${calloutIcon}</span><div class="coach-callout-body">${formatInlines(calloutBody)}</div></div>`);
-      continue;
-    }
-
-    // Unordered list: - item or * item
-    const ulMatch = line.match(/^[-*]\s+(.+)$/);
-    if (ulMatch) {
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      if (!inUl) { out.push('<ul class="coach-msg-ul">'); inUl = true; }
-      out.push(`<li class="coach-msg-li">${formatInlines(ulMatch[1])}</li>`);
-      continue;
-    }
-
-    // Ordered list: 1. item
-    const olMatch = line.match(/^(\d+)\.\s+(.+)$/);
-    if (olMatch) {
-      if (inUl) { out.push('</ul>'); inUl = false; }
-      if (!inOl) { out.push('<ol class="coach-msg-ol">'); inOl = true; }
-      out.push(`<li class="coach-msg-li">${formatInlines(olMatch[2])}</li>`);
-      continue;
-    }
-
-    // Standard paragraph
-    closeLists();
-    out.push(`<p class="coach-msg-p">${formatInlines(line)}</p>`);
-  }
-  closeLists();
-
-  let html = out.join('');
-
-  // 5. Restore Code Blocks
-  html = html.replace(/__CODE_BLOCK_(\d+)__/g, function(_, idx) {
-    const cb = codeBlocks[Number(idx)];
-    return `<pre class="coach-code-block"><code>${cb.code}</code></pre>`;
-  });
-
-  // 6. Restore Math
-  html = html.replace(/__MATH_BLOCK_(\d+)__/g, function(_, idx) {
-    const m = mathTokens[Number(idx)];
-    return `<div class="coach-math-block" data-tex="${m.code}">$$${m.code}$$</div>`;
-  });
-  html = html.replace(/__MATH_INLINE_(\d+)__/g, function(_, idx) {
-    const m = mathTokens[Number(idx)];
-    return `<span class="coach-math-inline" data-tex="${m.code}">$${m.code}$</span>`;
-  });
-
-  return html;
-}
-
 /* KaTeX Math Typesetting with Offline Unicode Fallback */
 function renderCoachMath(element) {
   if (!element) return;
@@ -4617,6 +4818,17 @@ window.copyCoachReply = function(btn) {
   }
 };
 
+window.openVaultReadingFromCoach = function(readingId) {
+  if (typeof switchView === 'function') {
+    switchView('view-knowledge-vault');
+  }
+  setTimeout(function() {
+    if (typeof openReaderModal === 'function' && readingId) {
+      openReaderModal(readingId);
+    }
+  }, 120);
+};
+
 function openWidget(){
   coachState.panelState = 'open';
   el.widget.hidden = false;
@@ -4670,29 +4882,22 @@ function renderMessages(){
   coachState.messages.forEach(function(m){
     const bubble = document.createElement('div');
     bubble.className = 'coach-w-msg from-' + m.role;
-    bubble.setAttribute('data-raw', m.text);
+    const rawText = (typeof m.text === 'object' && m.text !== null)
+      ? (m.text.answer || m.text.response || m.text.reply || m.text.text || '')
+      : (m.text || '');
+    bubble.setAttribute('data-raw', rawText);
 
     if (m.role === 'user') {
-      bubble.textContent = m.text;
+      bubble.textContent = rawText;
     } else if (m.role === 'smartboard' || m.isHtml) {
       bubble.className = 'coach-w-msg from-smartboard';
-      bubble.innerHTML = m.html || m.text;
+      bubble.innerHTML = m.html || rawText;
       renderCoachMath(bubble);
     } else if (m.role === 'coach') {
-      const formattedHtml = formatCoachMarkdown(m.text);
-      const timeStr = m.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      bubble.innerHTML = `
-        <div class="coach-msg-content">${formattedHtml}</div>
-        <div class="coach-msg-meta">
-          <span class="coach-msg-time">${timeStr}</span>
-          <div class="coach-msg-meta-actions">
-            <button type="button" class="coach-msg-action-btn" title="Copy response" onclick="window.copyCoachReply(this)">📋 Copy</button>
-          </div>
-        </div>
-      `;
-      renderCoachMath(bubble);
+      // Use premium renderer for coach responses
+      apexBuildCoachBubble(bubble, m, rawText, handleUserQuestion);
     } else {
-      bubble.innerHTML = formatCoachMarkdown(m.text);
+      bubble.innerHTML = formatCoachMarkdown(rawText);
     }
 
     el.messages.appendChild(bubble);
@@ -4700,9 +4905,25 @@ function renderMessages(){
   el.messages.scrollTop = el.messages.scrollHeight;
 }
 
-function appendMessage(role, text){
+function appendMessage(role, text, chips, vaultReadings, meta){
+  if (typeof text === 'object' && text !== null) {
+    chips = chips || text.chips || text.suggested_chips || [];
+    vaultReadings = vaultReadings || text.vaultReadings || text.vault_readings || [];
+    text = text.answer || text.response || text.reply || text.text || '';
+  }
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  coachState.messages.push({ role: role, text: text, time: time });
+  const isNew = (meta && meta.isNew !== undefined) ? meta.isNew : (role === 'coach');
+  coachState.messages.push({
+    role: role,
+    text: text,
+    time: time,
+    chips: chips || [],
+    vaultReadings: vaultReadings || [],
+    source: (meta && meta.source) || '',
+    tier: (meta && meta.tier) || '',
+    question: (meta && meta.question) || coachState._lastQuestion || '',
+    _isNew: isNew
+  });
   if (typeof persistActiveStudioSession === 'function') {
     persistActiveStudioSession(role, text);
   }
@@ -4712,12 +4933,27 @@ function appendMessage(role, text){
 
 async function sendToCoach(question, mode){
   const sid = AppState.studentId || 'general';
+  const t0 = Date.now();
+  const history = (coachState.messages || []).slice(-6).map(function(m) {
+    const txt = (typeof m.text === 'object' && m.text !== null)
+      ? (m.text.answer || m.text.response || m.text.reply || m.text.text || '')
+      : (m.text || '');
+    return { role: m.role || 'user', text: txt };
+  });
   const data = await ApiClient.post(`/api/ai/chat/${sid}`, {
     prompt: question,
     mode: mode || coachState.mode || 'pedagogical',
+    history: history,
     include_student_state: true
   });
-  return data.response || data.answer || data.reply || 'No reply generated by coach.';
+  return {
+    answer: data.response || data.answer || data.reply || 'No reply generated by coach.',
+    chips: data.suggested_chips || [],
+    vaultReadings: data.vault_readings || [],
+    source: data.source || data.ai_source || '',
+    tier: data.tier || data.ai_tier || '',
+    elapsed: Date.now() - t0
+  };
 }
 
 async function handleUserQuestion(question){
@@ -4725,6 +4961,7 @@ async function handleUserQuestion(question){
   if (!question) return;
 
   openWidget();
+  coachState._lastQuestion = question;
   appendMessage('user', question);
   el.sendBtn.disabled = true;
 
@@ -4736,9 +4973,10 @@ async function handleUserQuestion(question){
   el.messages.scrollTop = el.messages.scrollHeight;
 
   try {
-    const answer = await sendToCoach(question, coachState.mode);
+    const coachRes = await sendToCoach(question, coachState.mode);
     typingBubble.remove();
-    appendMessage('coach', answer);
+    const meta = { source: coachRes.source || '', tier: coachRes.tier || '', question: question, isNew: true };
+    appendMessage('coach', coachRes.answer, coachRes.chips, coachRes.vaultReadings, meta);
   } catch (err) {
     typingBubble.remove();
     appendMessage('system', 'Could not reach the coach backend (' + err.message + ').');
