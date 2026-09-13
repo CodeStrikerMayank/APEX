@@ -4360,6 +4360,18 @@ function apexBuildCoachBubble(bubble, m, rawText, sendFn) {
   }
 }
 
+window.apexFeedback = function(btn, type) {
+  btn.style.background = type === 'up' ? 'var(--green-bg)' : 'var(--red-bg)';
+  btn.style.borderColor = type === 'up' ? 'var(--green-border)' : 'var(--red-border)';
+  btn.style.color = type === 'up' ? 'var(--green-fg)' : 'var(--red-fg)';
+  btn.disabled = true;
+  if (window.apexToast) window.apexToast(type === 'up' ? 'Thanks for the feedback! 🎉' : 'We\'ll improve this response.', type === 'up' ? 'success' : 'info');
+};
+
+
+
+
+
 
 
 
