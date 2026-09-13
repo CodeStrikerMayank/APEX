@@ -128,3 +128,135 @@ Computes retrieval probability $R = e^{-t / S}$ to remediate concepts decaying i
 
 ---
 
+## 5. Domain Protocol Engine (`domain_protocols.py`)
+
+Every student belongs to an exam domain with immutable pedagogical rules:
+
+### 🚀 1. IIT-JEE Protocol
+- **Focus**: Pure physics mechanics, electromagnetism, organic reaction mechanisms, physical chemistry, differential calculus.
+- **Invariants**: Strict dimensional checks $[M L T^{-2}]$, algebraic sign tracking, and step-by-step mathematical derivations.
+- **Tone**: Analytical, mathematically rigorous, focused on JEE Advanced edge cases.
+
+### 🧬 2. NEET Protocol
+- **Focus**: Medical entrance, biological systems, chemical equilibrium, human physiology, botanical taxonomy.
+- **Invariants**: NCERT textbook primacy, morphological accuracy, and clinical mnemonics.
+- **Cross-Disciplinary Warning**: If a JEE student asks about photosynthesis, the mentor answers cleanly while reminding them of their enrolled track.
+
+### 🏛️ 3. UPSC Protocol
+- **Focus**: General Studies Paper I - IV, Polity, Economy, Geography, International Relations, Ethics.
+- **Invariants**: Multi-dimensional analysis (Constitutional, Economic, Sociological), balanced neutral perspective, and reference to government policies and Supreme Court precedents.
+
+### 🔬 4. GENERAL_STEM Protocol
+- Universal scientific inquiry with strict verification and zero hand-waving.
+
+---
+
+## 6. OmniContext Harvester & Knowledge Vault
+
+Located in [`backend/app/ai/omni_context.py`](file:///d:/UNCLECHAN/generate/backend/app/ai/omni_context.py):
+
+1. **Context Harvesting**: Pulls active student exam, target milestones, recent quiz attempts, wrong-answer rationales, and current mastery levels.
+2. **Knowledge Vault Retriever**:
+   - Queries the local SQLite curriculum database for authentic FineWeb syllabus readings matching keywords.
+   - Attaches verified formula previews ($I = I_{cm} + Md^2$).
+   - **Critical Integrity Rule**: If no authentic database record matches the query, `vault_readings` returns `None`. **No fake or hallucinated files are ever suggested to the student.**
+
+---
+
+## 7. Dynamic Asking-Form Interactive Chips
+
+Below every response, the system presents three interactive options in asking form:
+
+```html
+👉 Choose Next Step:
+[ 📐 Would you like to deep dive into the derivation of [Topic]? → ]
+[ 🗺️ How does [Topic] connect to the next topic in my syllabus? → ]
+[ 🎯 Would you like to solve a practice [Exam] question on [Topic]? → ]
+```
+
+### Multi-Turn Context Continuity:
+- In [`index.html`](file:///d:/UNCLECHAN/generate/index.html), the chat handler automatically passes a rolling history slice (`history: messages.slice(-6)`) to `/api/ai/chat/{student_id}`.
+- When the student clicks a chip like *"Would you like to deep dive into the derivation?"*, the LLM knows the exact context of the previous turn and proceeds with the mathematical proof without asking the user to repeat the topic.
+
+---
+
+## 8. Pedagogical Safety Guards
+
+Located in [`backend/app/student_model/numerical_guards.py`](file:///d:/UNCLECHAN/generate/backend/app/student_model/numerical_guards.py) & [`backend/app/ai/socratic_agents.py`](file:///d:/UNCLECHAN/generate/backend/app/ai/socratic_agents.py):
+
+1. **`OutputNumericalGuard`**: Scans LLM outputs for arithmetic errors, dimensional inconsistencies, and accidental answer leakages during active quiz questions.
+2. **`CodeTraceDissector`**: For programming and algorithmic queries, it parses syntax, explains stack traces, and highlights logic errors without spoiling the solution.
+3. **Pure Chat Output Protection**: Break alerts and cognitive fatigue notifications are isolated to diagnostic HUD telemetry and completely suppressed from the student chat window to maintain clean, uninterrupted learning.
+
+---
+
+## 9. Bring Your Own Key (BYOK) Dynamic Key Vault
+
+Students and administrators can hot-swap API keys at runtime without restarting the server:
+
+* **Trigger**: Press **`Ctrl + O + P`** anywhere on the dashboard.
+* **Supported Providers**: ExperientialLabs (`gpt-5.6-luna`), Google Gemini, xAI Grok, OpenRouter, and custom OpenAI-compatible endpoints.
+* **Live Connectivity Testing**: Click **🧪 Test Key** to send a live validation ping and inspect response codes and token usage breakdown.
+* **Persistence**: Automatically updates [`.env`](file:///d:/UNCLECHAN/generate/.env) when *"Persist changes to local .env file"* is checked.
+
+---
+
+## 10. Codebase Structure Reference
+
+```
+backend/app/
+├── ai/
+│   ├── cloud_llm.py           # Multi-provider gateway (Experiential, Gemini, Grok, BYOK)
+│   ├── domain_protocols.py    # Formal protocols (JEE, NEET, UPSC, GENERAL_STEM)
+│   ├── local_llm.py           # Local Ollama client & clean conceptual prompt builder
+│   ├── omni_context.py        # Student context harvester & Knowledge Vault retriever
+│   ├── socratic_agents.py     # Pedagogical policy router & in-chat quiz agent
+│   ├── templates.py           # Deterministic offline fail-safe templates
+│   ├── intent_classifier.py   # Query classifier (Solve vs Concept vs Chat)
+│   └── explanation.py         # Formative explanation generators
+├── api/
+│   └── ai.py                  # API endpoints (/chat, /engine-status, /keys-config, /test-key)
+├── student_model/
+│   ├── irt.py                 # 2PL Item Response Theory implementation
+│   ├── bkt.py                 # Bayesian Knowledge Tracing engine
+│   └── numerical_guards.py    # Output safety & arithmetic verification
+└── curriculum/
+    ├── exambench_service.py   # Competitive exam benchmark questions
+    └── hierarchy.py           # Curriculum syllabus tree (Physics, Chem, Math, Bio)
+```
+
+---
+
+## 11. Environment Configuration (`.env`)
+
+```env
+# ── ExperientialLabs / Custom Gateway (Tier 1 & 2) ───────────
+PREFERRED_AI_PROVIDER=experiential
+CUSTOM_AI_PROVIDER=ExperientialLabs
+CUSTOM_AI_BASE_URL=https://api.experientiallabs.ai/v1
+CUSTOM_AI_MODEL=gpt-5.6-luna
+EXPLABS_API_KEY=your_key_here
+
+# ── Google Cloud Frontier Layer (Tier 3) ─────────────────────
+GEMINI_API_KEY=your_gemini_key_here
+GEMINI_MODEL=gemini-flash-latest
+USE_GEMINI_POLISH=true
+GEMINI_TIMEOUT_SECONDS=15.0
+
+# ── xAI Frontier Layer (Tier 4) ──────────────────────────────
+GROK_API_KEY=your_grok_key_here
+GROK_MODEL=grok-2-latest
+GROK_TIMEOUT_SECONDS=15.0
+
+# ── Local Edge Ollama Engine (Tier 5) ────────────────────────
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2.5:0.5b
+USE_OLLAMA_POLISH=true
+OLLAMA_TIMEOUT_SECONDS=35.0
+
+# ── Offline Deterministic Fallback (Tier 6) ───────────────────
+LOCAL_AI_ENABLED=true
+```
+
+---
+*Document Version: 2.4.0 | Maintained by APEX AI Cognitive Architecture Team*
