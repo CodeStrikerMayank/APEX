@@ -50,19 +50,40 @@ class CloudLLMHub:
 
     @property
     def custom_provider(self) -> str:
-        return CloudLLMHub._runtime_custom_provider or os.getenv("CUSTOM_AI_PROVIDER", "None")
+        if CloudLLMHub._runtime_custom_provider:
+            return CloudLLMHub._runtime_custom_provider
+        env_prov = os.getenv("CUSTOM_AI_PROVIDER")
+        if env_prov and env_prov.lower() != "none":
+            return env_prov
+        if os.getenv("EXPLABS_API_KEY"):
+            return "ExperientialLabs"
+        return "None"
 
     @property
     def custom_api_key(self) -> Optional[str]:
-        return CloudLLMHub._runtime_custom_api_key or os.getenv("CUSTOM_API_KEY")
+        return CloudLLMHub._runtime_custom_api_key or os.getenv("CUSTOM_API_KEY") or os.getenv("EXPLABS_API_KEY")
 
     @property
     def custom_base_url(self) -> Optional[str]:
-        return CloudLLMHub._runtime_custom_base_url or os.getenv("CUSTOM_AI_BASE_URL")
+        if CloudLLMHub._runtime_custom_base_url:
+            return CloudLLMHub._runtime_custom_base_url
+        env_url = os.getenv("CUSTOM_AI_BASE_URL")
+        if env_url:
+            return env_url
+        if os.getenv("EXPLABS_API_KEY"):
+            return "https://api.experientiallabs.ai/v1"
+        return None
 
     @property
     def custom_model(self) -> Optional[str]:
-        return CloudLLMHub._runtime_custom_model or os.getenv("CUSTOM_AI_MODEL", "deepseek/deepseek-r1")
+        if CloudLLMHub._runtime_custom_model:
+            return CloudLLMHub._runtime_custom_model
+        env_model = os.getenv("CUSTOM_AI_MODEL")
+        if env_model:
+            return env_model
+        if os.getenv("EXPLABS_API_KEY") or (os.getenv("CUSTOM_AI_PROVIDER") and "experiential" in os.getenv("CUSTOM_AI_PROVIDER", "").lower()):
+            return "gpt-5.6-luna"
+        return "deepseek/deepseek-r1"
 
     def is_gemini_available(self) -> bool:
         return bool(self.gemini_key) and time.time() > CloudLLMHub._gemini_exhausted_until
@@ -73,7 +94,7 @@ class CloudLLMHub:
     def is_custom_available(self) -> bool:
         return bool(self.custom_api_key) and bool(self.custom_base_url) and time.time() > CloudLLMHub._custom_exhausted_until
 
-    def mark_gemini_exhausted(self, duration_seconds: float = 600.0):
+    def mark_gemini_exhausted(self, duration_seconds: float = 15.0):
         CloudLLMHub._gemini_exhausted_until = time.time() + duration_seconds
 
     def mark_grok_exhausted(self, duration_seconds: float = 600.0):
@@ -158,7 +179,11 @@ class CloudLLMHub:
         """Returns safe masked configuration for UI display."""
         active_gemini = cls._runtime_gemini_key or os.getenv("GEMINI_API_KEY", "")
         active_grok = cls._runtime_grok_key or os.getenv("GROK_API_KEY", "")
-        active_custom_key = cls._runtime_custom_api_key or os.getenv("CUSTOM_API_KEY", "")
+        active_custom_key = cls._runtime_custom_api_key or os.getenv("CUSTOM_API_KEY", "") or os.getenv("EXPLABS_API_KEY", "")
+
+        default_provider = cls._runtime_custom_provider or os.getenv("CUSTOM_AI_PROVIDER") or ("ExperientialLabs" if (os.getenv("EXPLABS_API_KEY") or os.getenv("CUSTOM_API_KEY")) else "OpenRouter")
+        default_base_url = cls._runtime_custom_base_url or os.getenv("CUSTOM_AI_BASE_URL") or ("https://api.experientiallabs.ai/v1" if (os.getenv("EXPLABS_API_KEY") or os.getenv("CUSTOM_API_KEY")) else "https://openrouter.ai/api/v1")
+        default_model = cls._runtime_custom_model or os.getenv("CUSTOM_AI_MODEL") or ("gemini-3.7-flash" if (os.getenv("EXPLABS_API_KEY") or os.getenv("CUSTOM_API_KEY")) else "deepseek/deepseek-r1")
 
         return {
             "gemini": {
@@ -174,12 +199,12 @@ class CloudLLMHub:
                 "is_exhausted": time.time() <= cls._grok_exhausted_until
             },
             "custom": {
-                "provider": cls._runtime_custom_provider or os.getenv("CUSTOM_AI_PROVIDER", "OpenRouter"),
+                "provider": default_provider,
                 "has_key": bool(active_custom_key),
                 "masked": cls._mask_key(active_custom_key),
-                "base_url": cls._runtime_custom_base_url or os.getenv("CUSTOM_AI_BASE_URL", "https://openrouter.ai/api/v1"),
-                "model": cls._runtime_custom_model or os.getenv("CUSTOM_AI_MODEL", "deepseek/deepseek-r1"),
-                "is_active": bool(active_custom_key) and bool(cls._runtime_custom_base_url or os.getenv("CUSTOM_AI_BASE_URL"))
+                "base_url": default_base_url,
+                "model": default_model,
+                "is_active": bool(active_custom_key) and bool(default_base_url)
             }
         }
 
@@ -190,7 +215,8 @@ class CloudLLMHub:
         if not clean_key:
             return {"valid": False, "message": "Key cannot be empty"}
 
-        if provider.lower() == "gemini":
+        p_lower = provider.lower()
+        if p_lower == "gemini":
             test_model = model or "gemini-2.0-flash"
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{test_model}:generateContent?key={clean_key}"
             payload = {"contents": [{"role": "user", "parts": [{"text": "Ping"}]}]}
@@ -205,7 +231,7 @@ class CloudLLMHub:
             except Exception as e:
                 return {"valid": False, "status_code": 500, "message": f"Connection error: {str(e)}"}
 
-        elif provider.lower() == "grok":
+        elif p_lower == "grok":
             url = "https://api.x.ai/v1/chat/completions"
             payload = {
                 "model": model or "grok-2-latest",
@@ -225,6 +251,39 @@ class CloudLLMHub:
                         return {"valid": False, "status_code": resp.status_code, "message": f"Grok Rejected Key (HTTP {resp.status_code}): {err_text}"}
             except Exception as e:
                 return {"valid": False, "status_code": 500, "message": f"Connection error: {str(e)}"}
+
+        elif p_lower in ("explabs", "experientiallabs"):
+            target_url = (base_url or "https://api.experientiallabs.ai/v1").rstrip("/") + "/chat/completions"
+            models_to_test = [model] if model else ["gpt-5.6-luna", "gemini-3.7-flash"]
+            last_err = ""
+            for m in models_to_test:
+                payload = {
+                    "model": m,
+                    "messages": [{"role": "user", "content": "Ping"}],
+                    "max_tokens": 5
+                }
+                try:
+                    async with httpx.AsyncClient(timeout=5.0) as client:
+                        resp = await client.post(
+                            target_url, json=payload,
+                            headers={"Authorization": f"Bearer {clean_key}", "Content-Type": "application/json"}
+                        )
+                        if resp.status_code in (200, 201):
+                            data = resp.json()
+                            usage = data.get("usage", {})
+                            u_str = f"Tokens: {usage.get('total_tokens', 'N/A')} (prompt: {usage.get('prompt_tokens', 0)}, comp: {usage.get('completion_tokens', 0)})"
+                            return {
+                                "valid": True,
+                                "status_code": resp.status_code,
+                                "model": m,
+                                "usage": usage,
+                                "message": f"ExperientialLabs ({m}) Verified Successfully! {u_str}"
+                            }
+                        else:
+                            last_err = f"HTTP {resp.status_code}: {resp.text[:100]}"
+                except Exception as e:
+                    last_err = str(e)
+            return {"valid": False, "status_code": 500, "message": f"ExperientialLabs Rejected: {last_err}"}
 
         else:  # Custom / OpenRouter / OpenAI
             target_url = (base_url or "https://openrouter.ai/api/v1").rstrip("/") + "/chat/completions"
@@ -265,6 +324,8 @@ class CloudLLMHub:
             keys_to_write["CUSTOM_AI_PROVIDER"] = cls._runtime_custom_provider
         if cls._runtime_custom_api_key:
             keys_to_write["CUSTOM_API_KEY"] = cls._runtime_custom_api_key
+            if "experientiallabs" in (cls._runtime_custom_base_url or "").lower() or (cls._runtime_custom_provider or "").lower() == "experientiallabs":
+                keys_to_write["EXPLABS_API_KEY"] = cls._runtime_custom_api_key
         if cls._runtime_custom_base_url:
             keys_to_write["CUSTOM_AI_BASE_URL"] = cls._runtime_custom_base_url
         if cls._runtime_custom_model:
@@ -297,8 +358,10 @@ class CloudLLMHub:
         if not self.is_gemini_available():
             return None
 
-        models = [self.gemini_model]
-        for fallback in ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-3.6-flash"]:
+        # Prioritize verified working endpoints for Gemini v1beta
+        preferred_model = self.gemini_model if self.gemini_model not in ("gemini-2.5-flash", "gemini-3.6-flash") else "gemini-flash-latest"
+        models = [preferred_model]
+        for fallback in ["gemini-flash-latest", "gemini-flash-lite-latest", "gemma-4-26b-a4b-it", "gemini-3.6-flash", "gemini-2.5-flash"]:
             if fallback not in models:
                 models.append(fallback)
 
@@ -316,17 +379,35 @@ class CloudLLMHub:
                     resp = await client.post(url, json=payload, headers=headers)
                     if resp.status_code == 200:
                         data = resp.json()
+                        # Detect Gemini "model output error" — returned as HTTP 200 with error key
+                        if "error" in data:
+                            err_msg = data["error"].get("message", "")
+                            if "model output" in err_msg.lower() or "output text" in err_msg.lower():
+                                continue  # Skip to next model — safety/content filter triggered
+                            continue
                         candidates = data.get("candidates", [])
-                        if candidates and "content" in candidates[0]:
-                            parts = candidates[0]["content"].get("parts", [])
+                        if not candidates:
+                            continue  # Empty candidates — blocked output, try next model
+                        candidate = candidates[0]
+                        # Check finishReason — SAFETY/OTHER = blocked, skip
+                        finish_reason = candidate.get("finishReason", "STOP")
+                        if finish_reason in ("SAFETY", "OTHER", "RECITATION", "BLOCKLIST"):
+                            continue
+                        if "content" in candidate:
+                            parts = candidate["content"].get("parts", [])
                             if parts and "text" in parts[0]:
-                                return parts[0]["text"].strip()
-                    elif resp.status_code in (401, 403, 429):
-                        self.mark_gemini_exhausted()
-                        break
+                                text = parts[0]["text"].strip()
+                                if text:
+                                    return text
+                    elif resp.status_code == 429:
+                        continue  # Try next model before marking entire provider exhausted
+                    elif resp.status_code in (401, 403):
+                        self.mark_gemini_exhausted(duration_seconds=300.0)
+                        return None
             except Exception:
                 continue
 
+        self.mark_gemini_exhausted(duration_seconds=15.0)
         return None
 
     async def generate_grok(self, prompt: str, system_instruction: str = "") -> Optional[str]:
@@ -368,8 +449,8 @@ class CloudLLMHub:
 
         return None
 
-    async def generate_custom(self, prompt: str, system_instruction: str = "") -> Optional[str]:
-        """Calls user-added custom provider (OpenRouter / OpenAI / Anthropic compatible)."""
+    async def generate_custom(self, prompt: str, system_instruction: str = "") -> Optional[Dict[str, Any]]:
+        """Calls user-added custom provider (ExperientialLabs / OpenRouter / OpenAI compatible)."""
         if not self.is_custom_available():
             return None
 
@@ -379,56 +460,219 @@ class CloudLLMHub:
             messages.append({"role": "system", "content": system_instruction})
         messages.append({"role": "user", "content": prompt})
 
-        payload = {
-            "model": self.custom_model,
-            "messages": messages,
-            "stream": False
-        }
+        # Multi-model candidate list for Experiential gateway: gpt-5.6-luna primary, gemini-3.7-flash fallback
+        models = [self.custom_model]
+        is_explabs = "experiential" in self.custom_provider.lower() or "experiential" in (self.custom_base_url or "").lower()
+        if is_explabs:
+            if "gpt-5.6-luna" not in models:
+                models.insert(0, "gpt-5.6-luna")
+            if "gemini-3.7-flash" not in models:
+                models.append("gemini-3.7-flash")
+
         headers = {
             "Authorization": f"Bearer {self.custom_api_key}",
             "Content-Type": "application/json"
         }
-        try:
-            async with httpx.AsyncClient(timeout=self.custom_timeout) as client:
-                resp = await client.post(target_url, json=payload, headers=headers)
-                if resp.status_code in (200, 201):
-                    data = resp.json()
-                    return data["choices"][0]["message"]["content"].strip()
-                elif resp.status_code in (401, 403, 429):
-                    self.mark_custom_exhausted()
-        except Exception:
-            pass
 
+        for model in models:
+            payload = {
+                "model": model,
+                "messages": messages,
+                "stream": False
+            }
+            try:
+                async with httpx.AsyncClient(timeout=self.custom_timeout) as client:
+                    resp = await client.post(target_url, json=payload, headers=headers)
+                    if resp.status_code in (200, 201):
+                        data = resp.json()
+                        # Detect gateway-relayed "model output error" from Gemini models
+                        if "error" in data and not data.get("choices"):
+                            err_msg = str(data["error"])
+                            if "model output" in err_msg.lower() or "output text" in err_msg.lower():
+                                continue  # Try next gateway model
+                            continue
+                        choices = data.get("choices", [])
+                        if not choices:
+                            continue
+                        content = (choices[0].get("message") or {}).get("content", "") or ""
+                        content = content.strip()
+                        if not content:
+                            continue  # Empty response, try next model
+                        usage = data.get("usage", {})
+                        return {"text": content, "model": model, "usage": usage}
+                    elif resp.status_code in (401, 403):
+                        self.mark_custom_exhausted()
+                        return None
+                    elif resp.status_code == 429:
+                        continue  # Try next fallback model (e.g. gemini-3.7-flash)
+            except Exception:
+                continue
+
+        self.mark_custom_exhausted(duration_seconds=20.0)
         return None
 
     async def generate_best(
         self,
         prompt: str,
         system_instruction: str = "",
-        preferred_provider: str = "gemini"
+        preferred_provider: str = "experiential"
     ) -> Dict[str, Any]:
         """
-        Attempts generation using primary cloud provider with instant failover to alternate/custom.
+        Attempts generation using primary ExperientialLabs cloud provider (gpt-5.6-luna -> gemini-3.7-flash)
+        with multi-tier instant failover to Gemini direct, Grok xAI, and offline tiers.
         """
-        if preferred_provider == "gemini":
-            ans = await self.generate_gemini(prompt, system_instruction)
-            if ans:
-                return {"text": ans, "source": f"CLOUD_{self.gemini_model.upper()}", "tier": "CLOUD_PRIMARY"}
-            ans_grok = await self.generate_grok(prompt, system_instruction)
-            if ans_grok:
-                return {"text": ans_grok, "source": f"CLOUD_{self.grok_model.upper()}", "tier": "CLOUD_PRIMARY"}
-        else:
-            ans_grok = await self.generate_grok(prompt, system_instruction)
-            if ans_grok:
-                return {"text": ans_grok, "source": f"CLOUD_{self.grok_model.upper()}", "tier": "CLOUD_PRIMARY"}
-            ans = await self.generate_gemini(prompt, system_instruction)
-            if ans:
-                return {"text": ans, "source": f"CLOUD_{self.gemini_model.upper()}", "tier": "CLOUD_PRIMARY"}
+        effective_preference = os.getenv("PREFERRED_AI_PROVIDER", preferred_provider).lower()
+        
+        # TIER 1 & TIER 2: ExperientialLabs Gateway (gpt-5.6-luna, then gemini-3.7-flash)
+        if effective_preference in ("experiential", "explabs", "experientiallabs", "custom") or self.is_custom_available():
+            if self.is_custom_available():
+                ans_custom = await self.generate_custom(prompt, system_instruction)
+                if ans_custom and ans_custom.get("text"):
+                    return {
+                        "text": ans_custom["text"],
+                        "source": f"EXPERIENTIAL_{ans_custom.get('model', self.custom_model).upper()}",
+                        "tier": "CLOUD_PRIMARY",
+                        "model": ans_custom.get("model", self.custom_model),
+                        "usage": ans_custom.get("usage", {})
+                    }
+        
+        # TIER 3: Google Gemini Direct Frontier
+        ans_gemini = await self.generate_gemini(prompt, system_instruction)
+        if ans_gemini:
+            return {"text": ans_gemini, "source": f"CLOUD_{self.gemini_model.upper()}", "tier": "CLOUD_FALLBACK"}
 
-        # Try user-configured custom provider if active
+        # TIER 4: xAI Grok Frontier
+        ans_grok = await self.generate_grok(prompt, system_instruction)
+        if ans_grok:
+            return {"text": ans_grok, "source": f"CLOUD_{self.grok_model.upper()}", "tier": "CLOUD_FALLBACK"}
+
+        # Secondary check if custom wasn't primary but is available
         if self.is_custom_available():
             ans_custom = await self.generate_custom(prompt, system_instruction)
-            if ans_custom:
-                return {"text": ans_custom, "source": f"CUSTOM_{self.custom_provider.upper()}", "tier": "CLOUD_CUSTOM"}
+            if ans_custom and ans_custom.get("text"):
+                return {
+                    "text": ans_custom["text"],
+                    "source": f"EXPERIENTIAL_{ans_custom.get('model', self.custom_model).upper()}",
+                    "tier": "CLOUD_FALLBACK",
+                    "model": ans_custom.get("model", self.custom_model),
+                    "usage": ans_custom.get("usage", {})
+                }
 
         return {"text": "", "source": "NONE", "tier": "EXHAUSTED"}
+
+
+def get_experiential_client():
+    """
+    Builds an OpenAI client configured for the ExperientialLabs gateway.
+    1. Points the client at https://api.experientiallabs.ai/v1 as the base URL.
+    2. Authenticates with the Experiential API key from EXPLABS_API_KEY environment variable.
+       If it isn't set, stops and tells the user to create one under Settings -> API Keys and export it.
+    """
+    key = os.getenv("EXPLABS_API_KEY")
+    if not key or not key.strip():
+        raise ValueError(
+            "EXPLABS_API_KEY is not set! Please create one under Settings -> API Keys and export it (e.g. in your .env or run export EXPLABS_API_KEY=...)."
+        )
+    from openai import OpenAI
+    return OpenAI(base_url="https://api.experientiallabs.ai/v1", api_key=key.strip())
+
+
+def build_unified_system_prompt(
+    student_context: Dict[str, Any],
+    exam: str = "JEE",
+    mode: str = "pedagogical",
+    is_solve: bool = False,
+    troubleshoot_str: str = "",
+    history_str: str = ""
+) -> str:
+    """
+    Constructs the single-statement multi-tier system prompt:
+    - Tier 1: Persona, Tone & Readability (Kid-friendly, empathetic, structured emojis/badges, zero robotic filler).
+    - Tier 2: Domain Protocol Rules (JEE / NEET / UPSC / GENERAL_STEM from DomainProtocolEngine).
+    - Tier 3: Psychometric Grounding (IRT Ability theta tier, BKT mastery, FSRS decay, prerequisite root causes).
+    - Tier 4: Step-by-Step Problem Solving & Didactic Scaffolding (5-step derivation for mathematical solve queries).
+    """
+    from backend.app.ai.domain_protocols import DomainProtocolEngine
+    from backend.app.ai.omni_context import OmniContextHarvester
+
+    proto = DomainProtocolEngine.get_protocol(exam)
+    proto_instructions = proto.get_system_instructions(is_solve=is_solve)
+
+    theta_val = float(student_context.get("latent_ability_theta", 0.0) or 0.0)
+    if theta_val < -0.5:
+        theta_tier_instruction = (
+            "STUDENT COGNITIVE TIER: Foundational Baseline (θ < -0.5).\n"
+            "- Use warm, validating encouragement and simplify prerequisites.\n"
+            "- Break down mathematical derivations into granular algebraic steps with plain English transitions."
+        )
+    elif theta_val > 0.7:
+        theta_tier_instruction = (
+            "STUDENT COGNITIVE TIER: Advanced Mastery (θ > 0.7).\n"
+            "- Maintain high competitive rigor; avoid over-explaining trivial steps.\n"
+            "- Emphasize dimensional analysis shortcuts, symmetry arguments, and Olympiad/Advanced challenge variations."
+        )
+    else:
+        theta_tier_instruction = (
+            "STUDENT COGNITIVE TIER: Intermediate Core (-0.5 <= θ <= 0.7).\n"
+            "- Balance conceptual clarity with competitive speed, exam pacing, and negative marking prevention."
+        )
+
+    mode_map = {
+        "socratic": (
+            "PEDAGOGICAL MODE: Socratic Prober. Do NOT reveal complete formulas or final numerical answers immediately. "
+            "Pose 1-2 targeted discriminatory questions to guide the student to discover the principle."
+        ),
+        "scaffolding": (
+            "PEDAGOGICAL MODE: Stepped Scaffolding. Provide graduated assistance across 3 structured micro-steps. "
+            "Set up Step 1, hint at Step 2, and prompt the student to solve Step 3."
+        ),
+        "diagnostic": (
+            "PEDAGOGICAL MODE: Cognitive Diagnostician. Pinpoint mental model flaws and discriminate between conceptual and calculation gaps."
+        ),
+        "challenge": (
+            "PEDAGOGICAL MODE: Olympiad & Extreme Limits. Stress-test boundary conditions and synthesize multi-concept relations."
+        ),
+        "forensics": (
+            "PEDAGOGICAL MODE: Mistake Forensics. Contrast student misconceptions against correct keys and explain distractor traps."
+        ),
+        "pedagogical": (
+            "PEDAGOGICAL MODE: Canonical Pedagogical Mentor. Provide clear, academically rigorous derivations with LaTeX formulas."
+        )
+    }
+    mode_text = mode_map.get(mode, mode_map["pedagogical"])
+
+    grounding_str = OmniContextHarvester.format_grounding_block(student_context, mode=mode)
+
+    parts = [
+        f"You are the APEX AI Cognitive Study Mentor for {exam} ({proto.display_title}).",
+        "",
+        "=== TIER 1: TONE, STYLE & ACCESSIBILITY ===",
+        "- Tone: Warm, deeply encouraging, empathetic, and intellectually rigorous.",
+        "- Visual Structure: Use short paragraphs, clear section headers (###), bullet points, and visual emojis (💡, 📐, ⚡, ⚠️, 🎯).",
+        "- Kid-Friendly Clarity: Explain hard concepts intuitively (Feynman method) using everyday physical analogies before formal mathematics.",
+        "- Formatting Invariant: All equations, formulas, variables, and math MUST be rendered in LaTeX ($...$ inline, $$...$$ block).",
+        "",
+        "=== TIER 2: DOMAIN PROTOCOL INVARIANTS ===",
+        proto_instructions,
+        "",
+        "=== TIER 3: COGNITIVE & PSYCHOMETRIC GROUNDING ===",
+        theta_tier_instruction,
+        mode_text,
+        f"Live Telemetry Grounding:\n{grounding_str}",
+    ]
+
+    if is_solve:
+        parts.extend([
+            "",
+            "=== TIER 4: STEP-BY-STEP PROBLEM SOLVER ===",
+            proto.get_solve_structure()
+        ])
+
+    if troubleshoot_str:
+        parts.extend(["", "=== TECHNICAL TROUBLESHOOTING CONTEXT ===", troubleshoot_str])
+
+    if history_str:
+        parts.extend(["", "=== ROLLING MULTI-TURN HISTORY ===", history_str])
+
+    return "\n".join(parts)
+
