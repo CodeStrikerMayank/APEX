@@ -179,8 +179,27 @@ def format_concept_explanation(topic_hint: Optional[str], exam: str) -> str:
 
     th = topic_hint.lower()
     
+    # Physics & JEE: Gravity & Universal Gravitation
+    if "gravit" in th or "gravity" in th or "kepler" in th or "orbit" in th:
+        return (
+            "### 🪐 Gravity & Universal Gravitation\n\n"
+            "**Gravity** is the universal attractive force exerted between any two bodies with mass. "
+            "In Newtonian physics, every object in the universe attracts every other object with a force directly "
+            "proportional to the product of their masses and inversely proportional to the square of the distance between their centers:\n\n"
+            "$$F = G \\frac{m_1 m_2}{r^2}$$\n\n"
+            "- $G = 6.674 \\times 10^{-11} \\text{ N}\\cdot\\text{m}^2/\\text{kg}^2$: Universal Gravitational Constant\n"
+            "- $m_1, m_2$: Masses of the two interacting bodies (kg)\n"
+            "- $r$: Distance between their centers of mass (m)\n\n"
+            "#### 💡 Core Principles & Acceleration Due to Gravity\n"
+            "Near the surface of Earth ($M_E, R_E$), this gravitational force produces a uniform downward acceleration:\n"
+            "$$g = \\frac{G M_E}{R_E^2} \\approx 9.8 \\text{ m/s}^2$$\n\n"
+            "- **Variation with Height ($h$):** $g' = g \\left(1 - \\frac{2h}{R_E}\\right)$ for $h \\ll R_E$\n"
+            "- **Variation with Depth ($d$):** $g' = g \\left(1 - \\frac{d}{R_E}\\right)$ (reaches zero at Earth's core)\n\n"
+            "*Select an option below to unpack the mathematical derivation, explore physical intuition, or practice exam questions!*"
+        )
+
     # Physics & JEE: Simple Harmonic Motion
-    if "shm" in th or "oscillation" in th or "harmonic" in th:
+    elif "shm" in th or "oscillation" in th or "harmonic" in th:
         return (
             "### 🔬 Concept Masterclass: Simple Harmonic Motion (SHM)\n\n"
             "#### 💡 1. Intuitive Mental Model (Feynman Analogy)\n"
@@ -332,6 +351,87 @@ def format_concept_explanation(topic_hint: Optional[str], exam: str) -> str:
         )
 
 
+def format_greeting(ctx: Dict[str, Any]) -> str:
+    """
+    Intelligent greeting handler.
+    If the student has zero exam data, clearly explains their profile status and invites calibration.
+    If the student has exam history, summarizes their current metrics and sets the next priority.
+    """
+    exam = ctx.get("exam", "JEE")
+    student_name = ctx.get("student_name", "Aspirant")
+    total_assessments = ctx.get("total_assessments", 0)
+    latest_attempt = ctx.get("latest_attempt")
+
+    # Zero exam data / Cold Start
+    if total_assessments == 0 and not latest_attempt:
+        return (
+            f"### 👋 Hello {student_name}! Welcome to Your {exam} Cognitive Mentor Studio\n\n"
+            f"I am your AI study mentor, powered by real-time Item Response Theory (IRT) and Knowledge Tracing. "
+            f"Right now, **your diagnostic profile is on standby awaiting initial calibration** because you haven't taken any tests yet.\n\n"
+            f"#### 🎯 How to Unlock Your Personalized Cognitive Profile:\n"
+            f"To give you an accurate rank prediction, detect recurring mistake patterns, and build your dynamic roadmap:\n"
+            f"1. ⚡ **Take a 3-Minute Baseline Diagnostic:** A quick 5-question test allows our Bayesian Knowledge Tracing (BKT) engine to gauge your latent ability ($\\theta$).\n"
+            f"2. 🗺️ **Explore Chapter Roadmaps:** Review high-yield weightages across Physics, Chemistry, and Mathematics/Biology.\n"
+            f"3. 🔬 **Ask Me Any Syllabus Doubt:** Ask for intuitive Feynman analogies, mathematical derivations, or exam traps.\n\n"
+            f"💡 *Would you like to start a quick 5-question diagnostic drill right now, or explore a specific topic together?*"
+        )
+
+    # Active student with past assessment history
+    theta_val = ctx.get("latent_ability_theta", 0.0)
+    mastery = ctx.get("overall_mastery", 50.0)
+    recent_mistakes = len(ctx.get("recent_mistakes", []))
+
+    return (
+        f"### 🤝 Welcome back, {student_name}!\n\n"
+        f"Great to see you in the study studio! Here is your quick cognitive telemetry check for **{exam}**:\n"
+        f"- 📈 **Latent Ability Index ($\\theta$):** `{theta_val:+.2f}`\n"
+        f"- 🎯 **Overall Syllabus Mastery:** `{mastery:.1f}%`\n"
+        f"- 🔍 **Active Attention Items:** `{recent_mistakes}` recent mistake traps awaiting review.\n\n"
+        f"What would you like to conquer today? You can say *'Analyze my mistakes'*, *'Explain my roadmap'*, or ask me any tough conceptual problem!"
+    )
+
+
+def format_off_topic_response(topic_hint: Optional[str], exam: str, student_name: str = "Aspirant") -> str:
+    """
+    Handles out-of-syllabus or casual queries (e.g., 'what is apple', 'who is batman').
+    Answers clearly and concisely without fake masterclasses, notes any subtle academic connection,
+    and politely pivots back to high-yield syllabus concepts.
+    """
+    topic = (topic_hint or "that topic").strip()
+    topic_clean = topic.lower()
+
+    # Intelligent cross-disciplinary link if applicable
+    cross_link = ""
+    if "apple" in topic_clean:
+        if exam == "NEET":
+            cross_link = (
+                "\n\n💡 *Curriculum Fact (NEET Botany):* In Plant Morphology, an apple is classified as a **false fruit (pome)** "
+                "because the fleshy edible part develops from the floral **thalamus**, not solely the ovary wall!"
+            )
+        else:
+            cross_link = (
+                "\n\n💡 *Physics Lore (JEE):* While Isaac Newton's falling apple inspired the Universal Law of Gravitation ($F = G\\frac{m_1 m_2}{r^2}$), "
+                "the fruit itself isn't on your syllabus!"
+            )
+    elif "batman" in topic_clean or "superman" in topic_clean or "ironman" in topic_clean:
+        cross_link = (
+            f"\n\n💡 *Physics Hook:* Calculating superhero cape aerodynamics or Tony Stark's arc reactor magnetic containment "
+            f"involves fluid dynamics and Faraday's Law, but the characters themselves won't appear on your {exam} question paper!"
+        )
+
+    return (
+        f"### 🍎 Let's Keep Focused, {student_name}!\n\n"
+        f"**{topic.title()}** is not a tested concept in the official **{exam}** syllabus.{cross_link}\n\n"
+        f"#### 🎯 High-Yield {exam} Alternatives to Study Instead:\n"
+        f"As your competitive exam mentor, my goal is to protect your study time and maximize your rank. "
+        f"Let's focus on high-weightage topics that will actually gain you marks:\n"
+        f"- 📐 **Physics:** Simple Harmonic Motion (SHM), Rotational Dynamics, Optics, Electrostatics\n"
+        f"- 🧪 **Chemistry:** Henderson-Hasselbalch Buffer Solutions, Chemical Kinetics, GOC Reaction Mechanisms\n"
+        f"- {'🧬 **Biology:** Meiosis I, Cell Division, Genetics & Molecular Inheritance' if exam == 'NEET' else '📐 **Mathematics:** Calculus Limits, Vectors & 3D Geometry, Definite Integrals'}\n\n"
+        f"👉 *Type 'Explain SHM', 'Explain Buffers', or ask me any question directly related to your {exam} prep!*"
+    )
+
+
 def format_unknown_fallback(exam: str) -> str:
     return (
         f"### 👋 Hello Aspirant! I'm Your Personal {exam} Study Mentor\n\n"
@@ -343,4 +443,5 @@ def format_unknown_fallback(exam: str) -> str:
         "- 🔬 **'Explain [Concept Name]'** — Step-by-step conceptual breakdowns and formula recaps.\n\n"
         "*Feel free to ask any question or click a prompt chip above to get started!*"
     )
+
 
