@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modern FSRS-5 Spaced Repetition Engine
 ======================================
 Platform Upgrade: Mathematical implementation of the Free Spaced Repetition Scheduler (FSRS-5).
@@ -174,3 +174,48 @@ class FSRSEngine:
             "retrievability": round(current_r, 4),
             "next_interval_days": round(next_interval, 2),
         }
+
+    @classmethod
+    def find_decay_remediation_candidates(
+        cls,
+        masteries: Any,
+        threshold: float = 0.70
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Scans tracked concepts to identify the single most critical memory-decay candidate
+        for proactive Socratic interleaving during active troubleshooting sessions.
+        """
+        candidates = []
+        for m in masteries:
+            # Safely read retrievability and mastery
+            retrievability = getattr(m, "fsrs_retrievability", 1.0)
+            if retrievability is None:
+                retrievability = 1.0
+            raw_mastery = getattr(m, "mastery", 0.0) or 0.0
+
+            # Only select concepts that were once partially learned but are decaying
+            if retrievability < threshold and raw_mastery >= 0.30:
+                cid = getattr(m, "concept_id", "concept")
+                candidates.append({
+                    "concept_id": cid,
+                    "retrievability": round(float(retrievability), 3),
+                    "mastery": round(float(raw_mastery), 3),
+                    "forgetting_risk": round(1.0 - float(retrievability), 3)
+                })
+
+        if not candidates:
+            return None
+
+        # Sort by lowest retrievability (highest urgency)
+        candidates.sort(key=lambda x: x["retrievability"])
+        top = candidates[0]
+        return {
+            "candidate_concept_id": top["concept_id"],
+            "retrievability": top["retrievability"],
+            "urgency": "HIGH" if top["retrievability"] < 0.50 else "MODERATE",
+            "interleaving_instruction": (
+                f"Proactive FSRS Memory Rescue: Concept '{top['concept_id']}' memory retrievability is at {round(top['retrievability']*100)}%. "
+                f"Before concluding this session, interleave a 10-second rapid micro-check question on this concept to reset the forgetting curve."
+            )
+        }
+
