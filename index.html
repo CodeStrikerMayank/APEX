@@ -4116,6 +4116,90 @@ const DEFAULT_SUGGESTIONS = [
   { icon: '🔬', text: 'Explain high-yield syllabus concepts' }
 ];
 
+/* ======= APEX PREMIUM MARKDOWN RENDERER (marked.js + highlight.js + DOMPurify) ======= */
+function apex_renderMarkdown(raw) {
+  if (!raw) return '';
+  if (typeof raw === 'object' && raw !== null) {
+    raw = raw.answer || raw.response || raw.reply || raw.text || JSON.stringify(raw);
+  }
+  let str = String(raw).trim();
+
+  // 1. Pre-protect LaTeX before marked processes it (marked escapes $ signs)
+  const mathTokens = [];
+  str = str.replace(/\$\$([\s\S]+?)\$\$/g, function(_, math) {
+    mathTokens.push({ display: true, code: math.trim() });
+    return `APEX_MATH_BLOCK_${mathTokens.length - 1}_END`;
+  });
+  str = str.replace(/\$([^$\n]{1,200}?)\$/g, function(_, math) {
+    mathTokens.push({ display: false, code: math.trim() });
+    return `APEX_MATH_INLINE_${mathTokens.length - 1}_END`;
+  });
+
+  // 2. Configure marked
+  let html = str;
+  if (window.marked) {
+    try {
+      const renderer = new window.marked.Renderer();
+      // Custom code block renderer with lang label and copy button
+      renderer.code = function(code, lang) {
+        const safeCode = typeof code === 'object' ? (code.text || '') : (code || '');
+        const safeLang = typeof lang === 'string' ? lang : (typeof code === 'object' ? (code.lang || '') : '');
+        let highlighted = safeCode;
+        if (window.hljs && safeLang && window.hljs.getLanguage(safeLang)) {
+          try { highlighted = window.hljs.highlight(safeCode, { language: safeLang }).value; } catch(e) {}
+        } else if (window.hljs) {
+          try { highlighted = window.hljs.highlightAuto(safeCode).value; } catch(e) {}
+        }
+        const langLabel = safeLang ? `<span class="apex-code-lang-label">${safeLang}</span>` : '';
+        const encoded = encodeURIComponent(safeCode);
+        return `<pre>${langLabel}<button type="button" class="apex-code-copy-btn" data-code="${encoded}">Copy</button><code class="hljs">${highlighted}</code></pre>`;
+      };
+      window.marked.setOptions({
+        renderer: renderer,
+        gfm: true,
+        breaks: true,
+        silent: true
+      });
+      html = window.marked.parse(str);
+    } catch(e) {
+      html = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    }
+  } else {
+    // Fallback minimal formatter if marked not loaded yet
+    html = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+               .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+               .replace(/\*(.+?)\*/g,'<em>$1</em>')
+               .replace(/\n/g,'<br>');
+  }
+
+  // 3. Sanitize with DOMPurify (allow safe HTML)
+  if (window.DOMPurify) {
+    html = window.DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p','br','strong','em','b','i','ul','ol','li','h1','h2','h3','h4','h5','h6',
+        'blockquote','pre','code','table','thead','tbody','tr','th','td','hr','a','span','div','button'],
+      ALLOWED_ATTR: ['class','href','target','rel','onclick','title','data-tex','data-code','data-chip-text','data-action','type']
+    });
+  }
+
+  // 4. Restore LaTeX tokens
+  html = html.replace(/APEX_MATH_BLOCK_(\d+)_END/g, function(_, idx) {
+    const m = mathTokens[Number(idx)];
+    return `<div class="coach-math-block" data-tex="${m.code}">$$${m.code}$$</div>`;
+  });
+  html = html.replace(/APEX_MATH_INLINE_(\d+)_END/g, function(_, idx) {
+    const m = mathTokens[Number(idx)];
+    return `<span class="coach-math-inline" data-tex="${m.code}">$${m.code}$</span>`;
+  });
+
+  return html;
+}
+
+// Legacy alias so any existing calls still work
+function formatCoachMarkdown(raw) { return apex_renderMarkdown(raw); }
+
+
+
+
 /* Rich, Sanitized Markdown & LaTeX Formatter for Academic Mentor */
 function formatCoachMarkdown(raw) {
   if (!raw) return '';
