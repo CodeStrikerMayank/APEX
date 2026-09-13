@@ -4242,6 +4242,33 @@ function apexTypewriter(container, html, onDone) {
   tick();
 }
 
+/* Generate contextual follow-up chips if backend doesn't provide them */
+function apexGenerateFollowupChips(question, answer) {
+  const q = (question || '').toLowerCase();
+  const a = (answer || '').toLowerCase();
+  // Pattern-based chip generation
+  if (q.includes('derive') || q.includes('proof') || a.includes('derivation')) {
+    return ['Show me step-by-step derivation', 'Give me practice problems on this', 'Explain the physical significance'];
+  }
+  if (q.includes('mistake') || q.includes('error') || q.includes('wrong')) {
+    return ['How do I avoid this mistake?', 'Give me similar practice questions', 'What\'s my weakest area?'];
+  }
+  if (q.includes('formula') || q.includes('equation') || a.includes('$$')) {
+    return ['Derive this formula from scratch', 'Show a numerical example', 'When does this formula fail?'];
+  }
+  if (q.includes('explain') || q.includes('what is') || q.includes('define')) {
+    return ['Show me an exam-style problem', 'Deeper dive with derivation', 'Compare with related concepts'];
+  }
+  if (q.includes('strategy') || q.includes('exam') || q.includes('tips')) {
+    return ['Time management techniques', 'Negative marking strategy', 'Last 30 days revision plan'];
+  }
+  // Generic fallback chips
+  return ['Show me a practice problem', 'Explain with a real example', 'What should I study next?'];
+}
+
+
+
+
 
 
   } else {
