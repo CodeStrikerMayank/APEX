@@ -287,3 +287,60 @@ class MultiDimensionalIRT:
         weights = np.array([0.35, 0.35, 0.15, 0.15], dtype=np.float64)
         scalar = float(np.dot(arr, weights))
         return round(min(max(scalar, cls.MIN_THETA), cls.MAX_THETA), 3)
+
+    @classmethod
+    def get_cognitive_control_vector(
+        cls,
+        theta_val: Union[float, Sequence[float], np.ndarray]
+    ) -> Dict[str, Any]:
+        """
+        Translates raw IRT/MIRT abilities into explicit control signals for the LLM mentor:
+          - Calculation strength vs vulnerability
+          - Conceptual understanding vs arithmetic slips
+          - Spatial/geometric intuition requirements
+          - Pacing / cognitive load management
+        """
+        if isinstance(theta_val, (list, tuple, np.ndarray)) and len(theta_val) == cls.DIM_COUNT:
+            vec = [float(v) for v in theta_val]
+            scalar = cls.composite_scalar_ability(vec)
+        else:
+            s = float(theta_val) if theta_val is not None else 0.0
+            vec = [s, s, s, s]
+            scalar = s
+
+        dim_names = ["calculation", "conceptual", "spatial", "pacing"]
+        dim_dict = dict(zip(dim_names, [round(v, 2) for v in vec]))
+
+        min_dim = min(dim_dict, key=dim_dict.get)
+        max_dim = max(dim_dict, key=dim_dict.get)
+
+        if dim_dict["calculation"] < -0.4 and dim_dict["conceptual"] >= 0.0:
+            pedagogical_focus = "ALGEBRAIC_STEPS_FOCUS"
+            mentor_directive = "Student grasps underlying physical concept but slips on algebraic/calculation steps. Emphasize line-by-line algebraic tracking and unit cancellation."
+        elif dim_dict["conceptual"] < -0.4:
+            pedagogical_focus = "INTUITIVE_CONCEPT_FOCUS"
+            mentor_directive = "Student exhibits conceptual gaps. Provide physical intuition, Feynman-style analogies, and first-principles definitions before formulas."
+        elif dim_dict["spatial"] < -0.4:
+            pedagogical_focus = "SPATIAL_GEOMETRY_FOCUS"
+            mentor_directive = "Student struggles with spatial or vector orientation. Describe geometry, coordinate axes, and free-body directions explicitly."
+        elif dim_dict["pacing"] < -0.4:
+            pedagogical_focus = "PACING_AND_DECISION_FOCUS"
+            mentor_directive = "Student is overthinking or rushing. Guide them on time allocation, option elimination, and negative marking prevention."
+        else:
+            pedagogical_focus = "BALANCED_RIGOR"
+            mentor_directive = "Maintain high standard academic rigor with clean derivation and competitive exam trap warnings."
+
+        return {
+            "scalar_theta": scalar,
+            "dimensions": dim_dict,
+            "primary_vulnerability": min_dim,
+            "dominant_strength": max_dim,
+            "pedagogical_focus": pedagogical_focus,
+            "mentor_directive": mentor_directive
+        }
+
+
+# Alias for flexible case-insensitive import
+MultidimensionalIRT = MultiDimensionalIRT
+
+
