@@ -23,7 +23,8 @@ INTENT_KEYWORDS = {
     INTENT_ANALYZE_MISTAKES: [
         "mistake", "error", "wrong", "failed", "incorrect", "postmortem",
         "analyze my mistakes", "why did i get wrong", "what did i miss", "weakness",
-        "calculation error", "conceptual gap", "distractor"
+        "calculation error", "conceptual gap", "distractor", "past test", "last test",
+        "test review", "retest", "review my test", "performance correction", "my score"
     ],
     INTENT_EXPLAIN_ROADMAP: [
         "roadmap", "plan", "milestone", "what next", "why this topic", "prerequisite",
@@ -43,7 +44,7 @@ INTENT_KEYWORDS = {
 
 INTENT_PATTERNS = {
     INTENT_GREETING: re.compile(r"^(hi|hello|hey|namaste|yo|good\s+(morning|afternoon|evening)|howdy)\b", re.IGNORECASE),
-    INTENT_ANALYZE_MISTAKES: re.compile(r"\b(mistake|error|wrong|incorrect|fail|analysis|postmortem)\b", re.IGNORECASE),
+    INTENT_ANALYZE_MISTAKES: re.compile(r"\b(mistake|error|wrong|incorrect|fail|analysis|postmortem|past test|last test|test review|retest|performance correction)\b", re.IGNORECASE),
     INTENT_EXPLAIN_ROADMAP: re.compile(r"\b(roadmap|milestone|schedule|path|next step|prerequisite|why should i)\b", re.IGNORECASE),
     INTENT_STRATEGY_TIPS: re.compile(r"\b(speed|accuracy|tip|strategy|time|pace|negative mark|score)\b", re.IGNORECASE),
     INTENT_EXPLAIN_CONCEPT: re.compile(r"\b(explain|what is|how do|formula|define|definition|concept)\b", re.IGNORECASE)

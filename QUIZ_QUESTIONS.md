@@ -2416,4 +2416,18 @@ The Adaptive Engine categorizes every student error into explicit diagnostic buc
 | `GRAPHICAL_INTERPRETATION_ERROR` | Misidentified axis intercepts, slopes, or peak coordinates on graphical PYQs. | Launches visual coordinate & curve drill. |
 
 ---
-*Document auto-generated containing all 54 questions for the Adaptive Intelligence Engine.*
+
+## Dynamic Question Generation via Multimodal PDF Ingestion & ExamBench
+
+In addition to the 54 core benchmark questions documented above, APEX features continuous, dynamic question synthesis:
+1. **ExamBench Corpus (405,000+ Questions)**: Asynchronously streamable and cached in `data/exambench_cache.json`.
+2. **Dynamic PDF Ingestion Pipeline (`backend/app/curriculum/pdf_ingestor.py`)**:
+   - Parses multi-page lecture notes, textbooks, and mock tests via PyMuPDF (`fitz`).
+   - Automatically generates new competitive MCQs equipped with 4 options, full KaTeX step-by-step derivations ($$...$$), and explicit distractor trap classifications (`CONCEPTUAL_ERROR`, `CALCULATION_ERROR`, `FORMULA_SELECTION_ERROR`, etc.).
+   - Dynamically augments `apex.db` after semantic deduplication (`vault_augmenter.py`).
+3. **Zero Raw ID Leakage Invariant**:
+   - When any question from this question bank is reviewed with the AI mentor, internal database keys (e.g. `JEE_2021_PHY_001`, `pHQ-1234`, `q_1`) are strictly filtered out by `OmniContextHarvester`.
+   - The mentor communicates via **Topic**, **Chapter**, **Concept Name**, problem stem, and pedagogical traps, ensuring a humanized and intuitive learning experience.
+
+---
+*Comprehensive Quiz & Item Specification — APEX Cognitive Platform (v4.5)*

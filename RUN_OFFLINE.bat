@@ -67,9 +67,11 @@ echo   [!] To stop the server, press Ctrl+C or simply close this window.
 echo ===============================================================================
 echo.
 
+:: Keep running and wait for user to close
 echo Press any key to stop the server and exit...
 pause >nul
 
+:: Cleanup background process if started
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000 ^| findstr LISTENING') do (
     taskkill /F /PID %%a >nul 2>&1
 )

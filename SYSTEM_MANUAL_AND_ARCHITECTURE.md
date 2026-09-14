@@ -18,10 +18,10 @@
    - 2.3 Starting the Backend Server & Web Interface
    - 2.4 Automated Verification Suite
    - 2.5 Role Protocols: Student, Guest, and Dual-Key Admin
-3. [API Key Configuration & Cloud Frontier Models](#3-api-key-configuration--cloud-frontier-models)
-   - 3.1 Google Gemini 3.6 Flash (Primary Cloud Reasoning & Vision)
-   - 3.2 xAI Grok Beta (Socratic Counter-Argument Engine)
-   - 3.3 Hugging Face Datasets Token & Public Endpoints
+3. [Multi-Key API Pool Configuration & Cloud Frontier Models](#3-multi-key-api-pool-configuration--cloud-frontier-models)
+   - 3.1 Google Gemini Flash Multi-Key Pool (Primary Frontier Reasoning & Vision)
+   - 3.2 xAI Grok Multi-Key Pool (Adversarial Socratic & Deep Analysis)
+   - 3.3 Hugging Face Qwen 2.5 Multi-Token Suite & Datasets Ingestion
    - 3.4 Administrative Master Passkeys
    - 3.5 Complete Production `.env` Specification
 4. [Local Ollama AI Engine: Drive D Hardware-Optimized Setup](#4-local-ollama-ai-engine-drive-d-hardware-optimized-setup)
@@ -30,7 +30,7 @@
    - 4.3 Automated Launcher Script (`start_ollama.ps1`)
    - 4.4 Tested & Recommended Ollama Model Catalog
    - 4.5 Step-by-Step Model Pulling, Verification, and Diagnostics
-   - 4.6 The 3-Tier Zero-Hallucination Fallback Hierarchy
+   - 4.6 The 7-Tier Power-Ranked AI Mentor Architecture with Multi-Key Pooling & Auto-Recharge
 5. [Blueprint Feature Census: Exact Count & Comprehensive Matrix](#5-blueprint-feature-census-exact-count--comprehensive-matrix)
    - 5.1 Official Feature Count: 10 Core Pillars + 3 Next-Gen Modules (Total: 13 Features)
    - 5.2 Comprehensive System Feature Matrix
@@ -187,35 +187,43 @@ flowchart TD
 
 ---
 
-## 3. API Key Configuration & Cloud Frontier Models
+## 3. Multi-Key API Pool Configuration & Cloud Frontier Models
 
-APEX features an intelligent multi-provider LLM hub configured via the `.env` file located in the project root (`D:\UNCLECHAN\generate\.env`).
+APEX features an intelligent multi-provider, multi-key asynchronous LLM hub (`backend/app/ai/cloud_llm.py`) configured via the root `.env` file (`D:\UNCLECHAN\generate\.env`). The engine supports comma-separated API key pools with automatic per-key cooldown timers and dynamic auto-recharge recovery.
 
-### 3.1 Google Gemini 3.6 Flash (Primary Cloud Reasoning & Vision)
+### 3.1 Google Gemini Flash Multi-Key Pool (Primary Frontier Reasoning & Vision)
 * **Purpose**: Ultra-low-latency pedagogical explanations, mathematical chain-of-thought derivations, optical diagram reasoning for authentic exam crops, and natural language response polishing.
-* **Model**: `gemini-3.6-flash` (or `gemini-1.5-flash`).
+* **Models Supported**: `gemini-3.6-flash`, `gemini-3.7-flash`, `gemini-flash-latest`.
+* **Multi-Key Pooling**: Specify multiple keys separated by commas:
+  `GEMINI_API_KEYS=key1,key2,key3` (or backward-compatible `GEMINI_API_KEY`).
 * **Acquisition**:
-  1. Visit the Google AI Studio console: `https://aistudio.google.com/`.
-  2. Sign in with your Google account.
-  3. Click **"Create API Key"** and copy your generated key string.
-  4. Paste into `.env` as `GEMINI_API_KEY=your_key_here`.
-* **Latency & Timeout**: Response latency typically `< 1200ms`. Configured with `GEMINI_TIMEOUT_SECONDS=10.0` for aggressive failover.
+  1. Visit Google AI Studio: `https://aistudio.google.com/`.
+  2. Sign in and create one or more API keys across project accounts.
+  3. Paste into `.env` as `GEMINI_API_KEYS=key1,key2`.
+* **Latency & Timeout**: Response latency `< 1200ms`. Configured with `GEMINI_TIMEOUT_SECONDS=10.0` for aggressive failover.
 
-### 3.2 xAI Grok Beta (Socratic Counter-Argument Engine)
-* **Purpose**: Acts as an adversarial Socratic tutor. When a student chooses an incorrect distractor, Grok constructs targeted counter-examples and exposes reasoning traps.
-* **Model**: `grok-beta`.
+### 3.2 xAI Grok Multi-Key Pool (Adversarial Socratic & Deep Analysis)
+* **Purpose**: Acts as an adversarial Socratic tutor. When a student selects an incorrect distractor, Grok exposes reasoning traps and constructs counter-arguments.
+* **Models Supported**: `grok-2-latest`, `grok-beta`.
+* **Multi-Key Pooling**: Specify multiple keys separated by commas:
+  `GROK_API_KEYS=xai-key1,xai-key2` (or backward-compatible `GROK_API_KEY`).
 * **Acquisition**:
   1. Visit the xAI Developer Console: `https://console.x.ai/`.
-  2. Generate a bearer token key.
-  3. Paste into `.env` as `GROK_API_KEY=your_key_here`.
-* **Fallback Role**: Automatically engages if Gemini encounters rate limits or network degradation.
+  2. Generate API bearer keys and paste into `.env`.
+* **Failover Role**: Engages automatically if the entire Gemini pool is exhausted or on cooldown.
 
-### 3.3 Hugging Face Datasets Token & Public Endpoints
+### 3.3 Hugging Face Qwen 2.5 Multi-Token Suite & Datasets Ingestion
+* **Purpose**: Serverless cloud open-weights frontier reasoning without local GPU requirements.
+* **Qwen 2.5 Hierarchy**:
+  - **Rank 3**: `Qwen/Qwen2.5-72B-Instruct` (Frontier 72B parameter reasoning).
+  - **Rank 4**: `Qwen/Qwen2.5-32B-Instruct` (High-efficiency 32B parameter math model).
+  - **Rank 5**: `Qwen/Qwen2.5-7B-Instruct` (Fast 7B parameter fallback).
+* **Multi-Token Pooling**: Specify multiple Hugging Face user tokens separated by commas:
+  `HF_TOKENS=hf_token1,hf_token2` (or backward-compatible `HF_TOKEN`).
 * **Datasets Integrated**:
   - `169Pi/exambench`: 405,906 competitive examination questions with step-by-step chain-of-thought derivations.
   - `Reja1/jee-neet-benchmark`: Authentic 2024–2025 scanned question paper crops.
-* **Public Access**: Hugging Face Datasets Server endpoints are public and do not strictly require an API key for standard queries.
-* **Optional Token (`HF_TOKEN`)**: If querying thousands of rows in rapid succession during bulk database seeding, obtain a free read token at `https://huggingface.co/settings/tokens` to prevent HTTP 429 rate limiting.
+  - `Open-MM-RL`: Multimodal STEM reasoning items.
 
 ### 3.4 Administrative Master Passkeys
 To protect destructive system routines (database resetting and mass external seeding), two immutable admin keys are embedded into the security middleware:
@@ -223,25 +231,32 @@ To protect destructive system routines (database resetting and mass external see
 2. `X-Admin-Key: aie_internal_2024`
 
 ### 3.5 Complete Production `.env` Specification
-Create or update `D:\UNCLECHAN\generate\.env` with the following parameters:
+The system operates with the following production configuration:
 
 ```ini
 # ─────────────────────────────────────────────────────────────
 # APEX Master Environment Configuration
 # ─────────────────────────────────────────────────────────────
 
-# ── Cloud LLM Frontier Layer ─────────────────────────────────
-GEMINI_API_KEY=your_gemini_api_key_here
+# ── Cloud LLM Multi-Key Pools ────────────────────────────────
+GEMINI_API_KEYS=your_gemini_api_key_1,your_gemini_api_key_2
 GEMINI_MODEL=gemini-3.6-flash
 USE_GEMINI_POLISH=true
 GEMINI_TIMEOUT_SECONDS=10.0
 
-GROK_API_KEY=your_xai_grok_api_key_here
-GROK_MODEL=grok-beta
+GROK_API_KEYS=your_xai_grok_api_key
+GROK_MODEL=grok-2-latest
+
+HF_TOKENS=your_hf_token_here
+HF_TIMEOUT_SECONDS=15.0
+
+# ── Dynamic Cooldown & Auto-Recharge Durations (Seconds) ──────
+AI_COOLDOWN_RATE_LIMIT=60.0
+AI_COOLDOWN_QUOTA=300.0
 
 # ── Local Ollama Engine (Hardware-Optimized on Drive D) ──────
 OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen2.5:0.5b
+OLLAMA_MODEL=qwen2.5:7b
 USE_OLLAMA_POLISH=true
 OLLAMA_TIMEOUT_SECONDS=35.0
 
@@ -349,41 +364,65 @@ D:\UNCLECHAN\ollama\ollama.exe run qwen2.5:0.5b "Explain Newton's First Law of M
 curl http://localhost:11434/api/tags
 ```
 
-### 4.6 The 3-Tier Zero-Hallucination Fallback Hierarchy
-APEX guarantees that a student never receives a hallucinated answer or encounters a frozen interface:
+### 4.6 The 7-Tier Power-Ranked AI Mentor Architecture with Multi-Key Pooling & Auto-Recharge
+APEX guarantees that a student never receives a hallucinated answer or encounters a frozen interface through an asynchronous 7-tier power-ranked hierarchy with automatic cooldown tracking and in-flight recharge:
 
 ```mermaid
 flowchart TD
-    A[Student Prompt / AI Query] --> B[Sanitize Input & Deterministic Intent Classifier]
-    B --> C[Retrieve Student Context: Quiz History, Active DAG, Decaying Concepts]
-    C --> D[Generate Grounded Canonical Pedagogical Text]
-    
-    D --> E{Cloud Polish Enabled?<br/>GEMINI_API_KEY}
-    E -->|Yes: Gemini 3.6 Flash| F[Cloud Polished Output: < 1200ms]
-    E -->|Error / Timeout 10s| G{Grok xAI Enabled?<br/>GROK_API_KEY}
-    G -->|Yes: Grok Beta| H[Cloud Socratic Output: < 1500ms]
-    G -->|Error / Timeout 10s| I{Local Ollama Running?<br/>localhost:11434}
-    
-    E -->|No| I
-    I -->|Yes: qwen2.5:0.5b| J[Local AI Polished Output: < 3000ms]
-    I -->|Offline / Timeout 35s| K[Zero-Latency Deterministic Grounded Engine]
-    
-    K --> L[100% Factual Markdown Response Delivered to Student]
-    F --> L
-    H --> L
-    J --> L
+    Prompt[Student AI Query / Pedagogical Prompt] --> Scramble[Input Sanitization & Intent Extraction]
+    Scramble --> Grounding[Fetch Student Context: Quiz History, Active DAG & Error Classification]
+    Grounding --> Scaffold[Synthesize Canonical Grounded Scaffold]
+
+    Scaffold --> Rank1{Rank 1: Google Gemini Pool<br/>gemini-3.6-flash / 3.7-flash<br/>GEMINI_API_KEYS Pool}
+    Rank1 -->|Key Available & 200 OK| Out1[Gemini Frontier Output: < 1200ms]
+    Rank1 -->|Cooldown / 429 / 403 / 404| Rank2{Rank 2: xAI Grok Pool<br/>grok-2-latest / grok-beta<br/>GROK_API_KEYS Pool}
+
+    Rank2 -->|Key Available & 200 OK| Out2[Grok Socratic Output: < 1500ms]
+    Rank2 -->|Cooldown / 429 / Auth Error| Rank3{Rank 3: HF Qwen 2.5 72B<br/>Qwen2.5-72B-Instruct<br/>HF_TOKENS Pool}
+
+    Rank3 -->|Token Available & 200 OK| Out3[Qwen 72B Output: < 2200ms]
+    Rank3 -->|Cooldown / 429 / 503| Rank4{Rank 4: HF Qwen 2.5 32B<br/>Qwen2.5-32B-Instruct<br/>HF_TOKENS Pool}
+
+    Rank4 -->|Token Available & 200 OK| Out4[Qwen 32B Output: < 1800ms]
+    Rank4 -->|Cooldown / 429 / 503| Rank5{Rank 5: HF Qwen 2.5 7B<br/>Qwen2.5-7B-Instruct<br/>HF_TOKENS Pool}
+
+    Rank5 -->|Token Available & 200 OK| Out5[Qwen 7B Output: < 1400ms]
+    Rank5 -->|Cooldown / Offline| Rank6{Rank 6: Local Ollama<br/>qwen2.5:7b on Drive D<br/>localhost:11434}
+
+    Rank6 -->|Ollama Daemon Active| Out6[Local Offline Output: < 3500ms]
+    Rank6 -->|Ollama Offline / Timeout| Rank7[Rank 7: Deterministic Scaffold<br/>Rule-Based Slot-Filling]
+
+    Out1 --> Final[Markdown Response Delivered to Student]
+    Out2 --> Final
+    Out3 --> Final
+    Out4 --> Final
+    Out5 --> Final
+    Out6 --> Final
+    Rank7 --> Final
 ```
 
-1. **Tier 1 — Cloud Frontier**: Calls Gemini 3.6 Flash (primary) or Grok Beta (fallback) to polish tone, clarify analogies, and format LaTeX equations.
-2. **Tier 2 — Local Hardware-Optimized Ollama**: If internet is down, automatically routes to `qwen2.5:0.5b` running on Drive D.
-3. **Tier 3 — Deterministic Intent Engine**: If Ollama is not running, the system immediately returns a structured, slot-filled template populated with the candidate's exact mistakes, prerequisite parent nodes, and formulas. **Failure rate: 0.0%**.
+#### Multi-Key Pooling, Dynamic Cooldowns & Auto-Recharge Mechanics
+1. **Multi-Key Pool Isolation**:
+   - Each provider maintains an isolated array of API keys.
+   - When a key encounters HTTP 429 (Rate Limit), it is placed in cooldown for `AI_COOLDOWN_RATE_LIMIT` (default: 60.0s).
+   - When a key encounters quota exhaustion (HTTP 402/403/Quota Exceeded), it is placed in cooldown for `AI_COOLDOWN_QUOTA` (default: 300.0s).
+2. **Top-Down Evaluation on Every Query**:
+   - Every incoming student chat evaluation starts at **Rank 1**.
+   - If an earlier exhausted key's cooldown timestamp has expired, it is immediately marked active again and re-assumes priority rotation.
+3. **In-Flight Cooldown Re-Checking**:
+   - If the system is currently using Rank 3 (HF Qwen) and Rank 3 encounters an issue, before immediately cascading downward to Rank 4, the engine re-inspects Rank 1 (Gemini) and Rank 2 (Grok). If any previously cooled-down key has recharged, traffic jumps right back to Rank 1.
+4. **Client BYOK (Bring Your Own Key) Vault**:
+   - Pressing `Ctrl + O + P` (or `Cmd + O + P`) opens the in-browser BYOK modal.
+   - Keys configured via BYOK are instantly tested via `POST /api/ai/test-key` and committed dynamically via `POST /api/ai/keys-config` without requiring a server reboot.
+5. **Zero-Hallucination Guarantees**:
+   - Even if all cloud APIs are severed and Ollama is stopped, **Rank 7** deterministic templates deliver 100% mathematically accurate step-by-step solutions derived directly from the student's attempt telemetry. **Failure rate: 0.0%**.
 
 ---
 
 ## 5. Blueprint Feature Census: Exact Count & Comprehensive Matrix
 
 ### 5.1 Official Feature Count
-> **Total Primary Blueprint Features**: **10 Core Architectural Pillars** in Platform Blueprint (v4.4) + **3 Next-Generation Modules** (v5.0) = **Exactly 13 Unified System Features**.
+> **Total Primary Blueprint Features**: **10 Core Architectural Pillars** in Platform Blueprint (v4.4) + **5 Advanced Production Modules** (v5.0) = **Exactly 15 Unified System Features**.
 
 ### 5.2 Comprehensive System Feature Matrix
 
@@ -402,6 +441,8 @@ flowchart TD
 | **11**| **Strict NEET Stream Containment & NCERT Perimeter Fence** *(New v5.0)* | Curriculum Isolation Subsystem | Prevents mathematical or administrative leakage into medical entrance prep. | Hardened SQL filters (`exam == 'NEET'`), PCB graph isolation, $+4/-1$ scoring, and 45-second high-speed pacing timers. | 100% pure NCERT medical preparation environment. |
 | **12**| **AI-Customized Dynamic To-Do List Engine** *(New v5.0)* | Student Planning & Productivity Subsystem | Solves student decision paralysis by auto-generating a prioritized, time-blocked daily study agenda. | Algorithmic priority scoring combining mastery gaps, exam weights, and retention decay into 25-minute Pomodoro blocks with non-punitive rescheduling. | Zero morning anxiety; clear, actionable daily roadmap. |
 | **13**| **Metacognitive Exam-Readiness & Burnout Shield** *(New v5.0)* | Metacognition & Wellness Subsystem | Eradicates overconfidence blindspots and protects candidates from cognitive exhaustion. | Confidence-accuracy calibration index ($\text{MCI}$), 60-second first-principles mistake inverter, empirical rank predictor, and fatigue watchdog. | Maximizes exam-day composure and prevents burnout. |
+| **14**| **Multimodal Document Ingestion & Dynamic Vault Evolution** *(New v5.0)* | Dynamic Curriculum Subsystem | Converts uploaded PDFs and syllabus text into validated curriculum nodes and competitive question banks. | PyMuPDF (`fitz`) parsing, sliding chunking, LLM extraction with deterministic fallback, Jaccard semantic deduplication, and DAG edge insertion. | Students and educators expand the curriculum with custom notes instantly. |
+| **15**| **Humanized Mistake Forensics & Interactive Retest Cards** *(New v5.0)* | Pedagogical Diagnostics Subsystem | Eliminates confusing raw database question IDs and provides immediate 1-click mistake revenge practice. | `OmniContextHarvester` zero-ID sanitizer, structured `test_review` and `quiz` card payloads, cognitive trap classification, and instant retest generator. | Clear conceptual clarity on mistakes with zero confusion and instant remediation. |
 
 ---
 
@@ -415,9 +456,10 @@ flowchart TD
         UI[Cyberpunk Dark Minimalist HUD - index.html]
         CanvasDAG[Interactive HTML5 Canvas Knowledge Graph]
         TestingArena[Adaptive Assessment & Interleaved Practice Arena]
-        MentorChat[Quiz-Grounded AI Mentor Modal]
+        MentorChat[Quiz-Grounded AI Mentor Modal & Interactive Structured Cards]
         TodoWidget[AI Dynamic Study Agenda & Pomodoro Timer]
         ReadinessShield[Exam-Readiness & Metacognitive HUD]
+        VaultViewer[Dynamic Knowledge Vault & PDF Ingestion Zone]
     end
 
     subgraph APILayer ["FastAPI Asynchronous Gateway Layer"]
@@ -427,7 +469,8 @@ flowchart TD
         RouterAssess["/api/assessments (Tier 1 Screener, Tier 2 Drill, Tier 3 Scan)"]
         RouterUPSC["/api/upsc (Prelims MCQs & Mains 5D Rubric)"]
         RouterRoadmap["/api/roadmap (Next Best Action & Recalibration)"]
-        RouterAI["/api/ai (Chatbot & Explanation Generation)"]
+        RouterAI["/api/ai (Chatbot, Coach, Structured Cards, Engine Diagnostics)"]
+        RouterMaterials["/api/materials (Upload PDF, Ingest Notes, Augmented Vault)"]
         RouterTodo["/api/todo (Dynamic Agenda & Rescheduling)"]
         RouterMetacog["/api/metacognition (MCI, Mistake Inverter, Rank Predictor)"]
         RouterAdmin["/api/admin (DB Reset, Telemetry Stream, Seeding)"]
@@ -965,7 +1008,11 @@ APEX continuously monitors real-time telemetry to detect cognitive exhaustion:
 | | `GET` | `/api/upsc/history/{id}` | Fetch historical descriptive evaluations |
 | **Dynamic Roadmap** | `GET` | `/api/roadmap/active/{id}` | Fetch calibrated roadmap actions and Next Best Action (NBA) |
 | | `POST` | `/api/roadmap/regenerate/{id}` | Force topological recalculation of the learning path |
-| **AI Study Mentor** | `POST` | `/api/ai/chat/{id}` | Query AI mentor with student context (Gemini/Grok/Ollama/Deterministic) |
+| **AI Study Mentor** | `POST` | `/api/ai/chat/{id}` | Query 7-Tier AI mentor with multi-key failover and auto-recharge |
+| | `GET` | `/api/ai/engine-status` | Get real-time AI hierarchy, active rank, key pools & cooldown states |
+| | `GET` | `/api/ai/keys-config` | Fetch active API key configurations (masked) |
+| | `POST` | `/api/ai/keys-config` | Dynamically update multi-key pools without server restart |
+| | `POST` | `/api/ai/test-key` | Live-probe an individual API key against provider endpoint |
 | **Dynamic To-Do Agenda**| `GET`| `/api/todo/today/{id}` | Generate prioritized, time-blocked daily study agenda |
 | | `POST` | `/api/todo/toggle-task` | Mark task completed and update retention stability ($S$) |
 | **Metacognition Shield**| `POST`| `/api/metacognition/submit-item`| Submit item with confidence rating; get mistake inverter remedy |

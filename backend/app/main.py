@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.database.connection import engine, Base, SessionLocal
 from backend.app.curriculum.loader import seed_curriculum_and_questions
-from backend.app.api import auth, curriculum, assessments, roadmap, ai, telemetry, supporting, assignments, upsc
+from backend.app.api import auth, curriculum, assessments, roadmap, ai, telemetry, supporting, assignments, upsc, materials
 from backend.app.api.supporting import admin_router
 
 # Initialize DB tables
@@ -39,6 +39,7 @@ app.include_router(telemetry.router, prefix="/api")
 app.include_router(upsc.router, prefix="/api")
 app.include_router(supporting.router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
+app.include_router(materials.router)
 
 # Register V1 API Routers
 from backend.app.api.v1 import curriculum as v1_curriculum
@@ -74,6 +75,7 @@ def root(request: Request):
         "health_url": "/api/health"
     }
 
+@app.get("/health")
 @app.get("/api/health")
 def health_check():
     return {

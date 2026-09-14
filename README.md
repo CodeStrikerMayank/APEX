@@ -3,7 +3,7 @@
 An offline-first, mathematically-grounded **Adaptive Student Assessment, AI Skill Extraction, and Dynamic Roadmap Engine** engineered specifically for **JEE Main (PCM)**, **NEET-UG (PCB)**, and **UPSC**.
 
 > 📖 **Comprehensive System Manual**: See [SYSTEM_MANUAL_AND_ARCHITECTURE.md](SYSTEM_MANUAL_AND_ARCHITECTURE.md) for exhaustive mathematical derivations, algorithms, database schemas, and complete REST API specifications.  
-> 🗺️ **Platform Roadmap & Execution Status**: See [UPGRADE_V3_ROADMAP.md](UPGRADE_V3_ROADMAP.md) for the phased engineering record from Phase 0 to Phase 5.
+> 🤖 **AI Model Architecture & Failover Blueprint**: See [ai.md](ai.md) for the complete 7-Tier Power Cascade, multi-key pooling specifications, cooldown state machines, and BYOK Key Vault details.
 
 ---
 
@@ -32,13 +32,23 @@ The roadmap tab features a segmented 3-mode view switcher:
 2. **🕸️ Visual DAG Graph**: Native interactive SVG Directed Acyclic Graph with zoom/pan controls, directional prerequisite arrows, and color-coded status pills (🟢 Mastered $\ge 70\%$, 🟡 Developing $40-69\%$, 🔴 Weak $< 40\%$).
 3. **📊 Chapter Heatmap Grid**: Mobile-optimized chapter matrix showing average mastery %, concept counts, broken prerequisite alerts, and 1-click chapter drill triggers.
 
-### 5. Hardened Deterministic Offline Chatbot
-Powered by an offline `IntentClassifier` and slot-filling `templates.py`:
-* **Zero Hallucinations**: Responses are built directly from the student's quiz attempt items, distractor notes, and active roadmap actions.
-* **Two-Stage Intent Matching**: Regex/Keyword matching + Levenshtein token distance fallback for typos.
-* **Supported Intents**: `ANALYZE_MISTAKES`, `EXPLAIN_ROADMAP`, `STRATEGY_TIPS`, `EXPLAIN_CONCEPT`, `UNKNOWN`.
+### 5. 7-Tier Power-Ranked AI Mentor with Multi-Key Pooling & Auto-Recharge
+Powered by an intelligent, zero-downtime asynchronous gateway (`backend/app/ai/cloud_llm.py`):
+* **Strict 7-Tier Power Cascade**:
+  1. **Rank 1 — Google Gemini Pool**: Ultra-fast multi-key pool (`gemini-3.6-flash`, `gemini-3.7-flash`, `gemini-flash-latest`) via `GEMINI_API_KEYS`.
+  2. **Rank 2 — xAI Grok Pool**: Deep reasoning and adversarial Socratic tutor (`grok-2-latest`, `grok-beta`) via `GROK_API_KEYS`.
+  3. **Rank 3 — Hugging Face Qwen 2.5 72B Instruct**: High-parameter frontier model via `HF_TOKENS`.
+  4. **Rank 4 — Hugging Face Qwen 2.5 32B Instruct**: Balanced high-efficiency reasoning via `HF_TOKENS`.
+  5. **Rank 5 — Hugging Face Qwen 2.5 7B Instruct**: Ultra-fast serverless open-weights fallback via `HF_TOKENS`.
+  6. **Rank 6 — Local Hardware-Optimized Ollama**: Offline local engine running on Drive D (`qwen2.5:7b`, `llama3.2:3b`, `mistral:7b`).
+  7. **Rank 7 — Hardened Deterministic Scaffold**: 100% offline rule-based derivations and slot-filled templates. **Zero failure rate**.
+* **Multi-Key Pooling & In-Flight Auto-Recharge**:
+  - Distributes traffic across comma-separated API keys.
+  - Automatically isolates exhausted keys with temporary cooldown timers (60s for HTTP 429 rate limits, 300s for daily quota exhaustion).
+  - Every request performs top-down priority checks, and in-flight cascades re-check cooled-down upper tiers before dropping lower.
+* **Client BYOK (Bring Your Own Key) Vault**:
+  - Hotkey `Ctrl + O + P` (or `Cmd + O + P` / UI settings) opens a secure in-browser modal to test and configure private API keys without restarting the server.
 * **Safe Input Sanitization**: Prompt injection delimiters stripped, queries bounded to 500 characters, with quick prompt suggestion chips.
-* **Optional Ollama Polish**: Can optionally pass deterministic text to a local Ollama model for stylistic polish without altering technical facts.
 
 ### 6. Mobile-First Redesign & Exam Themes
 * **Dynamic Exam Theming**:
@@ -51,6 +61,14 @@ Powered by an offline `IntentClassifier` and slot-filling `templates.py`:
 * **Cognitive Error Trends (`GET /api/supporting/error-trends/{id}`)**: Visual analytics of error patterns over time (calculation slips vs conceptual gaps) and subject tendencies.
 * **Printable Academic Report Card (`GET /api/supporting/report-card/{id}`)**: Official audit scorecard with print-optimized (`@media print`) CSS for clean PDF export.
 
+### 8. Multimodal Document Ingestion & Dynamic Vault Evolution
+* **Instant Syllabus & Note Ingestion (`POST /api/materials/upload-pdf`)**: PyMuPDF (`fitz`) parsing with Pydantic structured output extraction.
+* **Continuous Knowledge Graph Evolution**: Extracts atomic concepts, definitions, prerequisites, and competitive MCQs with KaTeX derivations, continuously augmenting `apex.db` with zero duplication.
+
+### 9. Humanized Mistake Forensics & 1-Click Retest Drills
+* **Zero Raw ID Leakage**: Strips all internal database question codes (`pHQ-1234`, `q_1`, etc.) via `OmniContextHarvester` and translates errors into human Topics, Chapters, and Cognitive Trap classifications.
+* **Interactive Structured Mentor Cards**: Delivers `test_review` and `quiz` interactive cards with score meters and 1-click **"🎯 Retest Mistakes Drill"** for instant mastery recovery.
+
 ---
 
 ## 🏛️ System Architecture
@@ -61,6 +79,7 @@ Powered by an offline `IntentClassifier` and slot-filling `templates.py`:
 |  Curriculum Hierarchy (Exam -> Subject -> Chapter -> Topic -> Concept)            |
 |  Prerequisite DAG (NetworkX Graph with strength & topological dependency sort)    |
 |  PYQ Question Bank with Modified Data & Verified Step-by-Step Derivations          |
+|  External 405k ExamBench Stream + 2024-25 Scanned Benchmark Crops                 |
 +-----------------------------------------------------------------------------------+
                                          |
                                          v
@@ -79,7 +98,8 @@ Powered by an offline `IntentClassifier` and slot-filling `templates.py`:
 |  Tiered Diagnostic Selector (Screener -> Weak-Subject Drill -> Full Scan)         |
 |  Dynamic DAG Priority Engine (Prerequisites -> Yield -> Mastery Gap -> Forgetting)|
 |  Multi-Mode Roadmap Visualizer (Step Sequence | Visual DAG Graph | Chapter Heatmap)|
-|  Hardened Offline AI Study Mentor (Deterministic Intent Engine + Template Filling)|
+|  7-Tier Power-Ranked AI Study Mentor (Gemini -> Grok -> HF Qwen -> Ollama -> Scaf)|
+|  Multi-Key Cooldown & Auto-Recharge Engine with In-Flight Top-Down Recovery        |
 |  Spaced Repetition Review Queue & Error Trend Analytics                           |
 +-----------------------------------------------------------------------------------+
 ```
@@ -100,10 +120,17 @@ Powered by an offline `IntentClassifier` and slot-filling `templates.py`:
 | `GET` | `/api/roadmap/active/{id}` | Fetch active dynamic roadmap actions |
 | `GET` | `/api/roadmap/next-action/{id}` | Fetch Next Best Action (NBA) milestone |
 | `POST` | `/api/roadmap/regenerate/{id}` | Force dynamic roadmap recalculation |
-| `POST` | `/api/ai/chat/{id}` | Query AI mentor (mistakes, roadmap, strategy, concepts) |
+| `POST` | `/api/ai/chat/{id}` | Query 7-Tier AI mentor with multi-key failover and auto-recharge |
+| `GET` | `/api/ai/engine-status` | Inspect live AI hierarchy, active tier, key pools & cooldown states |
+| `GET` | `/api/ai/keys-config` | Fetch active API key configurations (masked) |
+| `POST` | `/api/ai/keys-config` | Update multi-key pools dynamically without restarting server |
+| `POST` | `/api/ai/test-key` | Live-probe an API key against its provider endpoint |
 | `GET` | `/api/supporting/review-queue/{id}` | Query concepts due for spaced-repetition review |
 | `GET` | `/api/supporting/error-trends/{id}` | Aggregated cognitive error patterns & subject biases |
-| `GET` | `/api/supporting/report-card/{id}` | Generate printable performance scorecard data |
+| `POST` | `/api/ai/coach` | Query cognitive mentor with intent classification & structured card outputs |
+| `POST` | `/api/materials/upload-pdf` | Upload PDF notes/textbooks for automatic concept & question extraction |
+| `POST` | `/api/materials/generate-from-text` | Generate structured curriculum concepts & MCQs directly from raw text |
+| `GET` | `/api/materials/augmented-vault` | Inspect dynamically ingested concepts & generated question banks |
 | `GET` | `/api/telemetry/stream/{id}` | Real-time append-only telemetry event log |
 
 ---

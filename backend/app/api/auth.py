@@ -1,11 +1,13 @@
 import uuid
 import hashlib
+from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.app.database.connection import get_db
-from backend.app.models.schema import Student, StudentConceptMastery
+from backend.app.models.schema import Student, StudentConceptMastery, CatSessionState
 from backend.app.schemas.pydantic_models import (
-    StudentRegisterRequest, StudentLoginRequest, StudentProfileResponse
+    StudentRegisterRequest, StudentLoginRequest, StudentProfileResponse,
+    ChangePasswordRequest, DeleteAccountRequest
 )
 from backend.app.events.collector import EventCollector
 
@@ -30,9 +32,24 @@ def register_student(req: StudentRegisterRequest, db: Session = Depends(get_db))
         target_exam=req.target_exam,
         target_track=req.target_track,
         daily_available_hours=req.daily_available_hours,
-        current_level="BEGINNER"
+        current_level=req.current_level or "BEGINNER"
     )
     db.add(student)
+    db.commit()
+
+    initial_theta = req.initial_theta if req.initial_theta is not None else 0.0
+    cat_session = CatSessionState(
+        session_id=f"cat_{uuid.uuid4().hex[:12]}",
+        student_id=student_id,
+        exam=req.target_exam,
+        current_theta=initial_theta,
+        current_sem=1.2 if abs(initial_theta) > 0.5 else 1.5,
+        items_answered_count=0,
+        is_terminated=False,
+        answered_history=[],
+        unvisited_question_ids=[]
+    )
+    db.add(cat_session)
     db.commit()
 
     EventCollector.log_event(
@@ -40,7 +57,7 @@ def register_student(req: StudentRegisterRequest, db: Session = Depends(get_db))
         student_id=student_id,
         session_id="auth",
         event_type="COURSE_STARTED",
-        metadata={"exam": req.target_exam}
+        metadata={"exam": req.target_exam, "archetype": req.current_level, "initial_theta": initial_theta}
     )
     db.commit()
 
@@ -63,6 +80,7 @@ def register_student(req: StudentRegisterRequest, db: Session = Depends(get_db))
         current_level=student.current_level,
         overall_mastery=0.0,
         overall_confidence=0.10,
+        latent_ability_theta=round(initial_theta, 2),
         created_at=student.created_at
     )
 
@@ -164,3 +182,48 @@ def switch_student_exam(
         db.rollback()
 
     return get_student_profile(student_id, db)
+
+@router.post("/change-password/{student_id}")
+def change_password(
+    student_id: str,
+    req: ChangePasswordRequest,
+    db: Session = Depends(get_db)
+):
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student account not found.")
+
+    if student.password_hash != hash_password(req.current_password):
+        raise HTTPException(status_code=401, detail="Current password verification failed.")
+
+    student.password_hash = hash_password(req.new_password)
+    db.commit()
+
+    return {
+        "status": "PASSWORD_UPDATED",
+        "message": "Account security credentials updated successfully."
+    }
+
+@router.post("/delete-account/{student_id}")
+def delete_account(
+    student_id: str,
+    req: DeleteAccountRequest,
+    db: Session = Depends(get_db)
+):
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student account not found.")
+
+    if student.password_hash != hash_password(req.password):
+        raise HTTPException(status_code=401, detail="Password verification failed. Cannot delete account.")
+
+    if req.confirmation.strip().upper() != "DELETE":
+        raise HTTPException(status_code=400, detail="Confirmation keyword 'DELETE' mismatch.")
+
+    db.delete(student)
+    db.commit()
+
+    return {
+        "status": "ACCOUNT_PURGED",
+        "message": "Student profile, diagnostic history, and study records have been permanently erased."
+    }

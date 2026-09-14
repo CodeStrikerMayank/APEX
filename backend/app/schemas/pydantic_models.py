@@ -10,10 +10,20 @@ class StudentRegisterRequest(BaseModel):
     target_exam: str = Field("JEE", description="JEE, NEET, or UPSC")
     target_track: Optional[str] = None
     daily_available_hours: float = 3.0
+    current_level: Optional[str] = "BEGINNER"
+    initial_theta: Optional[float] = 0.0
 
 class StudentLoginRequest(BaseModel):
     email: str
     password: str
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=6)
+
+class DeleteAccountRequest(BaseModel):
+    password: str
+    confirmation: str
 
 class StudentProfileResponse(BaseModel):
     student_id: str
@@ -267,6 +277,7 @@ class AIChatRequest(BaseModel):
 class AIChatResponse(BaseModel):
     response: str
     source: str = "OFFLINE_LLM_OR_RULE_FALLBACK"
+    model_used: Optional[str] = None
     structured_card: Optional[Dict[str, Any]] = None
     suggested_chips: Optional[List[str]] = None
     vault_readings: Optional[List[Dict[str, Any]]] = None
@@ -304,4 +315,109 @@ class CatNextQuestionResponse(BaseModel):
     items_answered_count: int
     termination_reason: Optional[str] = None
     question: Optional[Dict[str, Any]] = None
+
+
+# --- Unified Adaptive Study Roadmap Schemas ---
+class UnifiedRoadmapOverview(BaseModel):
+    overallMastery: int
+    conceptsTotal: int
+    conceptsMastered: int
+    conceptsDeveloping: int
+    criticalGaps: int
+    reviewsDue: int
+
+class UnifiedRoadmapFocus(BaseModel):
+    conceptId: str
+    concept: str
+    chapter: str
+    subject: str
+    mastery: float
+    priority: float
+    status: str
+    reasons: List[str]
+    estimatedMinutes: int
+
+class UnifiedRoadmapTodayItem(BaseModel):
+    id: str
+    taskType: str  # REVIEW, LEARN, PRACTICE
+    title: str
+    subtitle: str
+    conceptId: str
+    conceptName: str
+    chapter: str
+    subject: str
+    durationMinutes: int
+    retention: Optional[float] = None
+    mastery: Optional[float] = None
+    status: str = "PENDING"  # PENDING, COMPLETED
+    actionLabel: str
+
+class UnifiedPrereqItem(BaseModel):
+    id: str
+    name: str
+    mastery: float
+    isSatisfied: bool
+
+class UnifiedUnlockItem(BaseModel):
+    id: str
+    name: str
+    mastery: float
+
+class UnifiedRoadmapNode(BaseModel):
+    id: str
+    name: str
+    subject: str
+    chapter: str
+    mastery: float
+    retention: float
+    examRelevance: float
+    pyqFrequency: float
+    difficulty: float
+    status: str  # MASTERED, CURRENT, READY, DEVELOPING, CRITICAL, LOCKED
+    priority: float
+    prerequisites: List[UnifiedPrereqItem] = []
+    unlocks: List[UnifiedUnlockItem] = []
+    estimatedMinutes: int
+    questionsAttempted: int = 0
+    questionsCorrect: int = 0
+    accuracy: float = 0.0
+    lastStudied: Optional[str] = None
+    nextReview: Optional[str] = None
+    errorSignal: Optional[str] = None
+    recommendationReasons: List[str] = []
+
+class UnifiedRoadmapMilestone(BaseModel):
+    milestoneId: str
+    title: str
+    stage: int
+    description: Optional[str] = None
+    concepts: List[UnifiedRoadmapNode]
+
+class UnifiedSubjectMastery(BaseModel):
+    name: str
+    mastery: int
+    conceptsTotal: int
+    conceptsMastered: int
+    criticalGaps: int
+
+class UnifiedChapterItem(BaseModel):
+    id: str
+    name: str
+    subject: str
+    mastery: int
+    conceptsTotal: int
+    conceptsMastered: int
+    criticalGaps: int
+    topicsCount: int
+
+class UnifiedRoadmapResponse(BaseModel):
+    student: Dict[str, Any]
+    overview: UnifiedRoadmapOverview
+    currentFocus: Optional[UnifiedRoadmapFocus] = None
+    today: List[UnifiedRoadmapTodayItem] = []
+    milestones: List[UnifiedRoadmapMilestone] = []
+    nodes: List[UnifiedRoadmapNode] = []
+    subjects: List[UnifiedSubjectMastery] = []
+    chapters: List[UnifiedChapterItem] = []
+    graph: Optional[Dict[str, Any]] = None
 

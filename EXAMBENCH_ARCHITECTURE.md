@@ -27,6 +27,8 @@ Platform v3.1 resolves this by directly integrating the **Hugging Face `169Pi/ex
   * `split=train`
   * `offset={offset}` (range: `0` to `405906`)
   * `length={length}` (standard batch: `50` to `100`)
+* **Multi-Token Pooling**: Requests leverage the shared `HF_TOKENS` pool from `.env` with automatic bearer token rotation and 60s rate-limit cooldown isolation.
+* **Model Inference Synergy**: The same `HF_TOKENS` pool concurrently powers Ranks 3–5 of the AI Study Mentor (Qwen 2.5 72B, 32B, 7B Instruct) via Hugging Face Serverless Inference.
 
 ### 2.2. Row Data Model
 Each row from `169Pi/exambench` provides:
@@ -161,9 +163,28 @@ To convert open-ended ExamBench problems into rigorous multiple-choice assessmen
 
 ---
 
-## 8. Verification & Test Evidence
+## 8. Pedagogical Sanitization: Zero Raw ID Leakage Invariant
 
-All 19 automated test suites pass with 100% success rate:
+When questions from ExamBench or Daily Assignments are referenced during AI mentor chats, diagnostic reviews, or mistake forensics:
+1. **Telemetry Sanitization**: `OmniContextHarvester` and `templates.py` strip internal database IDs (`pHQ-...`, `exambench_...`, `q_...`).
+2. **Humanized Context Delivery**: Questions are surfaced by **Topic**, **Chapter**, **Concept Name**, verbatim problem statement, and cognitive distractor analysis.
+3. **Structured Interactive Retest Cards**: Errors generate actionable `test_review` cards with a 1-click **"🎯 Retest Mistakes Drill"** button that compiles a targeted remedial drill prioritizing missed concepts.
+
+---
+
+## 9. Dynamic Document Ingestion Interoperability
+
+In addition to ExamBench's 405k question stream, the platform supports dynamic curriculum synthesis from user-uploaded PDFs and raw text (`/api/materials/upload-pdf`, `/api/materials/generate-from-text`):
+* Ingested items adhere to the exact same schema as ExamBench questions.
+* Semantic deduplication via tokenized Jaccard similarity ensures external documents seamlessly merge with existing ExamBench and PYQ nodes without creating duplicate syllabus vertices.
+
+---
+
+## 10. Verification & Test Evidence
+
+All automated test suites pass with 100% success rate:
+* `tests/test_pdf_ingestor.py`: Validates PyMuPDF extraction, chunking, Pydantic schemas, and fallback synthesis.
+* `tests/test_e2e_api.py`: Validates end-to-end API workflows, mistake diagnostics, and dynamic retests.
 * `tests/test_exambench_and_assignments.py`: Validates live API loading, subject classification, strict stream scoping, 60-question generation, autosaving, submission, and streak calculations.
 * `tests/test_quiz_engine.py`: Validates diagnostic quiz and topic drill lifecycle.
 * `tests/test_irt_bkt.py`: Validates Bayesian Knowledge Tracing and Item Response Theory ability updates.

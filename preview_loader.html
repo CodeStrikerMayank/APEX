@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight-sage">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APEX Loader Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+  }
+
+  #pageLoader {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  html[data-theme="midnight-sage"] #pageLoader {
+    background: #111514;
+    --loader-canvas: #111514;
+    --loader-title: #F1F0E8;
+    --loader-sub: #A8B0A9;
+    --loader-muted: #737D76;
+    --loader-accent: #8FAF9A;
+    --loader-ai: #72B7B0;
+    --loader-track: rgba(255, 255, 255, 0.08);
+    --gear-fill: #1D2421;
+    --gear-stroke: #303934;
+    --gear-rim: #3A463F;
+    --gear-hub: #242C28;
+    --gear-axle: #8FAF9A;
+    --gear-core: #72B7B0;
+  }
+
+  html[data-theme="sketch"] #pageLoader {
+    background: #F4F2EC;
+    background-image:
+      repeating-linear-gradient(135deg, rgba(31,27,20,.035) 0px, rgba(31,27,20,.035) 1px, transparent 1px, transparent 7px),
+      repeating-linear-gradient(45deg, rgba(31,27,20,.02) 0px, rgba(31,27,20,.02) 1px, transparent 1px, transparent 9px);
+    --loader-canvas: #F4F2EC;
+    --loader-title: #211D17;
+    --loader-sub: #5A5245;
+    --loader-muted: #8C8272;
+    --loader-accent: #4E6857;
+    --loader-ai: #367872;
+    --loader-track: rgba(0, 0, 0, 0.07);
+    --gear-fill: #EDE9DF;
+    --gear-stroke: #2E2922;
+    --gear-rim: #8C8272;
+    --gear-hub: #DFD9CC;
+    --gear-axle: #2E2922;
+    --gear-core: #367872;
+  }
+
+  .apex-loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    max-width: 440px;
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+
+  .apex-loader-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 22px;
+  }
+
+  .apex-loader-title {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    color: var(--loader-title);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .apex-loader-subtitle {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--loader-sub);
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  .apex-loader-gears-wrap {
+    width: 280px;
+    height: 280px;
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .apex-loader-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+
+  .gear-big {
+    transform-origin: 159px 137px;
+    animation: spinCW 6s linear infinite;
+  }
+
+  .gear-small {
+    transform-origin: 118px 190px;
+    animation: spinCCW 4.5s linear infinite;
+  }
+
+  @keyframes spinCW {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes spinCCW {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+
+  .gear-body {
+    fill: var(--gear-fill);
+    stroke: var(--gear-stroke);
+    stroke-width: 1.2px;
+  }
+
+  .gear-rim-line {
+    fill: none;
+    stroke: var(--gear-rim);
+    stroke-width: 0.8px;
+    opacity: 0.7;
+  }
+
+  .gear-aperture {
+    fill: var(--loader-canvas);
+    stroke: var(--gear-stroke);
+    stroke-width: 0.9px;
+  }
+
+  .gear-hub-rim {
+    stroke: var(--gear-stroke);
+    stroke-width: 1px;
+  }
+
+  .gear-inner-hub {
+    fill: var(--gear-hub);
+    stroke: var(--gear-stroke);
+    stroke-width: 0.8px;
+  }
+
+  .gear-axle-accent {
+    fill: var(--gear-axle);
+    opacity: 0.9;
+  }
+
+  .gear-core-node {
+    fill: var(--gear-core);
+    transform-origin: 159px 137px;
+    animation: apexCorePulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes apexCorePulse {
+    0%, 100% {
+      opacity: 0.75;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 3px var(--loader-ai));
+    }
+  }
+
+  .apex-loader-status-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .apex-loader-status-text {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--loader-title);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    min-height: 18px;
+  }
+
+  .apex-loader-bar-wrap {
+    width: 300px;
+    height: 4px;
+    background: var(--loader-track);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+
+  .apex-loader-bar-fill {
+    height: 100%;
+    width: 68%;
+    background: var(--loader-accent);
+    border-radius: 999px;
+  }
+
+  .apex-loader-metrics {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 300px;
+    margin-top: 10px;
+  }
+
+  .apex-loader-micro {
+    font-size: 11.5px;
+    color: var(--loader-sub);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .apex-loader-pct {
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--loader-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .theme-switcher-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--loader-accent);
+    color: #111514;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 100000;
+  }
+</style>
+</head>
+<body>
+
+<div id="pageLoader">
+  <div class="apex-loader-content">
+    <div class="apex-loader-brand">
+      <span class="apex-loader-title">APEX</span>
+      <span class="apex-loader-subtitle">Cognitive System</span>
+    </div>
+
+    <div class="apex-loader-gears-wrap" id="apexLoaderGears">
+      <svg class="apex-loader-svg" viewBox="0 0 280 280" width="280" height="280" aria-hidden="true">
+        <defs>
+          <filter id="gearDepthShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.35)" />
+          </filter>
+          <radialGradient id="gearHubGrad" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.08)" />
+            <stop offset="100%" stop-color="rgba(0,0,0,0.25)" />
+          </radialGradient>
+        </defs>
+
+        <!-- Large Gear (System Core) centered at (159, 137) -->
+        <g class="gear-group gear-big">
+          <path class="gear-body" d="M 139.97,168.15 L 133.05,175.95 L 127.82,171.90 L 133.63,163.24 L 129.50,158.49 L 120.12,163.05 L 116.84,157.31 L 125.52,151.54 L 123.52,145.57 L 113.11,146.19 L 112.27,139.63 L 122.51,137.62 L 122.94,131.34 L 113.09,127.93 L 114.82,121.55 L 125.05,123.61 L 127.85,117.97 L 120.05,111.05 L 124.10,105.82 L 132.76,111.63 L 137.51,107.50 L 132.95,98.12 L 138.69,94.84 L 144.46,103.52 L 150.43,101.52 L 149.81,91.11 L 156.37,90.27 L 158.38,100.51 L 164.66,100.94 L 168.07,91.09 L 174.45,92.82 L 172.39,103.05 L 178.03,105.85 L 184.95,98.05 L 190.18,102.10 L 184.37,110.76 L 188.50,115.51 L 197.88,110.95 L 201.16,116.69 L 192.48,122.46 L 194.48,128.43 L 204.89,127.81 L 205.73,134.37 L 195.49,136.38 L 195.06,142.66 L 204.91,146.07 L 203.18,152.45 L 192.95,150.39 L 190.15,156.03 L 197.95,162.95 L 193.90,168.18 L 185.24,162.37 L 180.49,166.50 L 185.05,175.88 L 179.31,179.16 L 173.54,170.48 L 167.57,172.48 L 168.19,182.89 L 161.63,183.73 L 159.62,173.49 L 153.34,173.06 L 149.93,182.91 L 143.55,181.18 L 145.61,170.95 Z" filter="url(#gearDepthShadow)" />
+          <circle cx="159" cy="137" r="36.5" class="gear-rim-line" />
+          <circle cx="176.32" cy="154.32" r="5.5" class="gear-aperture" />
+          <circle cx="141.68" cy="154.32" r="5.5" class="gear-aperture" />
+          <circle cx="141.68" cy="119.68" r="5.5" class="gear-aperture" />
+          <circle cx="176.32" cy="119.68" r="5.5" class="gear-aperture" />
+          <circle cx="159" cy="137" r="15" class="gear-hub-rim" fill="url(#gearHubGrad)" />
+          <circle cx="159" cy="137" r="11" class="gear-inner-hub" />
+          <circle cx="159" cy="137" r="5" class="gear-axle-accent" />
+          <circle cx="159" cy="137" r="2.8" class="gear-core-node" />
+        </g>
+
+        <!-- Small Gear (Cognitive Satellite) centered at (118, 190) -->
+        <g class="gear-group gear-small">
+          <path class="gear-body" d="M 133.23,174.40 L 140.64,169.12 L 144.16,173.74 L 137.09,179.47 L 138.99,184.11 L 148.05,183.24 L 148.78,188.99 L 139.80,190.43 L 139.12,195.39 L 147.40,199.17 L 145.16,204.52 L 136.66,201.27 L 133.60,205.23 L 138.88,212.64 L 134.26,216.16 L 128.53,209.09 L 123.89,210.99 L 124.76,220.05 L 119.01,220.78 L 117.57,211.80 L 112.61,211.12 L 108.83,219.40 L 103.48,217.16 L 106.73,208.66 L 102.77,205.60 L 95.36,210.88 L 91.84,206.26 L 98.91,200.53 L 97.01,195.89 L 87.95,196.76 L 87.22,191.01 L 96.20,189.57 L 96.88,184.61 L 88.60,180.83 L 90.84,175.48 L 99.34,178.73 L 102.40,174.77 L 97.12,167.36 L 101.74,163.84 L 107.47,170.91 L 112.11,169.01 L 111.24,159.95 L 116.99,159.22 L 118.43,168.20 L 123.39,168.88 L 127.17,160.60 L 132.52,162.84 L 129.27,171.34 Z" filter="url(#gearDepthShadow)" />
+          <circle cx="118" cy="190" r="21.8" class="gear-rim-line" />
+          <circle cx="118" cy="190" r="9" class="gear-hub-rim" fill="url(#gearHubGrad)" />
+          <circle cx="118" cy="190" r="6" class="gear-inner-hub" />
+          <circle cx="118" cy="190" r="2.2" class="gear-axle-accent" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="apex-loader-status-block">
+      <div class="apex-loader-status-text" id="apexLoaderStatus">INITIALIZING SYSTEM</div>
+      <div class="apex-loader-bar-wrap">
+        <div class="apex-loader-bar-fill" id="apexLoaderBar"></div>
+      </div>
+      <div class="apex-loader-metrics">
+        <span class="apex-loader-micro" id="apexLoaderMicro">Preparing your workspace...</span>
+        <span class="apex-loader-pct" id="apexLoaderPct">68%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="theme-switcher-btn" id="themeToggleBtn" onclick="toggleTheme()">Switch to Paper Theme</button>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggleBtn');
+    if (html.getAttribute('data-theme') === 'midnight-sage') {
+      html.setAttribute('data-theme', 'sketch');
+      btn.textContent = 'Switch to Midnight Sage';
+    } else {
+      html.setAttribute('data-theme', 'midnight-sage');
+      btn.textContent = 'Switch to Paper Theme';
+    }
+  }
+</script>
+
+</body>
+</html>

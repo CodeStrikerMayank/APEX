@@ -37,6 +37,9 @@ The system operates across three competitive examination tracks:
 | Identity & Access Control          | 3-Role Portal (Student, Guest, Admin) with Sci-Fi HUD Buffer|
 | Psychometric Modeling              | Hybrid: Multi-Factor Mastery + BKT + 2PL IRT + Ebbinghaus   |
 | Diagnostic Testing Arena           | 3-Tier Testing: 9-Q Screener, 5-Q Topic Drill, Full Scan    |
+| AI Mentorship & Gateway            | 7-Tier Power Cascade (Gemini->Grok->HF Qwen->Ollama->Scaffold) with Multi-Key Auto-Recharge & BYOK Vault (Ctrl+O+P) |
+| Multimodal Material Ingestion      | Fast PyMuPDF Parser + Structured LLM Extraction + Continuous Knowledge Vault Augmentation (/api/materials/*) |
+| Humanized Mistake Diagnostics      | Zero Raw ID Leakage + Interactive `test_review` and `quiz` Cards + 1-Click Retest Revenge Drills |
 +------------------------------------+-------------------------------------------------------------+
 ```
 
@@ -428,10 +431,19 @@ Before certifying the engine for daily practice, ensure each subsystem passes th
 [ ] 6. UPSC Civil Services Subsystem:
        - Prelims quiz applies +2.0 / -0.66 scoring.
        - Mains answer workspace validates word count and returns 5-dimensional rubric feedback.
-[ ] 7. Automated Test Suite:
+[ ] 7. AI Mentorship & Multi-Key Gateway:
+       - Engine status (/api/ai/engine-status) returns active tier and valid key manifests.
+       - BYOK Key Vault shortcut (Ctrl + O + P) opens key manager and verifies key testing.
+[ ] 8. Automated Test Suite:
        - All 24 unit test suites pass successfully via `pytest`.
+[ ] 9. Multimodal Material Ingestion:
+       - POST /api/materials/upload-pdf extracts concepts and MCQs via PyMuPDF.
+       - GET /api/materials/augmented-vault reflects newly discovered nodes without duplicate entries.
+[ ] 10. Humanized Mistake Diagnostics & Retest:
+       - OmniContextHarvester strips raw IDs (pHQ-...) and provides humanized Topic & Concept names.
+       - Interactive test_review structured card renders score gauge and triggers 1-click mistake revenge drill.
 ```
 
 ---
 
-*This document serves as the master specification for the Adaptive Intelligence Engine.*
+*This document serves as the master specification for the Adaptive Intelligence Engine (v4.5).*

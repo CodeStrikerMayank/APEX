@@ -270,7 +270,8 @@ async def chat_with_assistant(
     is_quiz_req = bool(req.quiz_intent) or any(k in prompt_lower for k in [
         "quiz me", "test me", "micro-check", "micro check",
         "practice question", "give me a question", "targeted recovery drill",
-        "quick drill", "practice problem", "interactive quiz"
+        "quick drill", "practice problem", "interactive quiz",
+        "retest", "re-test", "retest mistakes", "recovery drill", "test my mistakes"
     ])
 
     if is_quiz_req:
@@ -278,11 +279,19 @@ async def chat_with_assistant(
         target_cid = req.concept_id
 
         if not target_cid:
-            # Check if student prompt mentions any concept directly
+            # First check if student prompt mentions any concept directly
             all_c = db.query(Concept).all()
             for c in all_c:
                 if c.name and (c.name.lower() in prompt_lower or c.concept_id.lower() in prompt_lower):
                     target_cid = c.concept_id
+                    break
+
+        if not target_cid:
+            # Prioritize targeting missed concepts from student's recent test attempt
+            recent_m = student_context.get("latest_quiz", {}).get("mistakes") or student_context.get("recent_mistakes") or []
+            for m in recent_m:
+                if m.get("concept_id"):
+                    target_cid = m.get("concept_id")
                     break
 
         if not target_cid:
@@ -396,16 +405,64 @@ async def chat_with_assistant(
         active_minutes = max(active_minutes, latest_attempt.time_taken_seconds / 60.0)
 
     is_explicit_socratic = raw_mode in ["socratic", "scaffolding", "diagnostic"]
-    is_troubleshoot_or_mistake_review = (
-        troubleshoot_diag.get("type") in ["TRACEBACK", "CODE_SNIPPET"] or
-        (user_intent == INTENT_ANALYZE_MISTAKES and bool(latest_attempt and student_context.get("latest_quiz", {}).get("mistakes")))
+    is_troubleshoot = troubleshoot_diag.get("type") in ["TRACEBACK", "CODE_SNIPPET"]
+    is_mistake_review = (
+        user_intent == INTENT_ANALYZE_MISTAKES or
+        any(k in prompt_lower for k in [
+            "mistake", "mistakes", "error", "errors", "wrong", "last test",
+            "past test", "previous test", "review my test", "performance correction",
+            "retest", "how did i do", "what did i miss"
+        ])
     )
-    
-    if (is_explicit_socratic or (mode in ["socratic", "scaffolding", "diagnostic"] and is_troubleshoot_or_mistake_review and user_intent != INTENT_EXPLAIN_CONCEPT)):
+
+    structured_card = None
+    if is_mistake_review and (latest_attempt or student_context.get("latest_quiz") or student_context.get("recent_mistakes")):
+        l_quiz = student_context.get("latest_quiz") or {}
+        test_title = l_quiz.get("test_title") or (latest_attempt.assessment.title if (latest_attempt and latest_attempt.assessment) else "Last Completed Assessment")
+        mistakes_list = l_quiz.get("mistakes") or student_context.get("recent_mistakes") or []
+
+        score_val = l_quiz.get("score_percentage")
+        if score_val is None and latest_attempt:
+            score_val = latest_attempt.score_percentage
+        score_val = round(score_val or 0.0, 1)
+
+        c_count = l_quiz.get("correct_count") if l_quiz.get("correct_count") is not None else (latest_attempt.correct_count if latest_attempt else 0)
+        t_count = l_quiz.get("total_questions") if l_quiz.get("total_questions") is not None else (latest_attempt.total_questions if latest_attempt else len(mistakes_list))
+        time_sec = l_quiz.get("time_taken_seconds") if l_quiz.get("time_taken_seconds") is not None else (latest_attempt.time_taken_seconds if latest_attempt else 0)
+
+        structured_card = {
+            "type": "test_review",
+            "test_title": test_title,
+            "score_percentage": score_val,
+            "correct_count": c_count,
+            "total_questions": t_count,
+            "time_taken_seconds": time_sec,
+            "can_retest": True,
+            "retest_concept_ids": [m["concept_id"] for m in mistakes_list if m.get("concept_id")],
+            "mistakes": [
+                {
+                    "topic": m.get("topic") or m.get("chapter") or "Curriculum Area",
+                    "chapter": m.get("chapter", ""),
+                    "concept_name": m.get("concept_name") or m.get("concept_id"),
+                    "concept_id": m.get("concept_id"),
+                    "question_text": m.get("content"),
+                    "content_snippet": m.get("content_snippet") or ((m.get("content") or "")[:140] + "..."),
+                    "student_answer": m.get("student_answer"),
+                    "correct_answer": m.get("correct_answer"),
+                    "options": m.get("options"),
+                    "trap_explanation": m.get("distractor_note"),
+                    "solution_explanation": m.get("explanation"),
+                    "error_type": m.get("error_type")
+                }
+                for m in mistakes_list
+            ]
+        }
+
+    if is_explicit_socratic or (mode in ["socratic", "scaffolding", "diagnostic"] and is_troubleshoot and user_intent != INTENT_EXPLAIN_CONCEPT):
         concept_name = "Core Conceptual Foundation"
         if latest_attempt and student_context.get("latest_quiz", {}).get("mistakes"):
             first_mistake = student_context["latest_quiz"]["mistakes"][0]
-            concept_name = first_mistake.get("concept_id", concept_name)
+            concept_name = first_mistake.get("concept_name") or first_mistake.get("concept_id", concept_name)
             error_type = first_mistake.get("error_type")
             explanation = first_mistake.get("explanation")
         else:
@@ -492,18 +549,54 @@ async def chat_with_assistant(
                         topic_term = prev_words[0]
                         break
 
-        if topic_term:
-            topic_cap = topic_term.capitalize()
+        def _clean_chip_topic(raw_text: str) -> str:
+            if not raw_text:
+                return ""
+            raw_s = raw_text.strip()
+            stop_phrases = [
+                "and give me", "give me", "and provide", "and test", "and show", "with 4 options",
+                "with options", "multiple choice", "mcq", "to test my understanding", "to test my",
+                "to test", "for me", "please", "quick", "options", "question", "connect to the next topic",
+                "in my syllabus", "deep dive into the derivation of", "deep dive into", "derivation of",
+                "would you like to", "would you like", "how does", "connect to", "next topic",
+                "solve a practice", "practice jee question", "practice question", "practice problem",
+                "can you explain", "tell me about", "what is", "what are"
+            ]
+            lower_s = raw_s.lower()
+            for sp in stop_phrases:
+                idx = lower_s.find(sp)
+                if idx >= 0:
+                    raw_s = raw_s[:idx] + " " + raw_s[idx + len(sp):]
+                    lower_s = raw_s.lower()
+
+            words = [w for w in raw_s.split() if len(w) > 1 and w.lower() not in {
+                "and", "the", "a", "an", "of", "in", "on", "to", "for", "with", "by", "from", "at"
+            }]
+            if len(words) > 3:
+                words = words[:3]
+            clean_result = " ".join(words).strip()
+            if len(clean_result) > 22:
+                clean_result = clean_result[:22].strip()
+            return clean_result.title() if clean_result else "Key Principle"
+
+        if is_mistake_review:
             suggested_chips = [
-                f"📐 Would you like to deep dive into the derivation of {topic_cap}?",
-                f"🗺️ How does {topic_cap} connect to the next topic in my syllabus?",
-                f"🎯 Would you like to solve a practice {exam_label} question on {topic_cap}?"
+                "🎯 Retest Mistakes Drill",
+                "📐 Step Derivation",
+                f"🗺️ Next {exam_label} Goal"
+            ]
+        elif topic_term:
+            topic_clean = _clean_chip_topic(topic_term)
+            suggested_chips = [
+                f"📐 Derive {topic_clean}",
+                f"🗺️ Next Topic in Syllabus",
+                f"🎯 Practice {exam_label} Drill"
             ]
         else:
             suggested_chips = [
-                "📐 Would you like to deep dive into the derivation?",
-                "🗺️ How does this connect to the next topic in my syllabus?",
-                f"🎯 Would you like to solve a practice {exam_label} question on this?"
+                "📐 Key Mathematical Proof",
+                "🗺️ Next Topic in Syllabus",
+                f"🎯 Practice {exam_label} Drill"
             ]
 
     # ONLY if genuine, high-relevance Knowledge Vault files exist in the database, attach as bonus chip
@@ -517,6 +610,8 @@ async def chat_with_assistant(
     return AIChatResponse(
         response=final_text,
         source=source,
+        model_used=res.get("model") if ("res" in locals() and isinstance(res, dict)) else None,
+        structured_card=structured_card,
         suggested_chips=suggested_chips,
         vault_readings=vault_readings[:3] if vault_readings else None,
         domain_protocol=domain_diag["domain"]
@@ -551,31 +646,60 @@ async def get_engine_status():
     hub = CloudLLMHub()
     gemini_avail = hub.is_gemini_available()
     grok_avail = hub.is_grok_available()
+    hf_avail = hub.is_hf_available()
     custom_avail = hub.is_custom_available()
     
     llm = LocalLLMClient()
     ollama_ok = await llm.is_available()
     
-    tier = "CLOUD_PRIMARY"
-    if not gemini_avail and not grok_avail:
-        if custom_avail:
-            tier = "CLOUD_CUSTOM"
-        else:
-            tier = "LOCAL_OLLAMA" if ollama_ok else "DETERMINISTIC_MENTOR"
+    gemini_keys = hub.get_gemini_keys()
+    grok_keys = hub.get_grok_keys()
+    hf_tokens = hub.get_hf_tokens()
+    
+    if gemini_avail:
+        active_gem_key = next((k.to_dict()["masked"] for k in gemini_keys if k.is_available()), "")
+        tier = f"RANK_1_GEMINI ({hub.gemini_model} • {active_gem_key})"
+    elif grok_avail:
+        active_grok_key = next((k.to_dict()["masked"] for k in grok_keys if k.is_available()), "")
+        tier = f"RANK_2_GROK ({hub.grok_model} • {active_grok_key})"
+    elif hf_avail:
+        active_hf_tok = next((k.to_dict()["masked"] for k in hf_tokens if k.is_available()), "")
+        tier = f"RANK_3_HF_QWEN_72B ({hub.hf_72b_model} • {active_hf_tok})"
+    elif custom_avail:
+        tier = f"CUSTOM_PROVIDER ({hub.custom_model})"
+    elif ollama_ok:
+        tier = "RANK_6_LOCAL_OLLAMA"
+    else:
+        tier = "RANK_7_DETERMINISTIC_SCAFFOLD"
         
     return {
         "active_tier": tier,
         "gemini_available": gemini_avail,
+        "gemini_keys": [k.to_dict() for k in gemini_keys],
         "grok_available": grok_avail,
+        "grok_keys": [k.to_dict() for k in grok_keys],
+        "huggingface_available": hf_avail,
+        "huggingface_tokens": [k.to_dict() for k in hf_tokens],
+        "huggingface_model": hub.hf_model if hf_avail else None,
         "custom_available": custom_avail,
         "ollama_available": ollama_ok,
         "mentor_failsafe_active": True,
         "supported_exams": ["JEE", "NEET", "UPSC"],
-        "message": "Cloud LLM (Gemini/Grok/Custom) primary with local Ollama fallback and deterministic mentor fail-safe."
+        "hierarchy": [
+            "Rank 1: Google Gemini (gemini-3.6-flash / gemini-3.7-flash with multi-key pool)",
+            "Rank 2: xAI Grok (grok-2-latest)",
+            "Rank 3: Hugging Face Qwen 2.5 72B (Qwen/Qwen2.5-72B-Instruct)",
+            "Rank 4: Hugging Face Qwen 2.5 Coder 32B (Qwen/Qwen2.5-Coder-32B-Instruct)",
+            "Rank 5: Hugging Face Qwen 2.5 Coder 7B (Qwen/Qwen2.5-Coder-7B-Instruct)",
+            "Rank 6: Local Ollama (qwen2.5:0.5b / localhost:11434)",
+            "Rank 7: Deterministic Pedagogical Scaffold & FineWeb Knowledge Vault"
+        ],
+        "message": "Power-Ranked AI Hierarchy with Auto-Cooldown Recharge & Failover active."
     }
 
 
 class KeyConfigRequest(BaseModel):
+    hf_token: Optional[str] = None
     gemini_api_key: Optional[str] = None
     grok_api_key: Optional[str] = None
     custom_provider: Optional[str] = None
@@ -604,6 +728,7 @@ async def update_keys_config(req: KeyConfigRequest):
     """Dynamically applies new AI provider keys to runtime without server restart."""
     from backend.app.ai.cloud_llm import CloudLLMHub
     res = CloudLLMHub.update_keys(
+        hf_token=req.hf_token,
         gemini_key=req.gemini_api_key,
         grok_key=req.grok_api_key,
         custom_provider=req.custom_provider,

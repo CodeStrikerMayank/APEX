@@ -359,31 +359,50 @@ class OmniContextHarvester:
                 .all()
             )
             mistakes = []
+            all_items = []
             for item, q in items:
+                distractor_note = None
+                if q.distractor_explanations and item.student_answer:
+                    distractor_note = q.distractor_explanations.get(item.student_answer)
+
+                c_name = q.concept.name if (q.concept and q.concept.name) else q.concept_id
+                item_dict = {
+                    "question_id": q.question_id,
+                    "subject": q.subject,
+                    "chapter": q.chapter or "Core Syllabus",
+                    "topic": q.topic or q.chapter or "General",
+                    "concept_id": q.concept_id,
+                    "concept_name": c_name,
+                    "student_answer": item.student_answer,
+                    "correct_answer": q.correct_answer,
+                    "is_correct": bool(item.is_correct),
+                    "error_type": item.error_type or "CONCEPTUAL_GAP",
+                    "distractor_note": distractor_note,
+                    "explanation": q.explanation or "Apply fundamental governing equations step-by-step.",
+                    "options": q.options,
+                    "time_taken_seconds": item.time_taken_seconds,
+                    "content": q.content,
+                    "content_snippet": (q.content[:140] + "...") if q.content and len(q.content) > 140 else q.content
+                }
+                all_items.append(item_dict)
                 if not item.is_correct:
-                    distractor_note = None
-                    if q.distractor_explanations and item.student_answer:
-                        distractor_note = q.distractor_explanations.get(item.student_answer)
+                    mistakes.append(item_dict)
 
-                    mistakes.append({
-                        "question_id": q.question_id,
-                        "subject": q.subject,
-                        "concept_id": q.concept_id,
-                        "student_answer": item.student_answer,
-                        "correct_answer": q.correct_answer,
-                        "error_type": item.error_type or "CONCEPTUAL_GAP",
-                        "distractor_note": distractor_note,
-                        "time_taken_seconds": item.time_taken_seconds,
-                        "content_snippet": (q.content[:120] + "...") if q.content and len(q.content) > 120 else q.content
-                    })
-
-            context["latest_quiz"] = {
-                "score_percentage": latest_attempt.score_percentage,
+            test_title = latest_attempt.assessment.title if (latest_attempt.assessment and latest_attempt.assessment.title) else "Diagnostic Assessment"
+            attempt_dict = {
+                "assessment_id": latest_attempt.assessment_id,
+                "attempt_id": latest_attempt.attempt_id,
+                "test_title": test_title,
+                "score_percentage": round(latest_attempt.score_percentage, 1) if latest_attempt.score_percentage is not None else 0.0,
                 "correct_count": latest_attempt.correct_count,
                 "total_questions": latest_attempt.total_questions,
                 "time_taken_seconds": latest_attempt.time_taken_seconds,
+                "submitted_at": latest_attempt.submitted_at.isoformat() if latest_attempt.submitted_at else None,
+                "items": all_items,
                 "mistakes": mistakes
             }
+            context["latest_attempt"] = attempt_dict
+            context["latest_quiz"] = attempt_dict
             context["recent_mistakes"] = mistakes[:5]
 
         # 4. ROADMAP STATUS & NEXT-BEST ACTION (NBA)
@@ -803,11 +822,23 @@ class OmniContextHarvester:
 
         mistakes = context.get("recent_mistakes", [])
         if mistakes:
-            m_str = "; ".join(
-                f"Q: {m['question_id']} Choice: {m['student_answer']} Correct: {m['correct_answer']} (Trap: {m.get('distractor_note') or m['error_type']})"
-                for m in mistakes[:2]
-            )
-            lines.append(f"Recent Mistake Forensics: {m_str}")
+            m_items = []
+            for m in mistakes[:3]:
+                top = m.get("topic") or m.get("chapter") or "Curriculum Area"
+                cname = m.get("concept_name") or m.get("concept_id") or "Core Principle"
+                prob = (m.get("content_snippet") or m.get("content") or "").replace("\n", " ")
+                stud_ans = m.get("student_answer") or "Skipped"
+                corr_ans = m.get("correct_answer") or "Key"
+                trap = m.get("distractor_note") or m.get("error_type") or "Conceptual miscalculation"
+                sol = m.get("explanation") or "Apply fundamental governing equations step-by-step."
+                m_items.append(
+                    f"• [Topic: {top} | Concept: {cname}]\n"
+                    f"  - Problem Context: \"{prob}\"\n"
+                    f"  - Student Selected: Option {stud_ans} (Cognitive Trap: {trap})\n"
+                    f"  - Correct Answer: Option {corr_ans}\n"
+                    f"  - Step-by-Step Resolution: {sol}"
+                )
+            lines.append("Recent Test Mistake Diagnostics (HUMAN ACADEMIC ANALYSIS — NO RAW IDs):\n" + "\n".join(m_items))
 
         vault = context.get("vault_readings") or context.get("fineweb_citations", [])
         if vault:

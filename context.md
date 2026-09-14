@@ -24,6 +24,8 @@
 > 14. FineWeb-Edu Knowledge Vault & Grand Book Reader (35 curated textbooks, Llama-3-70B 4.8+ scored, LaTeX formula boxes, domain taxonomies)
 > 15. Multimodal STEM Vault (Open-MM-RL) (Live Hugging Face dataset API streaming with 15s timeout, 2-tier disk cache resilience, heuristic STEM keyword mapper)
 > 16. Database Foreign Key Auto-Provisioning Guardian & Self-Healing Relational Layer (Zero-bug before_flush interceptor)
+> 17. Multimodal PDF/Document Ingestion & Dynamic Vault Evolution (`pdf_ingestor.py`, `vault_augmenter.py`, PyMuPDF parsing, structured Pydantic extraction, semantic deduplication, and DAG edge insertion)
+> 18. Humanized Pedagogical Mistake Forensics & 1-Click Retest Subsystem (Zero Raw ID Leakage guarantee, rich `OmniContextHarvester` telemetry, structured `test_review` and `quiz` cards, and cognitive trap remediation)
 > 
 > It also fully specifies the **Daily 3-Subject Interleaved Assignment Engine**, the **External HuggingFace Live API Ingestion Pipelines (405k+ items)**, the **UPSC Civil Services Dual-Tier Subsystem (Prelims & Mains Rubric)**, and the **Futuristic Sci-Fi HUD Canvas Visualizer**.
 > 
@@ -1144,14 +1146,23 @@ CREATE TABLE upsc_written_submissions (
 - **`POST /api/assessments/start`**: Initializes diagnostic or challenge quiz sessions.
 - **`POST /api/assessments/submit`**: Grades completed attempts, runs BKT updates, GKT/GCN topological propagation, FSRS-5 retrievability steps, and regenerates dynamic roadmaps.
 
-### 3. AI Super-Tutor & Socratic Mentorship Endpoints
+### 3. AI Super-Tutor & 7-Tier Socratic Mentorship Endpoints
 - **`GET /api/ai/telemetry-hud/{student_id}`**:
-  - Delivers complete student cognitive telemetry: overall composite mastery, latent ability $\\theta$, ability tier, weak concepts, decaying topics, DAG bottlenecks, and FineWeb-Edu citations.
+  - Delivers complete student cognitive telemetry: overall composite mastery, latent ability $\theta$, ability tier, weak concepts, decaying topics, DAG bottlenecks, and FineWeb-Edu citations.
 - **`POST /api/ai/chat/{student_id}`**:
   - **Body**: `{ "prompt": "Can you explain King's property of definite integrals?", "mode": "pedagogical", "history": [...] }`
   - **Modes**: `pedagogical`, `socratic`, `forensics`.
-  - **Response**: `{ "response": "...", "source": "CLOUD_PRIMARY" | "SOCRATIC_MULTI_AGENT" | "LOCAL_OLLAMA", "structured_card": null, "suggested_chips": [...] }`
+  - **Response**: `{ "response": "...", "source": "CLOUD_GEMINI-3.6-FLASH" | "CLOUD_GROK-2-LATEST" | "HF_QWEN_72B" | "HF_QWEN_32B" | "HF_QWEN_7B" | "LOCAL_OLLAMA" | "DETERMINISTIC_SCAFFOLD", "structured_card": null, "suggested_chips": [...] }`
   - When `quiz_intent` is detected, returns `structured_card` containing an interactive calibrated question card.
+  - **7-Tier Power-Ranked Cascade with Auto-Recharge**:
+    1. **Rank 1**: Google Gemini Multi-Key Pool (`GEMINI_API_KEYS`, models `gemini-3.6-flash`, `gemini-3.7-flash`, `gemini-flash-latest`).
+    2. **Rank 2**: xAI Grok Multi-Key Pool (`GROK_API_KEYS`, models `grok-2-latest`, `grok-beta`).
+    3. **Rank 3**: Hugging Face Qwen 2.5 72B Instruct (`HF_TOKENS`, `Qwen/Qwen2.5-72B-Instruct`).
+    4. **Rank 4**: Hugging Face Qwen 2.5 32B Instruct (`HF_TOKENS`, `Qwen/Qwen2.5-32B-Instruct`).
+    5. **Rank 5**: Hugging Face Qwen 2.5 7B Instruct (`HF_TOKENS`, `Qwen/Qwen2.5-7B-Instruct`).
+    6. **Rank 6**: Local Hardware-Optimized Ollama on Drive D (`qwen2.5:7b`, `llama3.2:3b`, `mistral:7b`).
+    7. **Rank 7**: Hardened Deterministic Offline Scaffold (Zero-hallucination slot-filling).
+  - **Auto-Recharge & In-Flight Recovery**: Rate limit (429) triggers 60s cooldown; quota exhaustion triggers 300s cooldown. Every query evaluates top-down, and in-flight cascades re-check cooled-down upper tiers before dropping lower.
 - **`GET /api/ai/smartboard/topic/{concept_id}`**:
   - Delivers topic metadata, upstream and downstream prerequisite links, matched FineWeb-Edu reading with LaTeX formula boxes, and sample questions.
 - **`GET /api/ai/smartboard/mistakes/{student_id}`**:
@@ -1161,9 +1172,13 @@ CREATE TABLE upsc_written_submissions (
 - **`POST /api/ai/generate-question`**:
   - Generates targeted candidate practice questions for any concept using local/cloud LLM with difficulty tuning.
 - **`GET /api/ai/engine-status`**:
-  - Returns active LLM provider status (`CLOUD_PRIMARY`, `CLOUD_CUSTOM`, `LOCAL_OLLAMA`, `DETERMINISTIC_MENTOR`).
+  - Returns real-time 7-tier hierarchy diagnostics: active tier, current provider, key pool manifests (masked), per-key cooldown statuses, remaining cooldown seconds, total requests, and failover counts.
 - **`GET /api/ai/keys-config` & `POST /api/ai/keys-config`**:
-  - Safely reads and dynamically updates runtime API keys (Gemini, Grok, Custom OpenAI-compatible) without restarting the server.
+  - Safely reads and dynamically updates runtime multi-key pools (`GEMINI_API_KEYS`, `GROK_API_KEYS`, `HF_TOKENS`) without restarting the server.
+- **`POST /api/ai/test-key`**:
+  - Live-probes an individual API key against its provider endpoint (`{ "provider": "gemini"|"grok"|"hf", "key": "..." } -> { "success": true, "message": "..." }`).
+- **Client BYOK Vault (`Ctrl + O + P`)**:
+  - Built-in UI modal allowing students and administrators to configure private frontier API keys into memory on the fly.
 
 ### 4. Curriculum, Knowledge Vaults & Ingestion Endpoints
 - **`GET /api/curriculum/graph/{exam_id}`**: Returns full curriculum prerequisite DAG with nodes, edges, chapters, and subjects.
@@ -1531,6 +1546,8 @@ python -m pytest -q
 - [x] **Foreign Key Guardian**: Intercepts flushes to auto-provision missing parent entities, completely eliminating relational integrity crashes.
 - [x] **3-Subject Interleaving**: Generates 20–25 questions across each canonical subject daily with auto-save and hint penalties.
 - [x] **UPSC 5-Dimensional Rubric**: Evaluates descriptive essay submissions against understanding, structure, depth, policy, and balance.
+- [x] **Multimodal Material Ingestion**: PyMuPDF multi-page parsing, structured Pydantic schema validation, sliding 3,000-char chunking, and duplicate-free Knowledge Vault augmentation.
+- [x] **Humanized Mistake Diagnostics & 1-Click Retest**: Zero raw ID leakage guarantee, `OmniContextHarvester` rich telemetry, structured `test_review` and `quiz` interactive cards, and immediate retest generation.
 
 ---
 *Platform Architecture Specification & Blueprint v5.0 | Adaptive Student Intelligence Engine*

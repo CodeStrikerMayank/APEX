@@ -1289,6 +1289,9 @@ Hyper
 | **v4.0 Massive Ingestion** | `4ef7529` $\to$ `6272838` | ExamBench 405k question bank streaming, Reja1 benchmark crops, UPSC Civil Services subsystem, 3-role portal. |
 | **v4.4 Deployment & Cloud** | `711ea8c` $\to$ `3eda7f9` | FastAPI Vanilla JS SPA integration, Render deploy blueprint, dynamic ApiClient baseUrl, 1-click launcher. |
 | **v5.0 Phase 5 Production** | `3ccdbbf` $\to$ `82071ad` | Cognitive Cockpit, AKT sequence self-attention, MIRT 4D, GCN propagation, Socratic Multi-Agent bundle, Smart Board, Open-MM-RL, Foreign Key Guardian, and 85-test suite. |
+| **v5.1 Multi-Key Cascade** | `Phase 5.1` | Asynchronous 7-tier power-ranked LLM cascade (Gemini pool -> Grok pool -> HF Qwen 72B/32B/7B -> Ollama -> Scaffold) with dynamic per-key cooldowns and in-flight auto-recharge. |
+| **v5.2 BYOK & Hardening** | `Phase 5.2` | Hotkey-driven BYOK Key Vault (`Ctrl + O + P`), live diagnostics API (`/api/ai/engine-status`, `/api/ai/keys-config`, `/api/ai/test-key`), 103 automated tests, and complete codebase waste purge. |
+| **v5.3 Material Ingestion & Forensics** | `Phase 5.3` | Multimodal PDF/document ingestion pipeline (`pdf_ingestor.py`), dynamic Knowledge Vault evolution (`vault_augmenter.py`), zero raw ID leakage invariant (`OmniContextHarvester`), AI mentor structured interactive cards (`test_review` and `quiz`), 1-click mistake revenge drills, and full test verification (16/16 tests passing). |
 
 ---
 *End of Git Commit History & Branch Ledger — APEX Cognitive Platform*
