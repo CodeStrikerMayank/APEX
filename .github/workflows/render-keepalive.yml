@@ -1,0 +1,25 @@
+name: Render Zero-Downtime Keep-Alive
+
+on:
+  schedule:
+    # Runs every 10 minutes to prevent Render free-tier from sleeping after 15 minutes
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    name: Ping Render Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Lightweight Health Check Ping
+        run: |
+          TARGET_URL="${{ secrets.RENDER_APP_URL || 'https://apex-engine.onrender.com' }}"
+          echo "Sending keep-alive ping to: ${TARGET_URL}/health"
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -m 25 "${TARGET_URL}/health" || echo "000")
+          echo "Received HTTP status: ${STATUS_CODE}"
+          if [ "$STATUS_CODE" -ge 200 ] && [ "$STATUS_CODE" -lt 400 ]; then
+            echo "Render instance is active and awake."
+          else
+            echo "Retrying ping on root endpoint..."
+            curl -s -m 25 "${TARGET_URL}/" || true
+          fi

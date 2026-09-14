@@ -56,10 +56,23 @@ def get_app_js():
     return JSONResponse(status_code=404, content={"detail": "app.js not found"})
 
 @app.get("/")
+@app.head("/")
 def root(request: Request):
+    user_agent = request.headers.get("user-agent", "").lower()
+    
+    # Keep-Alive & Uptime Monitor optimization:
+    # If UptimeRobot, cron-job, or pingers call root, return lightweight JSON in <1ms without streaming index.html
+    if any(bot in user_agent for bot in ["uptimerobot", "pingdom", "betteruptime", "freshping", "cron", "monitor", "uptime", "curl", "python"]):
+        return {
+            "status": "HEALTHY",
+            "ping": "pong",
+            "keepalive": "active",
+            "service": "APEX Keep-Alive Engine"
+        }
+
     accept_header = request.headers.get("accept", "").lower()
     
-    # If a browser requests HTML, serve index.html
+    # If a human student browser requests HTML, serve index.html
     if "text/html" in accept_header:
         index_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "index.html"))
         if os.path.exists(index_path):
@@ -72,11 +85,13 @@ def root(request: Request):
         "version": "1.3.0",
         "docs_url": "/docs",
         "redoc_url": "/redoc",
-        "health_url": "/api/health"
+        "health_url": "/health"
     }
 
 @app.get("/health")
+@app.head("/health")
 @app.get("/api/health")
+@app.head("/api/health")
 def health_check():
     return {
         "status": "HEALTHY",
